@@ -6,7 +6,6 @@ import root from './graphql/resolvers.js';
 const app = express();
 const webPort = 3000;
 const websocketPort = 443;
-const routes = [];
 
 app.use('/graphql', graphqlHTTP({
   schema: schema,
