@@ -4,8 +4,8 @@ import schema from './graphql/schema.js';
 import root from './graphql/resolvers.js';
 
 const app = express();
-const webPort = 3000;
-const websocketPort = 443;
+const webPort: number = 3000;
+const websocketPort: number = 443;
 
 app.use('/graphql', graphqlHTTP({
   schema: schema,
