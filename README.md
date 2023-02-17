@@ -4,10 +4,16 @@ Node server for our Skirmish game for ZKIgnite.
 
 ### Development
 
+#### Compiling Typescript into Javascript
+
+```bash
+$ tsc --project tsconfig.json
+```
+
 #### Running the server:
 
 ```bash
-$ node app.js
+$ node dist/app.js
 ```
 
 The server runs on port 3000.
