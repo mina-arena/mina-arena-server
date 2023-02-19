@@ -1,18 +1,32 @@
 import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import schema from './graphql/schema.js';
-import root from './graphql/resolvers.js';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
+import http from 'http';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+
+import typeDefs from './graphql/schema.js';
+import resolvers from './graphql/resolvers.js';
 
 const app = express();
 const webPort: number = 3000;
 const websocketPort: number = 443;
 
-app.use('/graphql', graphqlHTTP({
-  schema: schema,
-  rootValue: root,
-  graphiql: true,
-}));
+const httpServer = http.createServer(app);
 
-app.listen(webPort, () => {
-  console.log(`Web server listening on port ${webPort}`)
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
+await apolloServer.start();
+
+app.use(
+  cors(),
+  bodyParser.json(),
+  expressMiddleware(apolloServer),
+);
+
+await new Promise((resolve: any) => httpServer.listen({ port: webPort }, resolve));
+console.log(`Server running on port ${webPort}`);
