@@ -4,6 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "generate": "graphql-codegen --config codegen.yml",
+    "compile": "npm run generate && tsc --project tsconfig.json",
+    "start": "npm run compile && node ./dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,6 +28,9 @@
   },
   "type": "module",
   "devDependencies": {
+    "@graphql-codegen/cli": "^3.0.0",
+    "@graphql-codegen/typescript": "^3.0.0",
+    "@graphql-codegen/typescript-resolvers": "^3.0.0",
     "@types/node": "^18.13.0"
   }
 }
