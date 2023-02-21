@@ -4,16 +4,14 @@ Node server for our Skirmish game for ZKIgnite.
 
 ### Development
 
-#### Compiling Typescript into Javascript
-
+Generate Typescript types for GraphQL schema and compile Typescript into Javascript:
 ```bash
-$ tsc --project tsconfig.json
+npm run compile
 ```
 
-#### Running the server:
-
+Do the above and also start the server in one command:
 ```bash
-$ node dist/app.js
+npm run start
 ```
 
 The server runs on port 3000.

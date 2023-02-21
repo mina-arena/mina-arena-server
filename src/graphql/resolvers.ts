@@ -1,21 +1,10 @@
+import { Resolvers, Message } from './__generated__/resolvers-types';
 import { randomBytes } from 'crypto';
-
-class Message {
-  id: string;
-  content: string;
-  author: string;
-
-  constructor(id: string, content: string, author: string) {
-    this.id = id;
-    this.content = content;
-    this.author = author;
-  }
-}
 
 // For now create a mock database keyed on object IDs
 var fakeDatabase = {};
 
-export default {
+const resolvers: Resolvers = {
   Query: {
     getMessage: (
       parent,
@@ -56,7 +45,7 @@ export default {
     ): Message => {
       // Create a random id for our "database".
       var id = randomBytes(10).toString('hex');
-      var msg = new Message(id, args.input.content, args.input.author);
+      var msg: Message = { id, author: args.input.author, content: args.input.content };
       fakeDatabase[id] = msg;
       return msg;
     },
@@ -69,9 +58,11 @@ export default {
       if (!fakeDatabase[args.id]) {
         throw new Error('no message exists with id ' + args.id);
       }
-      var msg = new Message(args.id, args.input.content, args.input.author);
+      var msg: Message = { id: args.id, author: args.input.author, content: args.input.content };
       fakeDatabase[args.id] = msg;
       return msg;
     },
   }
 };
+
+export default resolvers;
