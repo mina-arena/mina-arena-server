@@ -1,0 +1,11 @@
+// See https://sequelize.org/docs/v6/other-topics/migrations/#the-sequelizerc-file
+
+const path = require('path');
+
+// Tell Sequelize our folder structure
+module.exports = {
+  'config': path.resolve('src/db/config', 'config.js'),
+  'models-path': path.resolve('src', 'models'),
+  'seeders-path': path.resolve('src/db', 'seeders'),
+  'migrations-path': path.resolve('src/db', 'migrations')
+}

@@ -41,11 +41,12 @@ import { Player } from './models/index.js';
 
 var players = await Player.findAll();
 console.log('players.length = ' + players.length);
-console.log('players...');
+console.log('listing players...');
 players.forEach(player => {
-  console.log(
-    'id: ' + player.id + ', ' +
-    'name: ' + player.name + ', ' +
-    'minaPublicKey: ' + player.minaPublicKey
-  );
+  console.log(`id: ${player.id}, name: ${player.name}, minaPublicKey: ${player.minaPublicKey}`);
 });
+
+// Another example, creating a record
+// await Player.create({ name: 'New Guy', minaPublicKey: 'somekey' });
+// var createdPlayer = await Player.findOne({ where: { name: 'New Guy' }});
+// console.log(`id of created Player is ${createdPlayer.id}`);
