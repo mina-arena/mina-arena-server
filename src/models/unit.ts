@@ -1,16 +1,18 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 
-class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Player>> {
-  declare id: number
-  declare name: string
-  declare minaPublicKey: string;
+class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
+  declare id: number;
+  declare name: string;
+  declare attackPower: number;
+  declare armor: number;
+  declare maxHealth: number;
+  declare movementSpeed: number;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
-  declare readonly deletedAt: Date;
 }
 
-Player.init({
+Unit.init({
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
     autoIncrement: true,
@@ -20,8 +22,20 @@ Player.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  minaPublicKey: {
-    type: DataTypes.STRING,
+  attackPower: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  armor: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  maxHealth: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  movementSpeed: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   createdAt: {
@@ -32,12 +46,8 @@ Player.init({
     allowNull: false,
     type: DataTypes.DATE,
   },
-  deletedAt: {
-    type: DataTypes.DATE
-  }
 }, {
-  sequelize: sequelizeConnection,
-  paranoid: true
+  sequelize: sequelizeConnection
 });
 
-export default Player;
+export default Unit;

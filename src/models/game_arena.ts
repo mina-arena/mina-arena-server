@@ -1,28 +1,32 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 
-class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Player>> {
-  declare id: number
-  declare name: string
-  declare minaPublicKey: string;
+class GameArena extends Model<InferAttributes<GameArena>, InferCreationAttributes<GameArena>> {
+  declare id: number;
+  declare gameId: number;
+  declare width: number;
+  declare height: number;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
-  declare readonly deletedAt: Date;
 }
 
-Player.init({
+GameArena.init({
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
     autoIncrement: true,
     primaryKey: true,
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
+  gameId: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
   },
-  minaPublicKey: {
-    type: DataTypes.STRING,
-    allowNull: false
+  width: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
+  },
+  height: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
   },
   createdAt: {
     allowNull: false,
@@ -32,12 +36,8 @@ Player.init({
     allowNull: false,
     type: DataTypes.DATE,
   },
-  deletedAt: {
-    type: DataTypes.DATE
-  }
 }, {
-  sequelize: sequelizeConnection,
-  paranoid: true
+  sequelize: sequelizeConnection
 });
 
-export default Player;
+export default GameArena;
