@@ -1,4 +1,8 @@
-import { Resolvers, Message } from './__generated__/resolvers-types';
+import { Resolvers } from './__generated__/resolvers-types';
+import * as Types from './__generated__/resolvers-types';
+import * as Models from '../models/index.js';
+
+import { camelToScreamingSnake } from './helpers.js';
 import { randomBytes } from 'crypto';
 
 // For now create a mock database keyed on object IDs
@@ -6,61 +10,65 @@ var fakeDatabase = {};
 
 const resolvers: Resolvers = {
   Query: {
-    getMessage: (
+    games: async (
+      parent,
+      args,
+      contextValue,
+      info
+    ): Promise<Models.Game[]> => {
+      return await Models.Game.findAll();
+    },
+    game: async (
       parent,
       args: { id: string },
       contextValue,
       info
-    ): Message => {
-      if (!fakeDatabase[args.id]) {
-        throw new Error('no message exists with id ' + args.id);
-      }
-      return fakeDatabase[args.id];
-    },
-    quoteOfTheDay: (): string => {
-      return Math.random() < 0.5 ? 'Take it easy' : 'Salvation lies within';
-    },
-    random: (): number => {
-      return Math.random();
-    },
-    rollDice: (
-      parent,
-      args: { numDice: number, numSides: number },
-      contextValue,
-      info
-    ): number[] => {
-      var output: number[] = [];
-      for (var i = 0; i < args.numDice; i++) {
-        output.push(1 + Math.floor(Math.random() * (args.numSides || 6)));
-      }
-      return output;
+    ): Promise<Models.Game> => {
+      return await Models.Game.findByPk(args.id);
     },
   },
   Mutation: {
-    createMessage: (
+    createGame: async (
       parent,
-      args: { input: { content: string, author: string }},
+      args: { input: Types.CreateGameInput },
       contextValue,
       info
-    ): Message => {
-      // Create a random id for our "database".
-      var id = randomBytes(10).toString('hex');
-      var msg: Message = { id, author: args.input.author, content: args.input.content };
-      fakeDatabase[id] = msg;
-      return msg;
+    ): Promise<Models.Game> => {
+      return await Models.Game.create(args.input)
     },
-    updateMessage: (
-      parent,
-      args: { id: string, input: { content: string, author: string }},
-      contextValue,
-      info
-    ): Message => {
-      if (!fakeDatabase[args.id]) {
-        throw new Error('no message exists with id ' + args.id);
+  },
+  // Define custom field resolvers for fields
+  // which require some kind of transformation
+  Game: {
+    id: game => game.id.toString(),
+    status: game => camelToScreamingSnake(game.status),
+    turnPlayerOrder: game => game.gamePlayersInTurnOrder(),
+  },
+  GamePhase: {
+    id: gamePhase => gamePhase.id.toString(),
+    name: gamePhase => camelToScreamingSnake(gamePhase.phase),
+  },
+  GamePiece: {
+    coordinates: function(gamePiece) {
+      return { x: gamePiece.positionX, y: gamePiece.positionY };
+    },
+  },
+  GamePieceAction: {
+    actionType: action => camelToScreamingSnake(action.actionType),
+  },
+  GamePieceActionData: {
+    __resolveType(obj, contextValue, info){
+      switch(obj.actionType) {
+        case 'move':
+          return 'GamePieceMoveAction'
+          break;
+        case 'rangedAttack':
+          return 'GamePieceRangedAttackAction'
+          break;
+        case 'meleeAttack':
+          return 'GamePieceMeleeAttackAction'
+          break;
       }
-      var msg: Message = { id: args.id, author: args.input.author, content: args.input.content };
-      fakeDatabase[args.id] = msg;
-      return msg;
     },
   }
 };

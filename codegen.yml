@@ -9,3 +9,15 @@ generates:
       - "typescript-resolvers"
     config:
       useIndexSignature: true
+      mappers:
+        GameArena: ../../models/index.js#GameArena as GameArenaModel
+        GamePhase: ../../models/index.js#GamePhase as GamePhaseModel
+        GamePieceAction: ../../models/index.js#GamePieceAction as GamePieceActionModel
+        GamePiece: ../../models/index.js#GamePiece as GamePieceModel
+        GamePlayer: ../../models/index.js#GamePlayer as GamePlayerModel
+        Game: ../../models/index.js#Game as GameModel
+        PlayerUnit: ../../models/index.js#PlayerUnit as PlayerUnitModel
+        Player: ../../models/index.js#Player as PlayerModel
+        Unit: ../../models/index.js#Unit as UnitModel
+        GamePhaseName: ../../models/game_phase.js#GamePhaseName as GamePhaseNameModel
+        GamePieceActionData: ../../models/game_piece_action.js#GamePieceActionData as GamePieceActionDataModel

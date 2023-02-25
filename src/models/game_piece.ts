@@ -1,5 +1,6 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
+import * as Models from './index.js';
 
 class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttributes<GamePiece>> {
   declare id: CreationOptional<number>;
@@ -11,6 +12,18 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
   declare health: number;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
+
+  async game(): Promise<Models.Game> {
+    return await Models.Game.findByPk(this.gameId);
+  }
+
+  async gamePlayer(): Promise<Models.GamePlayer> {
+    return await Models.GamePlayer.findByPk(this.gamePlayerId);
+  }
+
+  async playerUnit(): Promise<Models.PlayerUnit> {
+    return await Models.PlayerUnit.findByPk(this.playerUnitId);
+  }
 }
 
 GamePiece.init({

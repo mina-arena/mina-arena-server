@@ -1,22 +1,159 @@
 type Query {
-  getMessage(id: ID!): Message
-  quoteOfTheDay: String
-  random: Float!
-  rollDice(numDice: Int!, numSides: Int): [Int]
+  game(id: ID!): Game
+  games: [Game!]!
+  unit(id: ID!): Unit
+  units: [Unit!]!
 }
 
 type Mutation {
-  createMessage(input: MessageInput): Message
-  updateMessage(id: ID!, input: MessageInput): Message
+  createGame(input: CreateGameInput!): Game
 }
 
-input MessageInput {
-  content: String
-  author: String
+scalar Iso8601DateTime
+
+enum GameStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
 }
 
-type Message {
+enum GamePhaseName {
+  MOVEMENT
+  SHOOTING
+  MELEE
+}
+
+enum GamePieceActionType {
+  MOVE
+  RANGED_ATTACK
+  MELEE_ATTACK
+}
+
+type Player {
   id: ID!
-  content: String
-  author: String
+  name: String!
+  minaPublicKey: String!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type Game {
+  id: ID!
+  status: GameStatus!
+  arena: GameArena
+  turnNumber: Int
+  gamePlayers: [GamePlayer!]!
+  turnPlayerOrder: [GamePlayer!]!
+  turnGamePlayer: GamePlayer
+  winningGamePlayer: GamePlayer
+  gamePieces: [GamePiece!]!
+  gamePhases: [GamePhase!]!
+  currentPhase: GamePhase
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type GamePlayer {
+  id: ID!
+  game: Game!
+  player: Player!
+  playerNumber: Int!
+  gamePhases: [GamePhase!]!
+  gamePieceActions: [GamePieceAction!]!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type GameArena {
+  id: ID!
+  game: Game!
+  width: Int!
+  height: Int!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type Unit {
+  id: ID!
+  name: String!
+  attackPower: Int!
+  armor: Int!
+  maxHealth: Int!
+  movementSpeed: Int!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type PlayerUnit {
+  id: ID!
+  player: Player!
+  unit: Unit!
+  name: String!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type GamePiece {
+  id: ID!
+  game: Game!
+  gamePlayer: GamePlayer!
+  playerUnit: PlayerUnit!
+  coordinates: GamePieceCoordinates
+  health: Int!
+  gamePieceActions: [GamePieceAction!]!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type GamePieceCoordinates {
+  x: Int!
+  y: Int!
+}
+
+type GamePhase {
+  id: ID!
+  game: Game!
+  gamePlayer: GamePlayer!
+  turnNumber: Int!
+  name: GamePhaseName!
+  gamePieceActions: [GamePieceAction!]!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+type GamePieceAction {
+  id: ID!
+  gamePhase: GamePhase!
+  gamePlayer: GamePlayer!
+  gamePiece: GamePiece!
+  actionType: GamePieceActionType!
+  actionData: GamePieceActionData!
+  createdAt: Iso8601DateTime!
+  updatedAt: Iso8601DateTime!
+}
+
+union GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction
+
+type GamePieceMoveAction {
+  moveFrom: GamePieceCoordinates!
+  moveTo: GamePieceCoordinates!
+}
+
+type GamePieceRangedAttackAction {
+  targetGamePiece: GamePiece!
+}
+
+type GamePieceMeleeAttackAction {
+  targetGamePiece: GamePiece!
+}
+
+input CreateGameInput {
+  arenaWidth: Int!
+  arenaHeight: Int!
+}
+
+input CreatePlayerUnitInput {
+  unitId: Int!
+  name: String!
 }

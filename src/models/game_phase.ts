@@ -1,5 +1,6 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
+import * as Models from './index.js';
 
 export type GamePhaseName = 'movement' | 'shooting' | 'melee';
 
@@ -11,6 +12,21 @@ class GamePhase extends Model<InferAttributes<GamePhase>, InferCreationAttribute
   declare phase: GamePhaseName;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
+
+  async game(): Promise<Models.Game> {
+    return await Models.Game.findByPk(this.gameId);
+  }
+
+  async gamePlayer(): Promise<Models.GamePlayer> {
+    return await Models.GamePlayer.findByPk(this.gamePlayerId);
+  }
+
+  async gamePieceActions(): Promise<Models.GamePieceAction[]> {
+    return await Models.GamePieceAction.findAll({
+      where: { gamePhaseId: this.id },
+      order: [['id', 'ASC']]
+    });
+  }
 }
 
 GamePhase.init({

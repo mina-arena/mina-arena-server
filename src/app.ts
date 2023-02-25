@@ -39,15 +39,3 @@ console.log(`Server running on port ${webPort}`);
 // See https://sequelize.org/v5/manual/models-usage.html#data-retrieval---finders
 import { Player, Unit, PlayerUnit, Game, GamePlayer, GamePiece, GamePieceAction, GamePhase } from './models/index.js';
 import { GamePieceMoveAction } from './models/game_piece_action.js';
-
-var players = await Player.findAll();
-console.log('players.length = ' + players.length);
-console.log('listing players...');
-players.forEach(player => {
-  console.log(`id: ${player.id}, name: ${player.name}, minaPublicKey: ${player.minaPublicKey}`);
-});
-
-// Another example, creating a record
-// await Player.create({ name: 'New Guy', minaPublicKey: 'somekey' });
-// var createdPlayer = await Player.findOne({ where: { name: 'New Guy' }});
-// console.log(`id of created Player is ${createdPlayer.id}`);

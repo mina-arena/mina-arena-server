@@ -1,5 +1,6 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
+import * as Models from './index.js';
 
 class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   declare id: number;
@@ -10,6 +11,10 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   declare movementSpeed: number;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
+
+  async playerUnits(): Promise<Models.PlayerUnit[]> {
+    return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
+  }
 }
 
 Unit.init({
