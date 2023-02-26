@@ -1,12 +1,13 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
+import * as Models from './index.js';
 
 export type GamePieceActionType = 'move' | 'rangedAttack' | 'meleeAttack';
 
 export type GameArenaCoordinates = { x: number, y: number };
-export type GamePieceMoveAction = { actionType: 'move', data: { moveFrom: GameArenaCoordinates, moveTo: GameArenaCoordinates } };
-export type GamePieceRangedAttackAction = { actionType: 'rangedAttack', data: { targetGamePieceId: number } };
-export type GamePieceMeleeAttackAction = { actionType: 'meleeAttack', data: { targetGamePieceId: number } };
+export type GamePieceMoveAction = { actionType: 'move', moveFrom: GameArenaCoordinates, moveTo: GameArenaCoordinates };
+export type GamePieceRangedAttackAction = { actionType: 'rangedAttack', targetGamePieceId: number };
+export type GamePieceMeleeAttackAction = { actionType: 'meleeAttack', targetGamePieceId: number };
 export type GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction;
 
 class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreationAttributes<GamePieceAction>> {
@@ -18,6 +19,18 @@ class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreat
   declare actionData: GamePieceActionData;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
+
+  async gamePhase(): Promise<Models.GamePhase> {
+    return await Models.GamePhase.findByPk(this.gamePhaseId);
+  }
+
+  async gamePlayer(): Promise<Models.GamePlayer> {
+    return await Models.GamePlayer.findByPk(this.gamePlayerId);
+  }
+
+  async gamePiece(): Promise<Models.GamePiece> {
+    return await Models.GamePiece.findByPk(this.gamePieceId);
+  }
 }
 
 GamePieceAction.init({

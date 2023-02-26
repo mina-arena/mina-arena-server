@@ -1,5 +1,6 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
+import * as Models from './index.js';
 
 class GameArena extends Model<InferAttributes<GameArena>, InferCreationAttributes<GameArena>> {
   declare id: number;
@@ -8,6 +9,10 @@ class GameArena extends Model<InferAttributes<GameArena>, InferCreationAttribute
   declare height: number;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
+
+  async game(): Promise<Models.Game> {
+    return await Models.Game.findByPk(this.gameId);
+  }
 }
 
 GameArena.init({
