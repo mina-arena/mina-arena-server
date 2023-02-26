@@ -63,6 +63,10 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     return await Models.GamePlayer.findByPk(this.winningGamePlayerId);
   }
 
+  async gameArena(): Promise<Models.GameArena> {
+    return await Models.GameArena.findOne({ where: { gameId: this.id }});
+  }
+
   turnPlayerOrderArray(): number[] {
     return this.turnPlayerOrder.split(',').map(numStr => +numStr);
   }

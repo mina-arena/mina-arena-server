@@ -151,6 +151,13 @@ type GamePieceMeleeAttackAction {
 input CreateGameInput {
   arenaWidth: Int!
   arenaHeight: Int!
+  players: [CreateGamePlayerInput!]!
+}
+
+input CreateGamePlayerInput {
+  minaPublicKey: String!
+  name: String!
+  playerNumber: Int!
 }
 
 input CreatePlayerUnitInput {

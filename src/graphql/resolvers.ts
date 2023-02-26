@@ -1,12 +1,8 @@
 import { Resolvers } from './__generated__/resolvers-types';
-import * as Types from './__generated__/resolvers-types';
 import * as Models from '../models/index.js';
+import * as Mutations from './mutations/index.js';
 
 import { camelToScreamingSnake } from './helpers.js';
-import { randomBytes } from 'crypto';
-
-// For now create a mock database keyed on object IDs
-var fakeDatabase = {};
 
 const resolvers: Resolvers = {
   Query: {
@@ -28,14 +24,7 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    createGame: async (
-      parent,
-      args: { input: Types.CreateGameInput },
-      contextValue,
-      info
-    ): Promise<Models.Game> => {
-      return await Models.Game.create(args.input)
-    },
+    createGame: Mutations.createGame,
   },
   // Define custom field resolvers for fields
   // which require some kind of transformation
@@ -43,6 +32,7 @@ const resolvers: Resolvers = {
     id: game => game.id.toString(),
     status: game => camelToScreamingSnake(game.status),
     turnPlayerOrder: game => game.gamePlayersInTurnOrder(),
+    arena: game => game.gameArena(),
   },
   GamePhase: {
     id: gamePhase => gamePhase.id.toString(),
