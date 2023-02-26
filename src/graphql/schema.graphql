@@ -1,8 +1,8 @@
 type Query {
   game(id: ID!): Game
   games: [Game!]!
-  unit(id: ID!): Unit
   units: [Unit!]!
+  player(minaPublicKey: String!): Player
 }
 
 type Mutation {
@@ -34,6 +34,7 @@ type Player {
   id: ID!
   name: String!
   minaPublicKey: String!
+  playerUnits: [PlayerUnit!]!
   createdAt: Iso8601DateTime!
   updatedAt: Iso8601DateTime!
 }

@@ -22,6 +22,22 @@ const resolvers: Resolvers = {
     ): Promise<Models.Game> => {
       return await Models.Game.findByPk(args.id);
     },
+    units: async (
+      parent,
+      args,
+      contextValue,
+      info
+    ): Promise<Models.Unit[]> => {
+      return await Models.Unit.findAll();
+    },
+    player: async (
+      parent,
+      args: { minaPublicKey: string },
+      contextValue,
+      info
+    ): Promise<Models.Player> => {
+      return await Models.Player.findOne({ where: { minaPublicKey: args.minaPublicKey }});
+    },
   },
   Mutation: {
     createGame: Mutations.createGame,
