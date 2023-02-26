@@ -32,7 +32,7 @@ export default async (
     if (game.status != 'pending') throw new Error(`Game is no longer allowing new GamePieces to be added`);
 
     // Create GamePieces
-    var createdGamePieces = [];
+    let createdGamePieces = [];
     for (const gamePieceInput of args.input.gamePieces) {
       if (gamePieceInput.playerUnitId) {
         // Client has selected a pre-existing
@@ -72,10 +72,10 @@ async function createGamePieceForPlayerUnit(
   playerUnitId: string,
   transaction
 ): Promise<Models.GamePiece> {
-  var playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction: transaction });
+  let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction: transaction });
   if (!playerUnit) throw new Error(`No PlayerUnit found with ID ${playerUnitId}`);
 
-  var unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction: transaction });
+  let unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction: transaction });
   return await Models.GamePiece.create(
     {
       gameId: game.id,
@@ -94,10 +94,10 @@ async function createGamePieceForUnit(
   playerUnitName: string,
   transaction
 ): Promise<Models.GamePiece> {
-  var unit = await Models.Unit.findByPk(unitId, { transaction: transaction });
+  let unit = await Models.Unit.findByPk(unitId, { transaction: transaction });
   if (!unit) throw new Error(`No Unit found with ID ${unitId}`);
 
-  var playerUnit = await Models.PlayerUnit.create(
+  let playerUnit = await Models.PlayerUnit.create(
     {
       playerId: gamePlayer.playerId,
       unitId: unit.id,
