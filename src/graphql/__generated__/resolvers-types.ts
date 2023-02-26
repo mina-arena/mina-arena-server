@@ -165,6 +165,7 @@ export type Player = {
   id: Scalars['ID'];
   minaPublicKey: Scalars['String'];
   name: Scalars['String'];
+  playerUnits: Array<PlayerUnit>;
   updatedAt: Scalars['Iso8601DateTime'];
 };
 
@@ -182,7 +183,7 @@ export type Query = {
   __typename?: 'Query';
   game?: Maybe<Game>;
   games: Array<Game>;
-  unit?: Maybe<Unit>;
+  player?: Maybe<Player>;
   units: Array<Unit>;
 };
 
@@ -192,8 +193,8 @@ export type QueryGameArgs = {
 };
 
 
-export type QueryUnitArgs = {
-  id: Scalars['ID'];
+export type QueryPlayerArgs = {
+  minaPublicKey: Scalars['String'];
 };
 
 export type Unit = {
@@ -450,6 +451,7 @@ export type PlayerResolvers<ContextType = any, ParentType extends ResolversParen
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   minaPublicKey?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  playerUnits?: Resolver<Array<ResolversTypes['PlayerUnit']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -467,7 +469,7 @@ export type PlayerUnitResolvers<ContextType = any, ParentType extends ResolversP
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   game?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<QueryGameArgs, 'id'>>;
   games?: Resolver<Array<ResolversTypes['Game']>, ParentType, ContextType>;
-  unit?: Resolver<Maybe<ResolversTypes['Unit']>, ParentType, ContextType, RequireFields<QueryUnitArgs, 'id'>>;
+  player?: Resolver<Maybe<ResolversTypes['Player']>, ParentType, ContextType, RequireFields<QueryPlayerArgs, 'minaPublicKey'>>;
   units?: Resolver<Array<ResolversTypes['Unit']>, ParentType, ContextType>;
 }>;
 
