@@ -1,5 +1,4 @@
 import { Resolvers } from './__generated__/resolvers-types';
-import * as Types from './__generated__/resolvers-types';
 import * as Models from '../models/index.js';
 import * as Mutations from './mutations/index.js';
 
@@ -23,16 +22,25 @@ const resolvers: Resolvers = {
     ): Promise<Models.Game> => {
       return await Models.Game.findByPk(args.id);
     },
-  },
-  Mutation: {
-    createGame: async (
+    units: async (
       parent,
-      args: { input: Types.CreateGameInput },
+      args,
       contextValue,
       info
-    ): Promise<Models.Game> => {
-      return await Models.Game.create(args.input)
+    ): Promise<Models.Unit[]> => {
+      return await Models.Unit.findAll();
     },
+    player: async (
+      parent,
+      args: { minaPublicKey: string },
+      contextValue,
+      info
+    ): Promise<Models.Player> => {
+      return await Models.Player.findOne({ where: { minaPublicKey: args.minaPublicKey }});
+    },
+  },
+  Mutation: {
+    createGame: Mutations.createGame,
     createGamePieces: Mutations.createGamePieces,
   },
   // Define custom field resolvers for fields
@@ -41,6 +49,7 @@ const resolvers: Resolvers = {
     id: game => game.id.toString(),
     status: game => camelToScreamingSnake(game.status),
     turnPlayerOrder: game => game.gamePlayersInTurnOrder(),
+    arena: game => game.gameArena(),
   },
   GamePhase: {
     id: gamePhase => gamePhase.id.toString(),
