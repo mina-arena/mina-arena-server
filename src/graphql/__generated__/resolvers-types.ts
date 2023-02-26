@@ -23,6 +23,13 @@ export type Scalars = {
 export type CreateGameInput = {
   arenaHeight: Scalars['Int'];
   arenaWidth: Scalars['Int'];
+  players: Array<CreateGamePlayerInput>;
+};
+
+export type CreateGamePlayerInput = {
+  minaPublicKey: Scalars['String'];
+  name: Scalars['String'];
+  playerNumber: Scalars['Int'];
 };
 
 export type CreatePlayerUnitInput = {
@@ -281,6 +288,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateGameInput: CreateGameInput;
+  CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   Game: ResolverTypeWrapper<GameModel>;
   GameArena: ResolverTypeWrapper<GameArenaModel>;
@@ -311,6 +319,7 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
   CreateGameInput: CreateGameInput;
+  CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   Game: GameModel;
   GameArena: GameArenaModel;
