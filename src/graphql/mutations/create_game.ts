@@ -11,13 +11,13 @@ export default async (
 ): Promise<Models.Game> => {
   return await sequelizeConnection.transaction(async (t) => {
     // Randomize player turn order
-    var playerOrder = shuffle(args.input.players.map(player => player.playerNumber));
+    let playerOrder = shuffle(args.input.players.map(player => player.playerNumber));
     if (unique(playerOrder).length != playerOrder.length) {
       throw new Error(`Invalid player numbers provided: ${playerOrder}`);
     }
 
     // Create the Game
-    var game = await Models.Game.create({
+    let game = await Models.Game.create({
       status: 'pending',
       turnPlayerOrder: playerOrder.join(',')
     }, { transaction: t });
