@@ -25,6 +25,17 @@ export type CreateGameInput = {
   arenaWidth: Scalars['Int'];
 };
 
+export type CreateGamePieceInput = {
+  createPlayerUnit?: InputMaybe<CreatePlayerUnitInput>;
+  playerUnitId?: InputMaybe<Scalars['ID']>;
+};
+
+export type CreateGamePiecesInput = {
+  gameId: Scalars['ID'];
+  gamePieces: Array<CreateGamePieceInput>;
+  minaPublicKey: Scalars['String'];
+};
+
 export type CreatePlayerUnitInput = {
   name: Scalars['String'];
   unitId: Scalars['Int'];
@@ -152,11 +163,17 @@ export enum GameStatus {
 export type Mutation = {
   __typename?: 'Mutation';
   createGame?: Maybe<Game>;
+  createGamePieces?: Maybe<Array<GamePiece>>;
 };
 
 
 export type MutationCreateGameArgs = {
   input: CreateGameInput;
+};
+
+
+export type MutationCreateGamePiecesArgs = {
+  input: CreateGamePiecesInput;
 };
 
 export type Player = {
@@ -280,6 +297,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateGameInput: CreateGameInput;
+  CreateGamePieceInput: CreateGamePieceInput;
+  CreateGamePiecesInput: CreateGamePiecesInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   Game: ResolverTypeWrapper<GameModel>;
   GameArena: ResolverTypeWrapper<GameArenaModel>;
@@ -310,6 +329,8 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
   CreateGameInput: CreateGameInput;
+  CreateGamePieceInput: CreateGamePieceInput;
+  CreateGamePiecesInput: CreateGamePiecesInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   Game: GameModel;
   GameArena: GameArenaModel;
@@ -443,6 +464,7 @@ export interface Iso8601DateTimeScalarConfig extends GraphQLScalarTypeConfig<Res
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationCreateGameArgs, 'input'>>;
+  createGamePieces?: Resolver<Maybe<Array<ResolversTypes['GamePiece']>>, ParentType, ContextType, RequireFields<MutationCreateGamePiecesArgs, 'input'>>;
 }>;
 
 export type PlayerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Player'] = ResolversParentTypes['Player']> = ResolversObject<{
