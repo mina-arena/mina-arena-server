@@ -98,11 +98,7 @@ async function validateGame(game: Models.Game, t): Promise<ValidateGameResult> {
 async function setupGame(game: Models.Game, gamePlayers: Models.GamePlayer[], t): Promise<Models.Game> {
   // Identify the player with the first turn and create the first phase
   const turnPlayerNumber = game.turnPlayerOrderArray()[0];
-  console.log(`game.turnPlayerOrder = ${game.turnPlayerOrder}`);
-  console.log(`game.turnPlayerOrderArray = ${game.turnPlayerOrderArray()}`);
-  console.log(`Looking for GamePlayer with number ${turnPlayerNumber}`);
   const turnPlayer = gamePlayers.find(function(gamePlayer) {
-    console.log(`Checking GamePlayer with number ${gamePlayer.playerNumber} against search ${turnPlayerNumber}`);
     return gamePlayer.playerNumber == turnPlayerNumber;
   });
   await Models.GamePhase.create(
