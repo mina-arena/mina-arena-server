@@ -41,6 +41,7 @@ const resolvers: Resolvers = {
   },
   Mutation: {
     createGame: Mutations.createGame,
+    createGamePieces: Mutations.createGamePieces,
   },
   // Define custom field resolvers for fields
   // which require some kind of transformation
@@ -56,6 +57,8 @@ const resolvers: Resolvers = {
   },
   GamePiece: {
     coordinates: function(gamePiece) {
+      if (!gamePiece.positionX && !gamePiece.positionY) return null;
+
       return { x: gamePiece.positionX, y: gamePiece.positionY };
     },
   },
