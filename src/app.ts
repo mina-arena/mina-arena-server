@@ -37,5 +37,5 @@ console.log(`Server running on port ${webPort}`);
 
 // Example of how to query a table using Sequelize
 // See https://sequelize.org/v5/manual/models-usage.html#data-retrieval---finders
-import { Player, Unit, PlayerUnit, Game, GamePlayer, GamePiece, GamePieceAction, GamePhase } from './models/index.js';
+import * as Models from './models/index.js';
 import { GamePieceMoveAction } from './models/game_piece_action.js';
