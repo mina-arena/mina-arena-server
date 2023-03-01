@@ -111,6 +111,14 @@ Game.init({
     type: DataTypes.DATE,
   },
 }, {
+  hooks: {
+    afterDestroy: async (game, options) => {
+      await Models.GameArena.destroy({ where: { gameId: game.id }});
+      await Models.GamePhase.destroy({ where: { gameId: game.id }});
+      await Models.GamePiece.destroy({ where: { gameId: game.id }});
+      await Models.GamePlayer.destroy({ where: { gameId: game.id }});
+    }
+  },
   sequelize: sequelizeConnection
 });
 

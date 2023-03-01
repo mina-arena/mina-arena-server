@@ -45,6 +45,12 @@ Player.init({
     type: DataTypes.DATE
   }
 }, {
+  hooks: {
+    afterDestroy: async (player, options) => {
+      await Models.PlayerUnit.destroy({ where: { playerId: player.id }});
+      await Models.GamePlayer.destroy({ where: { playerId: player.id }});
+    }
+  },
   sequelize: sequelizeConnection,
   paranoid: true
 });

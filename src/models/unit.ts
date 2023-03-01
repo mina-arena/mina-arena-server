@@ -56,6 +56,11 @@ Unit.init({
     type: DataTypes.DATE,
   },
 }, {
+  hooks: {
+    afterDestroy: async (unit, options) => {
+      await Models.PlayerUnit.destroy({ where: { unitId: unit.id }});
+    }
+  },
   sequelize: sequelizeConnection
 });
 

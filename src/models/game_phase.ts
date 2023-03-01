@@ -60,6 +60,11 @@ GamePhase.init({
     type: DataTypes.DATE,
   },
 }, {
+  hooks: {
+    afterDestroy: async (gamePhase, options) => {
+      await Models.GamePieceAction.destroy({ where: { gamePhaseId: gamePhase.id }});
+    }
+  },
   sequelize: sequelizeConnection
 });
 
