@@ -34,6 +34,9 @@ export default async (
 
     let createdGamePieceActions = [];
     for (const actionInput of args.input.actions) {
+      // TODO: Implement oneOf validation to enforce
+      // that exactly one action input was provided
+
       // Validate that this action is allowed in this phase
       let rawActionType = actionInput.actionType;
       let actionType = snakeToCamel(rawActionType);
