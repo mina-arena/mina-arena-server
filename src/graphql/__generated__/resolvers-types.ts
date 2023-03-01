@@ -171,6 +171,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createGame?: Maybe<Game>;
   createGamePieces?: Maybe<Array<GamePiece>>;
+  startGame?: Maybe<Game>;
 };
 
 
@@ -181,6 +182,11 @@ export type MutationCreateGameArgs = {
 
 export type MutationCreateGamePiecesArgs = {
   input: CreateGamePiecesInput;
+};
+
+
+export type MutationStartGameArgs = {
+  input: StartGameInput;
 };
 
 export type Player = {
@@ -219,6 +225,10 @@ export type QueryGameArgs = {
 
 export type QueryPlayerArgs = {
   minaPublicKey: Scalars['String'];
+};
+
+export type StartGameInput = {
+  gameId: Scalars['ID'];
 };
 
 export type Unit = {
@@ -330,6 +340,7 @@ export type ResolversTypes = ResolversObject<{
   Player: ResolverTypeWrapper<PlayerModel>;
   PlayerUnit: ResolverTypeWrapper<PlayerUnitModel>;
   Query: ResolverTypeWrapper<{}>;
+  StartGameInput: StartGameInput;
   String: ResolverTypeWrapper<Scalars['String']>;
   Unit: ResolverTypeWrapper<UnitModel>;
 }>;
@@ -360,6 +371,7 @@ export type ResolversParentTypes = ResolversObject<{
   Player: PlayerModel;
   PlayerUnit: PlayerUnitModel;
   Query: {};
+  StartGameInput: StartGameInput;
   String: Scalars['String'];
   Unit: UnitModel;
 }>;
@@ -475,6 +487,7 @@ export interface Iso8601DateTimeScalarConfig extends GraphQLScalarTypeConfig<Res
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationCreateGameArgs, 'input'>>;
   createGamePieces?: Resolver<Maybe<Array<ResolversTypes['GamePiece']>>, ParentType, ContextType, RequireFields<MutationCreateGamePiecesArgs, 'input'>>;
+  startGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationStartGameArgs, 'input'>>;
 }>;
 
 export type PlayerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Player'] = ResolversParentTypes['Player']> = ResolversObject<{

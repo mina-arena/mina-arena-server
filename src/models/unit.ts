@@ -15,6 +15,10 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   async playerUnits(): Promise<Models.PlayerUnit[]> {
     return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
   }
+
+  pointsCost(): number {
+    return this.attackPower + this.armor + this.maxHealth;
+  }
 }
 
 Unit.init({

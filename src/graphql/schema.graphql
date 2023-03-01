@@ -8,6 +8,7 @@ type Query {
 type Mutation {
   createGame(input: CreateGameInput!): Game
   createGamePieces(input: CreateGamePiecesInput!): [GamePiece!]
+  startGame(input: StartGameInput!): Game
 }
 
 scalar Iso8601DateTime
@@ -176,4 +177,8 @@ input CreateGamePieceInput {
 input CreatePlayerUnitInput {
   unitId: Int!
   name: String!
+}
+
+input StartGameInput {
+  gameId: ID!
 }
