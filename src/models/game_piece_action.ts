@@ -2,7 +2,9 @@ import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOpt
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
-export type GamePieceActionType = 'move' | 'rangedAttack' | 'meleeAttack';
+const ACTION_TYPES = ['move', 'rangedAttack', 'meleeAttack'];
+type GamePieceActionTypeTuple = typeof ACTION_TYPES;
+export type GamePieceActionType = GamePieceActionTypeTuple[number];
 
 export type GameArenaCoordinates = { x: number, y: number };
 export type GamePieceMoveAction = { actionType: 'move', moveFrom: GameArenaCoordinates, moveTo: GameArenaCoordinates };

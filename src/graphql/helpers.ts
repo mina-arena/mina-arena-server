@@ -6,6 +6,20 @@ export function camelToScreamingSnake(str) {
   return camelToSnake(str).toUpperCase();
 }
 
+export function snakeToCamel(str: string): string {
+  return str
+    .split("_")
+    .reduce(
+      (res, word, i) =>
+        i === 0
+          ? word.toLowerCase()
+          : `${res}${word.charAt(0).toUpperCase()}${word
+              .substr(1)
+              .toLowerCase()}`,
+      ""
+    );
+}
+
 export function shuffle(array: any[]): any[] {
   let currentIndex = array.length, randomIndex;
 
