@@ -30,13 +30,21 @@ const resolvers: Resolvers = {
     ): Promise<Models.Unit[]> => {
       return await Models.Unit.findAll();
     },
+    playerUnits: async (
+      parent,
+      args,
+      contextValue,
+      info
+    ): Promise<Models.PlayerUnit[]> => {
+      return await Models.PlayerUnit.findAll();
+    },
     player: async (
       parent,
       args: { minaPublicKey: string },
       contextValue,
       info
     ): Promise<Models.Player> => {
-      return await Models.Player.findOne({ where: { minaPublicKey: args.minaPublicKey }});
+      return await Models.Player.findOne({ where: { minaPublicKey: args.minaPublicKey } });
     },
   },
   Mutation: {
@@ -57,7 +65,7 @@ const resolvers: Resolvers = {
     name: gamePhase => camelToScreamingSnake(gamePhase.phase),
   },
   GamePiece: {
-    coordinates: function(gamePiece) {
+    coordinates: function (gamePiece) {
       if (!gamePiece.positionX && !gamePiece.positionY) return null;
 
       return { x: gamePiece.positionX, y: gamePiece.positionY };
@@ -67,8 +75,8 @@ const resolvers: Resolvers = {
     actionType: action => camelToScreamingSnake(action.actionType),
   },
   GamePieceActionData: {
-    __resolveType(obj, contextValue, info){
-      switch(obj.actionType) {
+    __resolveType(obj, contextValue, info) {
+      switch (obj.actionType) {
         case 'move':
           return 'GamePieceMoveAction'
           break;
