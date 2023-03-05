@@ -672,6 +672,34 @@ CREATE INDEX player_units_unit_id ON public."PlayerUnits" USING btree ("unitId")
 
 
 --
+-- Name: unique_game_phase_game_turn_phase; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_phase_game_turn_phase ON public."GamePhases" USING btree ("gameId", "turnNumber", phase);
+
+
+--
+-- Name: unique_game_piece_game_id_player_unit_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_piece_game_id_player_unit_id ON public."GamePieces" USING btree ("gameId", "playerUnitId");
+
+
+--
+-- Name: unique_game_player_game_id_player_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_player_game_id_player_id ON public."GamePlayers" USING btree ("gameId", "playerId");
+
+
+--
+-- Name: unique_game_player_game_id_player_number; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_player_game_id_player_number ON public."GamePlayers" USING btree ("gameId", "playerNumber");
+
+
+--
 -- Name: unique_player_mina_public_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
