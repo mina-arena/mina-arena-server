@@ -204,6 +204,7 @@ export type Mutation = {
   createGamePieceActions?: Maybe<Array<GamePieceAction>>;
   createGamePieces?: Maybe<Array<GamePiece>>;
   startGame?: Maybe<Game>;
+  submitGamePhase?: Maybe<Game>;
 };
 
 
@@ -224,6 +225,11 @@ export type MutationCreateGamePiecesArgs = {
 
 export type MutationStartGameArgs = {
   input: StartGameInput;
+};
+
+
+export type MutationSubmitGamePhaseArgs = {
+  input: SubmitGamePhaseInput;
 };
 
 export type Player = {
@@ -266,6 +272,11 @@ export type QueryPlayerArgs = {
 
 export type StartGameInput = {
   gameId: Scalars['ID'];
+};
+
+export type SubmitGamePhaseInput = {
+  gamePhaseId: Scalars['ID'];
+  minaPublicKey: Scalars['String'];
 };
 
 export type Unit = {
@@ -385,6 +396,7 @@ export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
   StartGameInput: StartGameInput;
   String: ResolverTypeWrapper<Scalars['String']>;
+  SubmitGamePhaseInput: SubmitGamePhaseInput;
   Unit: ResolverTypeWrapper<UnitModel>;
 }>;
 
@@ -422,6 +434,7 @@ export type ResolversParentTypes = ResolversObject<{
   Query: {};
   StartGameInput: StartGameInput;
   String: Scalars['String'];
+  SubmitGamePhaseInput: SubmitGamePhaseInput;
   Unit: UnitModel;
 }>;
 
@@ -538,6 +551,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createGamePieceActions?: Resolver<Maybe<Array<ResolversTypes['GamePieceAction']>>, ParentType, ContextType, RequireFields<MutationCreateGamePieceActionsArgs, 'input'>>;
   createGamePieces?: Resolver<Maybe<Array<ResolversTypes['GamePiece']>>, ParentType, ContextType, RequireFields<MutationCreateGamePiecesArgs, 'input'>>;
   startGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationStartGameArgs, 'input'>>;
+  submitGamePhase?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationSubmitGamePhaseArgs, 'input'>>;
 }>;
 
 export type PlayerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Player'] = ResolversParentTypes['Player']> = ResolversObject<{

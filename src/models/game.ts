@@ -56,10 +56,22 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     })
   }
 
+  // Get the GamePlayer whose turn it is
   async turnGamePlayer(): Promise<Models.GamePlayer> {
     if (this.turnGamePlayerId === undefined) return null;
 
     return await Models.GamePlayer.findByPk(this.turnGamePlayerId);
+  }
+
+  // Get the GamePlayer who will be taking the next turn
+  async nextGamePlayer(): Promise<Models.GamePlayer> {
+    const nextNumber = await this.nextGamePlayerNumber();
+    return await Models.GamePlayer.findOne({
+      where: {
+        gameId: this.id,
+        playerNumber: nextNumber
+      }
+    });
   }
 
   async winningGamePlayer(): Promise<Models.GamePlayer> {
@@ -72,8 +84,28 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     return await Models.GameArena.findOne({ where: { gameId: this.id }});
   }
 
+  // Get an array of integers representing the order in which players take turns.
+  // Each integer element is the playerNumber of the associated GamePlayer.
   turnPlayerOrderArray(): number[] {
     return this.turnPlayerOrder.split(',').map(numStr => +numStr);
+  }
+
+  // Get the playerNumber of the GamePlayer whose turn it is
+  async turnGamePlayerNumber(): Promise<number> {
+    return (await this.turnGamePlayer()).playerNumber;
+  }
+
+  // Get the playerNumber of the GamePlayer who will be taking the next turn
+  async nextGamePlayerNumber(): Promise<number> {
+    const currentPlayerNumber = await this.turnGamePlayerNumber();
+    const playerNumberOrder = this.turnPlayerOrderArray();
+
+    const currentPlayerIndex = playerNumberOrder.indexOf(currentPlayerNumber);
+    if (currentPlayerIndex == (playerNumberOrder.length - 1)) {
+      return playerNumberOrder[0];
+    } else {
+      return playerNumberOrder[currentPlayerIndex + 1];
+    }
   }
 }
 

@@ -57,6 +57,14 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
     return { x: this.positionX, y: this.positionY };
   }
 
+  isAlive(): boolean {
+    return this.health > 0;
+  }
+
+  isDead(): boolean {
+    return this.health <= 0;
+  }
+
   distanceTo(targetCoordinates: GamePieceCoordinates): number {
     return distanceBetweenPoints(this.coordinates(), targetCoordinates);
   }

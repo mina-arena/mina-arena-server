@@ -3,6 +3,7 @@ import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { unique, snakeToCamel, enforceOneOf } from '../helpers.js';
 import { MELEE_ATTACK_RANGE, RANGED_ATTACK_RANGE } from '../../models/unit.js';
+import { resolveMoveAction, resolveRangedAttackAction, resolveMeleeAttackAction } from '../../service_objects/game_piece_action_resolver.js';
 
 export default async (
   parent,
@@ -78,34 +79,15 @@ async function handleMoveAction(
   moveInput: Types.GamePieceMoveActionInput,
   transaction
 ): Promise<Models.GamePieceAction> {
-  const currentPos = gamePiece.coordinates();
-  const moveFrom = moveInput.moveFrom;
-  const moveTo = moveInput.moveTo;
+  // Validate move data, raises exception if not valid
+  await resolveMoveAction(
+    gamePiece,
+    moveInput.moveFrom,
+    moveInput.moveTo,
+    false, // commitChanges: false so we do a dry run
+    transaction
+  );
 
-  // Confirm that they're moving it from its current position
-  if (moveFrom.x != currentPos.x || moveFrom.y != currentPos.y) {
-    throw new Error(
-      `GamePiece ${gamePiece.id} is at ${JSON.stringify(currentPos)} ` +
-      `but you are attempting to move it from ${JSON.stringify(moveFrom)}`
-    );
-  }
-  
-  // Confirm that they're moving it within its max range
-  const moveValidityResult = await gamePiece.checkMoveValidity(moveTo);
-  if (!moveValidityResult.valid) {
-    if (moveValidityResult.invalidReason == 'beyondMaxRange') {
-      throw new Error(
-        `GamePiece ${gamePiece.id} cannot be moved from ${JSON.stringify(currentPos)} to ${JSON.stringify(moveTo)} ` +
-        `because the distance is ${moveValidityResult.distance} its movement speed is ${moveValidityResult.movementSpeed}`
-      );
-    }
-    if (moveValidityResult.invalidReason == 'collidesWithOtherPiece') {
-      throw new Error(
-        `GamePiece ${gamePiece.id} cannot be moved from ${JSON.stringify(currentPos)} ` +
-        `to ${JSON.stringify(moveTo)} because this collides with another GamePiece`
-      );
-    }
-  }
   return await Models.GamePieceAction.create(
     {
       gamePhaseId: gamePhase.id,
@@ -114,8 +96,8 @@ async function handleMoveAction(
       actionType: 'move',
       actionData: {
         actionType: 'move',
-        moveFrom: currentPos,
-        moveTo: moveTo
+        moveFrom: gamePiece.coordinates(),
+        moveTo: moveInput.moveTo
       }
     },
     { transaction: transaction }
@@ -129,55 +111,47 @@ async function handleRangedAttackAction(
   rangedAttackInput: Types.GamePieceRangedAttackActionInput,
   transaction
 ): Promise<Models.GamePieceAction> {
-    // Confirm target GamePiece exists and is a valid target
-    const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
-    if (!targetGamePiece) throw new Error(`No GamePiece found for targetGamePieceId ${rangedAttackInput.targetGamePieceId}`);
-    if (targetGamePiece.gameId != gamePiece.gameId) throw new Error(`Target GamePiece ${targetGamePiece.id} is not in the same Game as attacking GamePiece ${gamePiece.id}`);
-    if (targetGamePiece.gamePlayerId == gamePiece.gamePlayerId) throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${gamePiece.id}`);
-  
-    // Confirm attacking GamePiece can perform ranged attacks
-    const playerUnit = await Models.PlayerUnit.findByPk(gamePiece.playerUnitId, { transaction: transaction });
-    const unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction: transaction });
-    // TODO: For now only Units with name "Archer" can perform ranged attacks
-    if (unit.name != 'Archer') throw new Error(`GamePiece ${gamePiece.id} of Unit "${unit.name}" cannot perform ranged attacks`);
+  const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
 
-    // Confirm target GamePiece is in range, use const range for melee for now
-    const distanceToTarget = gamePiece.distanceTo(targetGamePiece.coordinates());
-    const attackerRange = RANGED_ATTACK_RANGE;
-    if (distanceToTarget > attackerRange) throw new Error(`GamePiece ${gamePiece.id} cannot execute a ranged attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than attacker's max range of ${attackerRange}`);
-  
-    return await Models.GamePieceAction.create(
-      {
-        gamePhaseId: gamePhase.id,
-        gamePlayerId: gamePlayer.id,
-        gamePieceId: gamePiece.id,
+  // Validate attack data, raises exception if not valid
+  await resolveRangedAttackAction(
+    gamePiece,
+    rangedAttackInput.targetGamePieceId,
+    false, // commitChanges: false so we do a dry run
+    transaction
+  );
+
+  return await Models.GamePieceAction.create(
+    {
+      gamePhaseId: gamePhase.id,
+      gamePlayerId: gamePlayer.id,
+      gamePieceId: gamePiece.id,
+      actionType: 'rangedAttack',
+      actionData: {
         actionType: 'rangedAttack',
-        actionData: {
-          actionType: 'rangedAttack',
-          targetGamePieceId: targetGamePiece.id,
-        }
-      },
-      { transaction: transaction }
-    );
+        targetGamePieceId: targetGamePiece.id,
+      }
+    },
+    { transaction: transaction }
+  );
 }
 
 async function handleMeleeAttackAction(
   gamePlayer: Models.GamePlayer,
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
-  rangedAttackInput: Types.GamePieceMeleeAttackActionInput,
+  meleeAttackInput: Types.GamePieceMeleeAttackActionInput,
   transaction
 ): Promise<Models.GamePieceAction> {
-  // Confirm target GamePiece exists and is a valid target
-  const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
-  if (!targetGamePiece) throw new Error(`No GamePiece found for targetGamePieceId ${rangedAttackInput.targetGamePieceId}`);
-  if (targetGamePiece.gameId != gamePiece.gameId) throw new Error(`Target GamePiece ${targetGamePiece.id} is not in the same Game as attacking GamePiece ${gamePiece.id}`);
-  if (targetGamePiece.gamePlayerId == gamePiece.gamePlayerId) throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${gamePiece.id}`);
-
-  // Confirm target GamePiece is in range, use const range for melee for now
-  const distanceToTarget = gamePiece.distanceTo(targetGamePiece.coordinates());
-  const attackerRange = MELEE_ATTACK_RANGE;
-  if (distanceToTarget > attackerRange) throw new Error(`GamePiece ${gamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than attacker's max range of ${attackerRange}`);
+  const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction: transaction });
+  
+  // Validate attack data, raises exception if not valid
+  await resolveMeleeAttackAction(
+    gamePiece,
+    meleeAttackInput.targetGamePieceId,
+    false, // commitChanges: false so we do a dry run
+    transaction
+  );
 
   return await Models.GamePieceAction.create(
     {

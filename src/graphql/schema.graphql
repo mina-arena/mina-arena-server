@@ -10,6 +10,7 @@ type Mutation {
   createGamePieces(input: CreateGamePiecesInput!): [GamePiece!]
   startGame(input: StartGameInput!): Game
   createGamePieceActions(input: CreateGamePieceActionsInput!): [GamePieceAction!]
+  submitGamePhase(input: SubmitGamePhaseInput!): Game
 }
 
 scalar Iso8601DateTime
@@ -214,4 +215,9 @@ input GamePieceRangedAttackActionInput {
 
 input GamePieceMeleeAttackActionInput {
   targetGamePieceId: ID!
+}
+
+input SubmitGamePhaseInput {
+  minaPublicKey: String!
+  gamePhaseId: ID!
 }
