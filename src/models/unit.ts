@@ -2,6 +2,9 @@ import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOpt
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
+export const MELEE_ATTACK_RANGE = 5;
+export const RANGED_ATTACK_RANGE = 35;
+
 class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   declare id: number;
   declare name: string;

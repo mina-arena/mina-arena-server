@@ -1,13 +1,12 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { GameArena as GameArenaModel, GamePhase as GamePhaseModel, GamePieceAction as GamePieceActionModel, GamePiece as GamePieceModel, GamePlayer as GamePlayerModel, Game as GameModel, PlayerUnit as PlayerUnitModel, Player as PlayerModel, Unit as UnitModel } from '../../models/index.js';
 import { GamePhaseName as GamePhaseNameModel } from '../../models/game_phase.js';
-import { GamePieceActionData as GamePieceActionDataModel } from '../../models/game_piece_action.js';
+import { GamePieceActionData as GamePieceActionDataModel, GamePieceRangedAttackAction as GamePieceRangedAttackActionModel, GamePieceMeleeAttackAction as GamePieceMeleeAttackActionModel } from '../../models/game_piece_action.js';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type EnumResolverSignature<T, AllowedValues = any> = { [key in keyof T]?: AllowedValues };
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
@@ -369,11 +368,11 @@ export type ResolversTypes = ResolversObject<{
   GamePieceActionType: GamePieceActionType;
   GamePieceCoordinates: ResolverTypeWrapper<GamePieceCoordinates>;
   GamePieceCoordinatesInput: GamePieceCoordinatesInput;
-  GamePieceMeleeAttackAction: ResolverTypeWrapper<Omit<GamePieceMeleeAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversTypes['GamePiece'] }>;
+  GamePieceMeleeAttackAction: ResolverTypeWrapper<GamePieceMeleeAttackActionModel>;
   GamePieceMeleeAttackActionInput: GamePieceMeleeAttackActionInput;
   GamePieceMoveAction: ResolverTypeWrapper<GamePieceMoveAction>;
   GamePieceMoveActionInput: GamePieceMoveActionInput;
-  GamePieceRangedAttackAction: ResolverTypeWrapper<Omit<GamePieceRangedAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversTypes['GamePiece'] }>;
+  GamePieceRangedAttackAction: ResolverTypeWrapper<GamePieceRangedAttackActionModel>;
   GamePieceRangedAttackActionInput: GamePieceRangedAttackActionInput;
   GamePlayer: ResolverTypeWrapper<GamePlayerModel>;
   GameStatus: GameStatus;
@@ -407,11 +406,11 @@ export type ResolversParentTypes = ResolversObject<{
   GamePieceActionData: GamePieceActionDataModel;
   GamePieceCoordinates: GamePieceCoordinates;
   GamePieceCoordinatesInput: GamePieceCoordinatesInput;
-  GamePieceMeleeAttackAction: Omit<GamePieceMeleeAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversParentTypes['GamePiece'] };
+  GamePieceMeleeAttackAction: GamePieceMeleeAttackActionModel;
   GamePieceMeleeAttackActionInput: GamePieceMeleeAttackActionInput;
   GamePieceMoveAction: GamePieceMoveAction;
   GamePieceMoveActionInput: GamePieceMoveActionInput;
-  GamePieceRangedAttackAction: Omit<GamePieceRangedAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversParentTypes['GamePiece'] };
+  GamePieceRangedAttackAction: GamePieceRangedAttackActionModel;
   GamePieceRangedAttackActionInput: GamePieceRangedAttackActionInput;
   GamePlayer: GamePlayerModel;
   ID: Scalars['ID'];
