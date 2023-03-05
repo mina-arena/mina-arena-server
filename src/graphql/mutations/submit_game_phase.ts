@@ -23,6 +23,11 @@ export default async (
     const gamePlayer = await Models.GamePlayer.findByPk(gamePhase.gamePlayerId, { transaction: t });
     if (gamePlayer.playerId != player.id) throw new Error(`It is not your turn!`);
 
+    // Validate that the GamePhase being submitted is the Game's current phase
+    const game = await Models.Game.findByPk(gamePhase.gameId, { transaction: t });
+    const currentPhase = await game.currentPhase();
+    if (gamePhase.id != currentPhase.id) throw new Error(`GamePhase ${gamePhase.id} cannot be submitted because it is not the current phase for Game ${game.id}`);
+
     // Resolve the GamePhase and return the Game
     return await gamePhase.resolve(t);
   });

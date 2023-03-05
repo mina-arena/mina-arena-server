@@ -93,7 +93,11 @@ async function createNextGamePhase(
       nextGamePlayerId = currentPhase.gamePlayerId;
       break;
     case 'melee':
-      nextTurnNumber = currentPhase.turnNumber + 1;
+      // Only increment the turn number when the first player is going again
+      const nextGamePlayerNumber = await game.nextGamePlayerNumber();
+      const firstPlayerNumber = game.turnPlayerOrderArray()[0];
+      const isNewRound = nextGamePlayerNumber == firstPlayerNumber;
+      nextTurnNumber = isNewRound ? currentPhase.turnNumber + 1 : currentPhase.turnNumber;
       nextPhase = 'movement';
       nextGamePlayerId = (await game.nextGamePlayer()).id;
       break;
