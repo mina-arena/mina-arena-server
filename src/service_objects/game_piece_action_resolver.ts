@@ -121,7 +121,8 @@ export async function resolveRangedAttackAction(
 
     const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
     const damage = Math.min(damageSubtotal, 1);
-    targetGamePiece.health -= damage;
+    const newHealth = Math.max(targetGamePiece.health - damage, 0);
+    targetGamePiece.health = newHealth;
     await targetGamePiece.save({ transaction: transaction });
   } else {
     // Any validation which should only be performed in dry runs
@@ -159,7 +160,8 @@ export async function resolveMeleeAttackAction(
 
     const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
     const damage = Math.max(damageSubtotal, 1);
-    targetGamePiece.health -= damage;
+    const newHealth = Math.max(targetGamePiece.health - damage, 0);
+    targetGamePiece.health = newHealth;
     await targetGamePiece.save({ transaction: transaction });
   } else {
     // Any validation which should only be performed in dry runs
