@@ -9,6 +9,7 @@ type Mutation {
   createGame(input: CreateGameInput!): Game
   createGamePieces(input: CreateGamePiecesInput!): [GamePiece!]
   startGame(input: StartGameInput!): Game
+  createGamePieceActions(input: CreateGamePieceActionsInput!): [GamePieceAction!]
 }
 
 scalar Iso8601DateTime
@@ -181,4 +182,36 @@ input CreatePlayerUnitInput {
 
 input StartGameInput {
   gameId: ID!
+}
+
+input CreateGamePieceActionsInput {
+  minaPublicKey: String!
+  gameId: ID!
+  actions: [CreateGamePieceActionInput!]!
+}
+
+input CreateGamePieceActionInput {
+  actionType: GamePieceActionType!
+  gamePieceId: ID!
+  moveInput: GamePieceMoveActionInput
+  rangedAttackInput: GamePieceRangedAttackActionInput
+  meleeAttackInput: GamePieceMeleeAttackActionInput
+}
+
+input GamePieceMoveActionInput {
+  moveFrom: GamePieceCoordinatesInput!
+  moveTo: GamePieceCoordinatesInput!
+}
+
+input GamePieceCoordinatesInput {
+  x: Int!
+  y: Int!
+}
+
+input GamePieceRangedAttackActionInput {
+  targetGamePieceId: ID!
+}
+
+input GamePieceMeleeAttackActionInput {
+  targetGamePieceId: ID!
 }

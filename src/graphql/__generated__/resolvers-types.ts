@@ -26,6 +26,20 @@ export type CreateGameInput = {
   players: Array<CreateGamePlayerInput>;
 };
 
+export type CreateGamePieceActionInput = {
+  actionType: GamePieceActionType;
+  gamePieceId: Scalars['ID'];
+  meleeAttackInput?: InputMaybe<GamePieceMeleeAttackActionInput>;
+  moveInput?: InputMaybe<GamePieceMoveActionInput>;
+  rangedAttackInput?: InputMaybe<GamePieceRangedAttackActionInput>;
+};
+
+export type CreateGamePieceActionsInput = {
+  actions: Array<CreateGamePieceActionInput>;
+  gameId: Scalars['ID'];
+  minaPublicKey: Scalars['String'];
+};
+
 export type CreateGamePieceInput = {
   createPlayerUnit?: InputMaybe<CreatePlayerUnitInput>;
   playerUnitId?: InputMaybe<Scalars['ID']>;
@@ -132,9 +146,18 @@ export type GamePieceCoordinates = {
   y: Scalars['Int'];
 };
 
+export type GamePieceCoordinatesInput = {
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+};
+
 export type GamePieceMeleeAttackAction = {
   __typename?: 'GamePieceMeleeAttackAction';
   targetGamePiece: GamePiece;
+};
+
+export type GamePieceMeleeAttackActionInput = {
+  targetGamePieceId: Scalars['ID'];
 };
 
 export type GamePieceMoveAction = {
@@ -143,9 +166,18 @@ export type GamePieceMoveAction = {
   moveTo: GamePieceCoordinates;
 };
 
+export type GamePieceMoveActionInput = {
+  moveFrom: GamePieceCoordinatesInput;
+  moveTo: GamePieceCoordinatesInput;
+};
+
 export type GamePieceRangedAttackAction = {
   __typename?: 'GamePieceRangedAttackAction';
   targetGamePiece: GamePiece;
+};
+
+export type GamePieceRangedAttackActionInput = {
+  targetGamePieceId: Scalars['ID'];
 };
 
 export type GamePlayer = {
@@ -170,6 +202,7 @@ export enum GameStatus {
 export type Mutation = {
   __typename?: 'Mutation';
   createGame?: Maybe<Game>;
+  createGamePieceActions?: Maybe<Array<GamePieceAction>>;
   createGamePieces?: Maybe<Array<GamePiece>>;
   startGame?: Maybe<Game>;
 };
@@ -177,6 +210,11 @@ export type Mutation = {
 
 export type MutationCreateGameArgs = {
   input: CreateGameInput;
+};
+
+
+export type MutationCreateGamePieceActionsArgs = {
+  input: CreateGamePieceActionsInput;
 };
 
 
@@ -315,6 +353,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateGameInput: CreateGameInput;
+  CreateGamePieceActionInput: CreateGamePieceActionInput;
+  CreateGamePieceActionsInput: CreateGamePieceActionsInput;
   CreateGamePieceInput: CreateGamePieceInput;
   CreateGamePiecesInput: CreateGamePiecesInput;
   CreateGamePlayerInput: CreateGamePlayerInput;
@@ -328,9 +368,13 @@ export type ResolversTypes = ResolversObject<{
   GamePieceActionData: ResolverTypeWrapper<GamePieceActionDataModel>;
   GamePieceActionType: GamePieceActionType;
   GamePieceCoordinates: ResolverTypeWrapper<GamePieceCoordinates>;
+  GamePieceCoordinatesInput: GamePieceCoordinatesInput;
   GamePieceMeleeAttackAction: ResolverTypeWrapper<Omit<GamePieceMeleeAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversTypes['GamePiece'] }>;
+  GamePieceMeleeAttackActionInput: GamePieceMeleeAttackActionInput;
   GamePieceMoveAction: ResolverTypeWrapper<GamePieceMoveAction>;
+  GamePieceMoveActionInput: GamePieceMoveActionInput;
   GamePieceRangedAttackAction: ResolverTypeWrapper<Omit<GamePieceRangedAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversTypes['GamePiece'] }>;
+  GamePieceRangedAttackActionInput: GamePieceRangedAttackActionInput;
   GamePlayer: ResolverTypeWrapper<GamePlayerModel>;
   GameStatus: GameStatus;
   ID: ResolverTypeWrapper<Scalars['ID']>;
@@ -349,6 +393,8 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
   CreateGameInput: CreateGameInput;
+  CreateGamePieceActionInput: CreateGamePieceActionInput;
+  CreateGamePieceActionsInput: CreateGamePieceActionsInput;
   CreateGamePieceInput: CreateGamePieceInput;
   CreateGamePiecesInput: CreateGamePiecesInput;
   CreateGamePlayerInput: CreateGamePlayerInput;
@@ -360,9 +406,13 @@ export type ResolversParentTypes = ResolversObject<{
   GamePieceAction: GamePieceActionModel;
   GamePieceActionData: GamePieceActionDataModel;
   GamePieceCoordinates: GamePieceCoordinates;
+  GamePieceCoordinatesInput: GamePieceCoordinatesInput;
   GamePieceMeleeAttackAction: Omit<GamePieceMeleeAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversParentTypes['GamePiece'] };
+  GamePieceMeleeAttackActionInput: GamePieceMeleeAttackActionInput;
   GamePieceMoveAction: GamePieceMoveAction;
+  GamePieceMoveActionInput: GamePieceMoveActionInput;
   GamePieceRangedAttackAction: Omit<GamePieceRangedAttackAction, 'targetGamePiece'> & { targetGamePiece: ResolversParentTypes['GamePiece'] };
+  GamePieceRangedAttackActionInput: GamePieceRangedAttackActionInput;
   GamePlayer: GamePlayerModel;
   ID: Scalars['ID'];
   Int: Scalars['Int'];
@@ -486,6 +536,7 @@ export interface Iso8601DateTimeScalarConfig extends GraphQLScalarTypeConfig<Res
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationCreateGameArgs, 'input'>>;
+  createGamePieceActions?: Resolver<Maybe<Array<ResolversTypes['GamePieceAction']>>, ParentType, ContextType, RequireFields<MutationCreateGamePieceActionsArgs, 'input'>>;
   createGamePieces?: Resolver<Maybe<Array<ResolversTypes['GamePiece']>>, ParentType, ContextType, RequireFields<MutationCreateGamePiecesArgs, 'input'>>;
   startGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationStartGameArgs, 'input'>>;
 }>;

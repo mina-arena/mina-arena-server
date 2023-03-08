@@ -1,8 +1,14 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
+import { GamePieceActionType } from './game_piece_action.js';
 import * as Models from './index.js';
 
 export type GamePhaseName = 'movement' | 'shooting' | 'melee';
+export const ALLOWED_ACTIONS_PER_PHASE: Record<GamePhaseName, GamePieceActionType[]> = {
+  'movement': ['move'],
+  'shooting': ['rangedAttack'],
+  'melee': ['meleeAttack']
+};
 
 class GamePhase extends Model<InferAttributes<GamePhase>, InferCreationAttributes<GamePhase>> {
   declare id: number;
@@ -26,6 +32,11 @@ class GamePhase extends Model<InferAttributes<GamePhase>, InferCreationAttribute
       where: { gamePhaseId: this.id },
       order: [['id', 'ASC']]
     });
+  }
+
+  actionTypeAllowed(actionType: GamePieceActionType): boolean {
+    let allowedActionTypes = ALLOWED_ACTIONS_PER_PHASE[this.phase];
+    return allowedActionTypes.includes(actionType);
   }
 }
 
