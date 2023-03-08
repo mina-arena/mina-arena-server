@@ -21,3 +21,5 @@ generates:
         Unit: ../../models/index.js#Unit as UnitModel
         GamePhaseName: ../../models/game_phase.js#GamePhaseName as GamePhaseNameModel
         GamePieceActionData: ../../models/game_piece_action.js#GamePieceActionData as GamePieceActionDataModel
+        GamePieceRangedAttackAction: ../../models/game_piece_action.js#GamePieceRangedAttackAction as GamePieceRangedAttackActionModel
+        GamePieceMeleeAttackAction: ../../models/game_piece_action.js#GamePieceMeleeAttackAction as GamePieceMeleeAttackActionModel

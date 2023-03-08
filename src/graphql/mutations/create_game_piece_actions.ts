@@ -1,7 +1,8 @@
 import * as Types from '../__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
-import { unique, snakeToCamel } from '../helpers.js';
+import { unique, snakeToCamel, enforceOneOf } from '../helpers.js';
+import { MELEE_ATTACK_RANGE, RANGED_ATTACK_RANGE } from '../../models/unit.js';
 
 export default async (
   parent,
@@ -34,8 +35,7 @@ export default async (
 
     let createdGamePieceActions = [];
     for (const actionInput of args.input.actions) {
-      // TODO: Implement oneOf validation to enforce
-      // that exactly one action input was provided
+      enforceOneOf(actionInput, ['moveInput', 'rangedAttackInput', 'meleeAttackInput']);
 
       // Validate that this action is allowed in this phase
       let rawActionType = actionInput.actionType;
@@ -56,10 +56,14 @@ export default async (
           );
           break;
         case 'rangedAttack':
-          // TODO
+          createdGamePieceActions.push(
+            await handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, actionInput.rangedAttackInput, t)
+          )
           break;
         case 'meleeAttack':
-          // TODO
+          createdGamePieceActions.push(
+            await handleMeleeAttackAction(gamePlayer, gamePhase, gamePiece, actionInput.meleeAttackInput, t)
+          )
           break;
       }
     }
@@ -112,6 +116,78 @@ async function handleMoveAction(
         actionType: 'move',
         moveFrom: currentPos,
         moveTo: moveTo
+      }
+    },
+    { transaction: transaction }
+  );
+}
+
+async function handleRangedAttackAction(
+  gamePlayer: Models.GamePlayer,
+  gamePhase: Models.GamePhase,
+  gamePiece: Models.GamePiece,
+  rangedAttackInput: Types.GamePieceRangedAttackActionInput,
+  transaction
+): Promise<Models.GamePieceAction> {
+    // Confirm target GamePiece exists and is a valid target
+    const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
+    if (!targetGamePiece) throw new Error(`No GamePiece found for targetGamePieceId ${rangedAttackInput.targetGamePieceId}`);
+    if (targetGamePiece.gameId != gamePiece.gameId) throw new Error(`Target GamePiece ${targetGamePiece.id} is not in the same Game as attacking GamePiece ${gamePiece.id}`);
+    if (targetGamePiece.gamePlayerId == gamePiece.gamePlayerId) throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${gamePiece.id}`);
+  
+    // Confirm attacking GamePiece can perform ranged attacks
+    const playerUnit = await Models.PlayerUnit.findByPk(gamePiece.playerUnitId, { transaction: transaction });
+    const unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction: transaction });
+    // TODO: For now only Units with name "Archer" can perform ranged attacks
+    if (unit.name != 'Archer') throw new Error(`GamePiece ${gamePiece.id} of Unit "${unit.name}" cannot perform ranged attacks`);
+
+    // Confirm target GamePiece is in range, use const range for melee for now
+    const distanceToTarget = gamePiece.distanceTo(targetGamePiece.coordinates());
+    const attackerRange = RANGED_ATTACK_RANGE;
+    if (distanceToTarget > attackerRange) throw new Error(`GamePiece ${gamePiece.id} cannot execute a ranged attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than attacker's max range of ${attackerRange}`);
+  
+    return await Models.GamePieceAction.create(
+      {
+        gamePhaseId: gamePhase.id,
+        gamePlayerId: gamePlayer.id,
+        gamePieceId: gamePiece.id,
+        actionType: 'rangedAttack',
+        actionData: {
+          actionType: 'rangedAttack',
+          targetGamePieceId: targetGamePiece.id,
+        }
+      },
+      { transaction: transaction }
+    );
+}
+
+async function handleMeleeAttackAction(
+  gamePlayer: Models.GamePlayer,
+  gamePhase: Models.GamePhase,
+  gamePiece: Models.GamePiece,
+  rangedAttackInput: Types.GamePieceMeleeAttackActionInput,
+  transaction
+): Promise<Models.GamePieceAction> {
+  // Confirm target GamePiece exists and is a valid target
+  const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
+  if (!targetGamePiece) throw new Error(`No GamePiece found for targetGamePieceId ${rangedAttackInput.targetGamePieceId}`);
+  if (targetGamePiece.gameId != gamePiece.gameId) throw new Error(`Target GamePiece ${targetGamePiece.id} is not in the same Game as attacking GamePiece ${gamePiece.id}`);
+  if (targetGamePiece.gamePlayerId == gamePiece.gamePlayerId) throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${gamePiece.id}`);
+
+  // Confirm target GamePiece is in range, use const range for melee for now
+  const distanceToTarget = gamePiece.distanceTo(targetGamePiece.coordinates());
+  const attackerRange = MELEE_ATTACK_RANGE;
+  if (distanceToTarget > attackerRange) throw new Error(`GamePiece ${gamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than attacker's max range of ${attackerRange}`);
+
+  return await Models.GamePieceAction.create(
+    {
+      gamePhaseId: gamePhase.id,
+      gamePlayerId: gamePlayer.id,
+      gamePieceId: gamePiece.id,
+      actionType: 'meleeAttack',
+      actionData: {
+        actionType: 'meleeAttack',
+        targetGamePieceId: targetGamePiece.id,
       }
     },
     { transaction: transaction }

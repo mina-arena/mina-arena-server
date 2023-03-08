@@ -45,3 +45,21 @@ export function unique(array: any[]): any[] {
     return array.indexOf(value) === index;
   });
 }
+
+// Given an input object and an array of keys,
+// enforce that exactly one key has a value provided.
+// If yes, return nothing.
+// If no, raise an exception.
+export function enforceOneOf(input: Object, keys: string[]): void {
+  let keysWithValues = [];
+  for (const key of keys) {
+    let keyValue = input[key];
+    if (keyValue) keysWithValues.push(key);
+  }
+  if (keysWithValues.length > 1) {
+    throw new Error(
+      `Exactly one of [${keys.join(', ')}] must be provided, but received ` +
+      `keys [${keysWithValues.join(', ')}] on input ${JSON.stringify(input)}`
+    );
+  }
+}

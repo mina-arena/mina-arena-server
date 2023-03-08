@@ -81,7 +81,17 @@ const resolvers: Resolvers = {
           break;
       }
     },
-  }
+  },
+  GamePieceRangedAttackAction: {
+    targetGamePiece: async (action) => {
+      return await Models.GamePiece.findByPk(action.targetGamePieceId);
+    },
+  },
+  GamePieceMeleeAttackAction: {
+    targetGamePiece: async (action) => {
+      return await Models.GamePiece.findByPk(action.targetGamePieceId);
+    },
+  },
 };
 
 export default resolvers;
