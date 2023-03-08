@@ -2,6 +2,7 @@ import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOpt
 import sequelizeConnection from '../db/config.js';
 import { GamePieceActionType } from './game_piece_action.js';
 import * as Models from './index.js';
+import resolveGamePhase from '../service_objects/game_phase_resolver.js';
 
 export type GamePhaseName = 'movement' | 'shooting' | 'melee';
 export const ALLOWED_ACTIONS_PER_PHASE: Record<GamePhaseName, GamePieceActionType[]> = {
@@ -37,6 +38,10 @@ class GamePhase extends Model<InferAttributes<GamePhase>, InferCreationAttribute
   actionTypeAllowed(actionType: GamePieceActionType): boolean {
     let allowedActionTypes = ALLOWED_ACTIONS_PER_PHASE[this.phase];
     return allowedActionTypes.includes(actionType);
+  }
+
+  async resolve(transaction): Promise<Models.Game> {
+    return await resolveGamePhase(this, transaction);
   }
 }
 

@@ -31,14 +31,12 @@ export default async (
 
     // Upsert Players and associate them with the Game
     for (const playerInput of args.input.players) {
-      console.log(`Upserting player with name ${playerInput.name}`)
       const [player, created] = await Models.Player.findOrCreate({
         where: { minaPublicKey: playerInput.minaPublicKey },
         defaults: { name: playerInput.name },
         transaction: t
       });
       
-      console.log(`Creating GamePlayer for player ${playerInput.name} with number ${playerInput.playerNumber}`)
       await Models.GamePlayer.create({
         gameId: game.id,
         playerId: player.id,

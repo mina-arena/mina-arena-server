@@ -43,7 +43,8 @@ const resolvers: Resolvers = {
     createGame: Mutations.createGame,
     createGamePieces: Mutations.createGamePieces,
     startGame: Mutations.startGame,
-    createGamePieceActions: Mutations.createGamePieceActions
+    createGamePieceActions: Mutations.createGamePieceActions,
+    submitGamePhase: Mutations.submitGamePhase,
   },
   // Define custom field resolvers for fields
   // which require some kind of transformation

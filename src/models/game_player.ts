@@ -1,6 +1,7 @@
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
+import { Op } from 'sequelize';
 
 class GamePlayer extends Model<InferAttributes<GamePlayer>, InferCreationAttributes<GamePlayer>> {
   declare id: number;
@@ -16,6 +17,16 @@ class GamePlayer extends Model<InferAttributes<GamePlayer>, InferCreationAttribu
 
   async player(): Promise<Models.Player> {
     return await Models.Player.findByPk(this.playerId);
+  }
+
+  async areAllGamePiecesDead(): Promise<boolean> {
+    const numLivingGamePieces = await Models.GamePiece.count({
+      where: {
+        gamePlayerId: this.id,
+        health: { [Op.gt]: 0 }
+      }
+    });
+    return numLivingGamePieces <= 0;
   }
 }
 
