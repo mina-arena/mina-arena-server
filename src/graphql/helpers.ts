@@ -48,9 +48,9 @@ export function unique(array: any[]): any[] {
 
 // Given an input object and an array of keys,
 // enforce that exactly one key has a value provided.
-// If yes, return the one key and value provided.
+// If yes, return nothing.
 // If no, raise an exception.
-export function enforceOneOf(input: Object, keys: string[]): [string, any] {
+export function enforceOneOf(input: Object, keys: string[]): void {
   let keysWithValues = [];
   for (const key of keys) {
     let keyValue = input[key];
@@ -62,5 +62,4 @@ export function enforceOneOf(input: Object, keys: string[]): [string, any] {
       `keys [${keysWithValues.join(', ')}] on input ${JSON.stringify(input)}`
     );
   }
-  return [keysWithValues[0], input[keysWithValues[0]]];
 }
