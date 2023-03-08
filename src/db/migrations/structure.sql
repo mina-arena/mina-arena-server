@@ -501,166 +501,6 @@ ALTER TABLE ONLY public."Units" ALTER COLUMN id SET DEFAULT nextval('public."Uni
 
 
 --
--- Data for Name: GameArenas; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."GameArenas" (id, "gameId", width, height, "createdAt", "updatedAt") FROM stdin;
-\.
-
-
---
--- Data for Name: GamePhases; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."GamePhases" (id, "gameId", "gamePlayerId", "turnNumber", phase, "createdAt", "updatedAt") FROM stdin;
-1	1	1	1	movement	2023-02-23 22:03:30.172-05	2023-02-23 22:03:30.172-05
-\.
-
-
---
--- Data for Name: GamePieceActions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."GamePieceActions" (id, "gamePhaseId", "gamePlayerId", "gamePieceId", "actionType", "actionData", "createdAt", "updatedAt") FROM stdin;
-1	1	1	1	move	{"moveTo": {"x": 13, "y": 13}, "moveFrom": {"x": 10, "y": 15}}	2023-02-23 22:03:30.177-05	2023-02-23 22:03:30.177-05
-\.
-
-
---
--- Data for Name: GamePieces; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."GamePieces" (id, "gameId", "gamePlayerId", "playerUnitId", "positionX", "positionY", health, "createdAt", "updatedAt") FROM stdin;
-1	1	1	1	\N	\N	3	2023-02-23 22:03:30.167-05	2023-02-23 22:03:30.167-05
-\.
-
-
---
--- Data for Name: GamePlayers; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."GamePlayers" (id, "gameId", "playerId", "playerNumber", "createdAt", "updatedAt") FROM stdin;
-1	1	1	1	2023-02-23 22:03:30.161-05	2023-02-23 22:03:30.161-05
-\.
-
-
---
--- Data for Name: Games; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Games" (id, status, "turnNumber", phase, "turnPlayerOrder", "turnGamePlayerId", "winningGamePlayerId", "createdAt", "updatedAt") FROM stdin;
-1	inProgress	1	movement	1,2	\N	\N	2023-02-23 22:03:30.11-05	2023-02-23 22:03:30.11-05
-\.
-
-
---
--- Data for Name: PlayerUnits; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."PlayerUnits" (id, name, "playerId", "unitId", "createdAt", "updatedAt") FROM stdin;
-1	My Special Unit	1	1	2023-02-23 20:53:12.257-05	2023-02-23 20:53:12.257-05
-\.
-
-
---
--- Data for Name: Players; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Players" (id, name, "minaPublicKey", "createdAt", "updatedAt", "deletedAt") FROM stdin;
-1	New Guy	somekey	2023-02-21 21:33:12.748-05	2023-02-21 21:33:12.748-05	\N
-\.
-
-
---
--- Data for Name: SequelizeMeta; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."SequelizeMeta" (name) FROM stdin;
-20230222021826-create-player.js
-20230223220101-create-unit.js
-20230223220946-create-player-unit.js
-20230223222323-create-game.js
-20230223222851-create-game-player.js
-20230223223040-create-game-arena.js
-20230223223238-create-game-phase.js
-20230223223501-create-game-piece.js
-20230224021134-create-game-piece-action.js
-\.
-
-
---
--- Data for Name: Units; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Units" (id, name, "attackPower", armor, "maxHealth", "movementSpeed", "createdAt", "updatedAt") FROM stdin;
-1	My Unit	1	1	3	10	2023-02-23 20:39:48.842-05	2023-02-23 20:39:48.842-05
-\.
-
-
---
--- Name: GameArenas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."GameArenas_id_seq"', 1, false);
-
-
---
--- Name: GamePhases_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."GamePhases_id_seq"', 1, true);
-
-
---
--- Name: GamePieceActions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."GamePieceActions_id_seq"', 1, true);
-
-
---
--- Name: GamePieces_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."GamePieces_id_seq"', 1, true);
-
-
---
--- Name: GamePlayers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."GamePlayers_id_seq"', 1, true);
-
-
---
--- Name: Games_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."Games_id_seq"', 1, true);
-
-
---
--- Name: PlayerUnits_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."PlayerUnits_id_seq"', 1, true);
-
-
---
--- Name: Players_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."Players_id_seq"', 1, true);
-
-
---
--- Name: Units_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."Units_id_seq"', 1, true);
-
-
---
 -- Name: GameArenas GameArenas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -829,6 +669,55 @@ CREATE INDEX player_units_player_id ON public."PlayerUnits" USING btree ("player
 --
 
 CREATE INDEX player_units_unit_id ON public."PlayerUnits" USING btree ("unitId");
+
+
+--
+-- Name: unique_game_phase_game_turn_phase; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_phase_game_turn_phase ON public."GamePhases" USING btree ("gameId", "turnNumber", phase);
+
+
+--
+-- Name: unique_game_piece_game_id_player_unit_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_piece_game_id_player_unit_id ON public."GamePieces" USING btree ("gameId", "playerUnitId");
+
+
+--
+-- Name: unique_game_player_game_id_player_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_player_game_id_player_id ON public."GamePlayers" USING btree ("gameId", "playerId");
+
+
+--
+-- Name: unique_game_player_game_id_player_number; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_game_player_game_id_player_number ON public."GamePlayers" USING btree ("gameId", "playerNumber");
+
+
+--
+-- Name: unique_player_mina_public_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_player_mina_public_key ON public."Players" USING btree ("minaPublicKey");
+
+
+--
+-- Name: unique_player_unit_name_by_player; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_player_unit_name_by_player ON public."PlayerUnits" USING btree ("playerId", name);
+
+
+--
+-- Name: unique_unit_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX unique_unit_name ON public."Units" USING btree (name);
 
 
 --
