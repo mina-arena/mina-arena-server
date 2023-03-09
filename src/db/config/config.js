@@ -19,6 +19,10 @@ export default {
   },
   production: {
     use_env_variable: "DATABASE_URL",
-    dialect: 'postgres'
+    dialect: 'postgres',
+    ssl: true,
+    dialectOptions: {
+      ssl: true
+    }
   }
 };
