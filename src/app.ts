@@ -14,7 +14,7 @@ import dbInit from './db/init.js';
 dbInit();
 
 const app = express();
-const webPort: number = 3000;
+const webPort = process.env.PORT || 3000;
 const websocketPort: number = 443;
 
 const httpServer = http.createServer(app);
@@ -34,8 +34,3 @@ app.use(
 
 await new Promise((resolve: any) => httpServer.listen({ port: webPort }, resolve));
 console.log(`Server running on port ${webPort}`);
-
-// Example of how to query a table using Sequelize
-// See https://sequelize.org/v5/manual/models-usage.html#data-retrieval---finders
-import { Player, Unit, PlayerUnit, Game, GamePlayer, GamePiece, GamePieceAction, GamePhase } from './models/index.js';
-import { GamePieceMoveAction } from './models/game_piece_action.js';

@@ -10,7 +10,7 @@ import resolvers from './graphql/resolvers.js';
 import dbInit from './db/init.js';
 dbInit();
 const app = express();
-const webPort = 3000;
+const webPort = process.env.PORT || 3000;
 const websocketPort = 443;
 const httpServer = http.createServer(app);
 const apolloServer = new ApolloServer({
