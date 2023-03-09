@@ -6,7 +6,8 @@
   "scripts": {
     "generate": "graphql-codegen --config codegen.yml",
     "compile": "npm run generate && tsc --project tsconfig.json",
-    "start": "npm run compile && node ./dist/app.js",
+    "dev": "npm run compile && npm run start",
+    "start": "node ./dist/app.js",
     "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql skirmish_server_poc_development --schema-only",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,6 +25,7 @@
     "@apollo/server": "^4.4.0",
     "@types/express": "^4.17.17",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "http": "^0.0.1-security",
     "pg": "^8.9.0",

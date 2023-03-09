@@ -1,5 +1,8 @@
 import dotenv from 'dotenv';
-dotenv.config();
+
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 import { Sequelize, Dialect } from 'sequelize';
 
@@ -12,7 +15,18 @@ if (environment == 'production') {
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl) throw new Error(`DATABASE_URL environment variable is required to boot in production!`);
 
-  sequelizeConnection = new Sequelize(process.env.DATABASE_URL);
+  sequelizeConnection = new Sequelize(
+    process.env.DATABASE_URL,
+    {
+      dialect: "postgres",
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      },
+    }
+  );
 } else {
   var dbHost: string;
   var dbName: string;
