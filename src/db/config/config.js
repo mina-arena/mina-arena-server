@@ -18,10 +18,9 @@ export default {
     dialect: 'postgres'
   },
   production: {
-    username: process.env.PROD_DB_USERNAME,
-    password: process.env.PROD_DB_PASSWORD,
-    database: process.env.PROD_DB_NAME,
-    host: process.env.PROD_DB_HOST,
+    production: {
+      use_env_variable: "DATABASE_URL"
+    },
     dialect: 'postgres'
   }
 };
