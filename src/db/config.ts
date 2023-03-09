@@ -17,7 +17,15 @@ if (environment == 'production') {
 
   sequelizeConnection = new Sequelize(
     process.env.DATABASE_URL,
-    { ssl: true }
+    {
+      dialect: "postgres",
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      },
+    }
   );
 } else {
   var dbHost: string;
