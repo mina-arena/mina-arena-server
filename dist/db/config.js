@@ -11,7 +11,7 @@ if (environment == 'production') {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl)
         throw new Error(`DATABASE_URL environment variable is required to boot in production!`);
-    sequelizeConnection = new Sequelize(process.env.DATABASE_URL);
+    sequelizeConnection = new Sequelize(process.env.DATABASE_URL, { ssl: true });
 }
 else {
     var dbHost;
