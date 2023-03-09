@@ -7,6 +7,7 @@
     "generate": "graphql-codegen --config codegen.yml",
     "compile": "npm run generate && tsc --project tsconfig.json",
     "start": "npm run compile && node ./dist/app.js",
+    "start_no_compile": "node ./dist/app.js",
     "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql skirmish_server_poc_development --schema-only",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
