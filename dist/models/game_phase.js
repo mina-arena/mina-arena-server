@@ -7,6 +7,9 @@ export const ALLOWED_ACTIONS_PER_PHASE = {
     'shooting': ['rangedAttack'],
     'melee': ['meleeAttack']
 };
+// TODO: For now, each player's turn will only consist of one movement phase
+// export const GAME_PHASE_ORDER: GamePhaseName[] = ['movement', 'shooting', 'melee'];
+export const GAME_PHASE_ORDER = ['movement'];
 class GamePhase extends Model {
     async game() {
         return await Models.Game.findByPk(this.gameId);
