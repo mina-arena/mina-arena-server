@@ -88,7 +88,7 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
     // on this exact spot. We probably want to enforce more space
     // around a unit, giving them some radius.
     const collidingUnits = await Models.GamePiece.findAll({
-      where: { positionX: moveTo.x, positionY: moveTo.y }
+      where: { gameId: this.gameId, positionX: moveTo.x, positionY: moveTo.y }
     });
     if (collidingUnits.length > 0) {
       return {
