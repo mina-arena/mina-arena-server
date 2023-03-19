@@ -28,11 +28,9 @@ export default async (gamePhase, transaction) => {
     else {
         // Game continues, create the next GamePhase
         const nextPhase = await createNextGamePhase(game, gamePhase, transaction);
-        console.log(`Created new game phase with ID ${nextPhase.id}`);
         game.phase = nextPhase.phase;
         game.turnNumber = nextPhase.turnNumber;
         game.turnGamePlayerId = nextPhase.gamePlayerId;
-        console.log(`Saving game`);
         await game.save({ transaction: transaction });
     }
     return game;
@@ -61,7 +59,6 @@ async function createNextGamePhase(game, currentPhase, transaction) {
     let nextGamePlayerId;
     const currentPhaseIndex = GAME_PHASE_ORDER.indexOf(currentPhase.phase);
     const endOfCurrentPlayerTurn = currentPhaseIndex == (GAME_PHASE_ORDER.length - 1);
-    console.log(`Resolving phase, currentPhaseIndex = ${currentPhaseIndex}, endOfCurrentPlayerTurn = ${endOfCurrentPlayerTurn}`);
     if (endOfCurrentPlayerTurn) {
         // Only increment the turn number when the first player is going again
         const nextGamePlayerNumber = await game.nextGamePlayerNumber();
@@ -76,7 +73,6 @@ async function createNextGamePhase(game, currentPhase, transaction) {
         nextPhase = GAME_PHASE_ORDER[currentPhaseIndex + 1];
         nextGamePlayerId = currentPhase.gamePlayerId;
     }
-    console.log(`Creating new GamePhase, gameId: ${game.id}, gamePlayerId: ${nextGamePlayerId}, turnNumber: ${nextTurnNumber}, phase: ${nextPhase}`);
     return await Models.GamePhase.create({
         gameId: game.id,
         gamePlayerId: nextGamePlayerId,
