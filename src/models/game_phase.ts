@@ -11,6 +11,10 @@ export const ALLOWED_ACTIONS_PER_PHASE: Record<GamePhaseName, GamePieceActionTyp
   'melee': ['meleeAttack']
 };
 
+// TODO: For now, each player's turn will only consist of one movement phase
+// export const GAME_PHASE_ORDER: GamePhaseName[] = ['movement', 'shooting', 'melee'];
+export const GAME_PHASE_ORDER: GamePhaseName[] = ['movement'];
+
 class GamePhase extends Model<InferAttributes<GamePhase>, InferCreationAttributes<GamePhase>> {
   declare id: number;
   declare gameId: number;
