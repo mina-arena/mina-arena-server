@@ -672,10 +672,10 @@ CREATE INDEX player_units_unit_id ON public."PlayerUnits" USING btree ("unitId")
 
 
 --
--- Name: unique_game_phase_game_turn_phase; Type: INDEX; Schema: public; Owner: postgres
+-- Name: unique_game_phase_game_turn_gameplayer_phase; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE UNIQUE INDEX unique_game_phase_game_turn_phase ON public."GamePhases" USING btree ("gameId", "turnNumber", phase);
+CREATE UNIQUE INDEX unique_game_phase_game_turn_gameplayer_phase ON public."GamePhases" USING btree ("gameId", "turnNumber", "gamePlayerId", phase);
 
 
 --

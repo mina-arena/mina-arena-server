@@ -1,7 +1,7 @@
 import * as Models from '../models/index.js';
 import sequelizeConnection from '../db/config.js';
 import resolveGamePieceAction from './game_piece_action_resolver.js';
-import { GamePhaseName } from '../models/game_phase.js';
+import { GamePhaseName, GAME_PHASE_ORDER } from '../models/game_phase.js';
 
 export default async (
   gamePhase: Models.GamePhase,
@@ -81,26 +81,21 @@ async function createNextGamePhase(
   let nextPhase: GamePhaseName;
   let nextGamePlayerId: number;
 
-  switch(currentPhase.phase) {
-    case 'movement':
-      nextTurnNumber = currentPhase.turnNumber;
-      nextPhase = 'shooting';
-      nextGamePlayerId = currentPhase.gamePlayerId;
-      break;
-    case 'shooting':
-      nextTurnNumber = currentPhase.turnNumber;
-      nextPhase = 'melee';
-      nextGamePlayerId = currentPhase.gamePlayerId;
-      break;
-    case 'melee':
-      // Only increment the turn number when the first player is going again
-      const nextGamePlayerNumber = await game.nextGamePlayerNumber();
-      const firstPlayerNumber = game.turnPlayerOrderArray()[0];
-      const isNewRound = nextGamePlayerNumber == firstPlayerNumber;
-      nextTurnNumber = isNewRound ? currentPhase.turnNumber + 1 : currentPhase.turnNumber;
-      nextPhase = 'movement';
-      nextGamePlayerId = (await game.nextGamePlayer()).id;
-      break;
+  const currentPhaseIndex = GAME_PHASE_ORDER.indexOf(currentPhase.phase);
+  const endOfCurrentPlayerTurn = currentPhaseIndex == (GAME_PHASE_ORDER.length - 1);
+
+  if (endOfCurrentPlayerTurn) {
+    // Only increment the turn number when the first player is going again
+    const nextGamePlayerNumber = await game.nextGamePlayerNumber();
+    const firstPlayerNumber = game.turnPlayerOrderArray()[0];
+    const isNewRound = nextGamePlayerNumber == firstPlayerNumber;
+    nextTurnNumber = isNewRound ? currentPhase.turnNumber + 1 : currentPhase.turnNumber;
+    nextPhase = GAME_PHASE_ORDER[0];
+    nextGamePlayerId = (await game.nextGamePlayer()).id;
+  } else {
+    nextTurnNumber = currentPhase.turnNumber;
+    nextPhase = GAME_PHASE_ORDER[currentPhaseIndex + 1];
+    nextGamePlayerId = currentPhase.gamePlayerId;
   }
 
   return await Models.GamePhase.create({

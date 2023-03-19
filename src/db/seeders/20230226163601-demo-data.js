@@ -23,7 +23,7 @@ module.exports = {
         attackPower: 3,
         armor: 1,
         maxHealth: 4,
-        movementSpeed: 1,
+        movementSpeed: 40,
         createdAt: new Date(),
         updatedAt: new Date()
       }]);
@@ -46,6 +46,10 @@ module.exports = {
       await queryInterface.bulkDelete('Players', null, {});
       await queryInterface.bulkDelete('Units', null, {});
       await queryInterface.bulkDelete('Games', null, {});
+      await queryInterface.bulkDelete('GamePlayers', null, {});
+      await queryInterface.bulkDelete('GamePieces', null, {});
+      await queryInterface.bulkDelete('GamePhases', null, {});
+      await queryInterface.bulkDelete('PlayerUnits', null, {});
       await transaction.commit();
     } catch (err) {
       await transaction.rollback();
