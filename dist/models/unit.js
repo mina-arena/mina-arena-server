@@ -7,9 +7,6 @@ class Unit extends Model {
     async playerUnits() {
         return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
     }
-    pointsCost() {
-        return this.attackPower + this.armor + this.maxHealth;
-    }
 }
 Unit.init({
     id: {
@@ -21,13 +18,61 @@ Unit.init({
         type: DataTypes.STRING,
         allowNull: false
     },
-    attackPower: {
+    pointsCost: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    armor: {
+    armorSaveRoll: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    meleeNumAttacks: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    meleeHitRoll: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    meleeWoundRoll: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    meleeArmorPiercing: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    meleeDamage: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    rangedRange: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    rangedNumAttacks: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    rangedHitRoll: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    rangedWoundRoll: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    rangedArmorPiercing: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    rangedDamage: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    rangedAmmo: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     maxHealth: {
         type: DataTypes.INTEGER,

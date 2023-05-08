@@ -119,7 +119,11 @@ export async function resolveRangedAttackAction(
     const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
     const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
 
-    const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
+    // TODO: Removed attackPower and armor, stub this as 1 for now.
+    //   Need to implement dice rolls and attack sequence.
+    // const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
+    const damageSubtotal = 1;
+
     const damage = Math.min(damageSubtotal, 1);
     const newHealth = Math.max(targetGamePiece.health - damage, 0);
     targetGamePiece.health = newHealth;
@@ -158,7 +162,11 @@ export async function resolveMeleeAttackAction(
     const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
     const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
 
-    const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
+    // TODO: Removed attackPower and armor, stub this as 1 for now.
+    //   Need to implement dice rolls and attack sequence.
+    // const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
+    const damageSubtotal = 1;
+
     const damage = Math.max(damageSubtotal, 1);
     const newHealth = Math.max(targetGamePiece.health - damage, 0);
     targetGamePiece.health = newHealth;

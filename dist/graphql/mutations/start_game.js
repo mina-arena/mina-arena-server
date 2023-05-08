@@ -59,7 +59,7 @@ async function validateGame(game, t) {
             let unit = units.find(unit => unit.id == playerUnit.unitId);
             if (!unit)
                 throw new Error(`PlayerUnit ${playerUnit.id} for player ${gamePlayer.player.name} references a non-existent Unit`);
-            totalPoints += unit.pointsCost();
+            totalPoints += unit.pointsCost;
             if (totalPoints > MAX_POINTS) {
                 throw new Error(`Player ${gamePlayer.player.name} has a points total of ` +
                     `${totalPoints} which exceeds the maximum of ${MAX_POINTS}`);

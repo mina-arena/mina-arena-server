@@ -8,19 +8,30 @@ export const RANGED_ATTACK_RANGE = 35;
 class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   declare id: number;
   declare name: string;
-  declare attackPower: number;
-  declare armor: number;
   declare maxHealth: number;
   declare movementSpeed: number;
+  declare armorSaveRoll: number;
+  declare pointsCost: number;
+
+  declare meleeNumAttacks: number;
+  declare meleeHitRoll: number;
+  declare meleeWoundRoll: number;
+  declare meleeArmorPiercing: number;
+  declare meleeDamage: number;
+
+  declare rangedRange: number;
+  declare rangedNumAttacks: number;
+  declare rangedHitRoll: number;
+  declare rangedWoundRoll: number;
+  declare rangedArmorPiercing: number;
+  declare rangedDamage: number;
+  declare rangedAmmo: number;
+
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
   async playerUnits(): Promise<Models.PlayerUnit[]> {
     return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
-  }
-
-  pointsCost(): number {
-    return this.attackPower + this.armor + this.maxHealth;
   }
 }
 
@@ -34,13 +45,61 @@ Unit.init({
     type: DataTypes.STRING,
     allowNull: false
   },
-  attackPower: {
+  pointsCost: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  armor: {
+  armorSaveRoll: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  meleeNumAttacks: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  meleeHitRoll: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  meleeWoundRoll: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  meleeArmorPiercing: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  meleeDamage: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  rangedRange: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  rangedNumAttacks: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  rangedHitRoll: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  rangedWoundRoll: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  rangedArmorPiercing: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  rangedDamage: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  rangedAmmo: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   },
   maxHealth: {
     type: DataTypes.INTEGER,
