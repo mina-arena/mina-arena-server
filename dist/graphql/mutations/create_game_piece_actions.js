@@ -1,7 +1,9 @@
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { snakeToCamel, enforceOneOf } from '../helpers.js';
-import { resolveMoveAction, resolveRangedAttackAction, resolveMeleeAttackAction } from '../../service_objects/game_piece_action_resolver.js';
+import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver';
+import resolveRangedAttackAction from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver';
+import resolveMeleeAttackAction from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver';
 export default async (parent, args, contextValue, info) => {
     return await sequelizeConnection.transaction(async (t) => {
         // Validate that Player exists
