@@ -16,7 +16,7 @@ export default async (action, commitChanges = false, parentTransaction) => {
                 gamePiece = await resolveMoveAction(gamePiece, action.actionData.moveFrom, action.actionData.moveTo, commitChanges, t);
                 break;
             case 'rangedAttack':
-                gamePiece = await resolveRangedAttackAction(gamePiece, action.actionData.targetGamePieceId, commitChanges, t);
+                await resolveRangedAttackAction(action, t);
                 break;
             case 'meleeAttack':
                 gamePiece = await resolveMeleeAttackAction(gamePiece, action.actionData.targetGamePieceId, commitChanges, t);

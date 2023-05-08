@@ -13,6 +13,12 @@ export function snakeToCamel(str) {
             .substr(1)
             .toLowerCase()}`, "");
 }
+export function diceRoll() {
+    return randomInt(1, 6);
+}
+export function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 export function shuffle(array) {
     let currentIndex = array.length, randomIndex;
     // While there remain elements to shuffle.

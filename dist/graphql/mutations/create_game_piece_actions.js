@@ -2,7 +2,7 @@ import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { snakeToCamel, enforceOneOf } from '../helpers.js';
 import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver';
-import resolveRangedAttackAction from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver';
+import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver';
 import resolveMeleeAttackAction from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver';
 export default async (parent, args, contextValue, info) => {
     return await sequelizeConnection.transaction(async (t) => {
@@ -76,10 +76,9 @@ async function handleMoveAction(gamePlayer, gamePhase, gamePiece, moveInput, tra
     }, { transaction: transaction });
 }
 async function handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, rangedAttackInput, transaction) {
-    const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
     // Validate attack data, raises exception if not valid
-    await resolveRangedAttackAction(gamePiece, rangedAttackInput.targetGamePieceId, false, // commitChanges: false so we do a dry run
-    transaction);
+    await validateRangedAttackAction(gamePiece, rangedAttackInput.targetGamePieceId, false, transaction);
+    // Create GamePieceAction record in unresolved state
     return await Models.GamePieceAction.create({
         gamePhaseId: gamePhase.id,
         gamePlayerId: gamePlayer.id,
@@ -87,7 +86,9 @@ async function handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, ranged
         actionType: 'rangedAttack',
         actionData: {
             actionType: 'rangedAttack',
-            targetGamePieceId: targetGamePiece.id,
+            resolved: false,
+            targetGamePieceId: rangedAttackInput.targetGamePieceId,
+            encodedDiceRolls: rangedAttackInput.diceRoll
         }
     }, { transaction: transaction });
 }

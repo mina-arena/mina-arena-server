@@ -8,9 +8,33 @@ export type GamePieceActionType = GamePieceActionTypeTuple[number];
 
 export type GameArenaCoordinates = { x: number, y: number };
 export type GamePieceMoveAction = { actionType: 'move', moveFrom: GameArenaCoordinates, moveTo: GameArenaCoordinates };
-export type GamePieceRangedAttackAction = { actionType: 'rangedAttack', targetGamePieceId: number };
+export type GamePieceRangedAttackAction = {
+  actionType: 'rangedAttack',
+  resolved: Boolean,
+  targetGamePieceId: number,
+  encodedDiceRolls: EncodedDiceRolls,
+  resolvedAttacks?: ResolvedAttack[]
+};
 export type GamePieceMeleeAttackAction = { actionType: 'meleeAttack', targetGamePieceId: number };
 export type GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction;
+
+export type EncodedDiceRolls = {
+  publicKey: { x: String, y: String },
+  cipherText: String,
+  signature: { r: String, s: String }
+}
+
+export type ResolvedAttack = {
+  hitRoll: RollResult,
+  woundRoll: RollResult,
+  saveRoll: RollResult,
+  damageDealt: number
+}
+
+export type RollResult = {
+  roll: number,
+  success: Boolean
+}
 
 class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreationAttributes<GamePieceAction>> {
   declare id: number;

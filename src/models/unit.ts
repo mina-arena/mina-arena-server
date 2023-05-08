@@ -33,6 +33,11 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   async playerUnits(): Promise<Models.PlayerUnit[]> {
     return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
   }
+
+  canMakeRangedAttack(): Boolean {
+    return this.rangedNumAttacks != undefined &&
+           this.rangedNumAttacks > 0;
+  }
 }
 
 Unit.init({

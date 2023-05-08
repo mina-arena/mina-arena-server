@@ -61,6 +61,22 @@ export type CreatePlayerUnitInput = {
   unitId: Scalars['Int'];
 };
 
+export type DiceRollInput = {
+  cipherText: Scalars['String'];
+  publicKey: DiceRollPublicKeyInput;
+  signature: DiceRollSignatureInput;
+};
+
+export type DiceRollPublicKeyInput = {
+  x: Scalars['String'];
+  y: Scalars['String'];
+};
+
+export type DiceRollSignatureInput = {
+  r: Scalars['String'];
+  s: Scalars['String'];
+};
+
 export type Game = {
   __typename?: 'Game';
   arena?: Maybe<GameArena>;
@@ -172,11 +188,14 @@ export type GamePieceMoveActionInput = {
 
 export type GamePieceRangedAttackAction = {
   __typename?: 'GamePieceRangedAttackAction';
+  resolved: Scalars['Boolean'];
+  resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
   targetGamePiece: GamePiece;
 };
 
 export type GamePieceRangedAttackActionInput = {
-  targetGamePieceId: Scalars['ID'];
+  diceRoll: DiceRollInput;
+  targetGamePieceId: Scalars['Int'];
 };
 
 export type GamePlayer = {
@@ -268,6 +287,20 @@ export type QueryGameArgs = {
 
 export type QueryPlayerArgs = {
   minaPublicKey: Scalars['String'];
+};
+
+export type ResolvedAttack = {
+  __typename?: 'ResolvedAttack';
+  damageDealt: Scalars['Int'];
+  hitRoll: RollResult;
+  saveRoll: RollResult;
+  woundRoll: RollResult;
+};
+
+export type RollResult = {
+  __typename?: 'RollResult';
+  roll: Scalars['Int'];
+  success: Scalars['Boolean'];
 };
 
 export type StartGameInput = {
@@ -381,6 +414,9 @@ export type ResolversTypes = ResolversObject<{
   CreateGamePiecesInput: CreateGamePiecesInput;
   CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
+  DiceRollInput: DiceRollInput;
+  DiceRollPublicKeyInput: DiceRollPublicKeyInput;
+  DiceRollSignatureInput: DiceRollSignatureInput;
   Game: ResolverTypeWrapper<GameModel>;
   GameArena: ResolverTypeWrapper<GameArenaModel>;
   GamePhase: ResolverTypeWrapper<GamePhaseModel>;
@@ -406,6 +442,8 @@ export type ResolversTypes = ResolversObject<{
   Player: ResolverTypeWrapper<PlayerModel>;
   PlayerUnit: ResolverTypeWrapper<PlayerUnitModel>;
   Query: ResolverTypeWrapper<{}>;
+  ResolvedAttack: ResolverTypeWrapper<ResolvedAttack>;
+  RollResult: ResolverTypeWrapper<RollResult>;
   StartGameInput: StartGameInput;
   String: ResolverTypeWrapper<Scalars['String']>;
   SubmitGamePhaseInput: SubmitGamePhaseInput;
@@ -422,6 +460,9 @@ export type ResolversParentTypes = ResolversObject<{
   CreateGamePiecesInput: CreateGamePiecesInput;
   CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
+  DiceRollInput: DiceRollInput;
+  DiceRollPublicKeyInput: DiceRollPublicKeyInput;
+  DiceRollSignatureInput: DiceRollSignatureInput;
   Game: GameModel;
   GameArena: GameArenaModel;
   GamePhase: GamePhaseModel;
@@ -444,6 +485,8 @@ export type ResolversParentTypes = ResolversObject<{
   Player: PlayerModel;
   PlayerUnit: PlayerUnitModel;
   Query: {};
+  ResolvedAttack: ResolvedAttack;
+  RollResult: RollResult;
   StartGameInput: StartGameInput;
   String: Scalars['String'];
   SubmitGamePhaseInput: SubmitGamePhaseInput;
@@ -538,6 +581,8 @@ export type GamePieceMoveActionResolvers<ContextType = any, ParentType extends R
 }>;
 
 export type GamePieceRangedAttackActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceRangedAttackAction'] = ResolversParentTypes['GamePieceRangedAttackAction']> = ResolversObject<{
+  resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
   targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -593,6 +638,20 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   units?: Resolver<Array<ResolversTypes['Unit']>, ParentType, ContextType>;
 }>;
 
+export type ResolvedAttackResolvers<ContextType = any, ParentType extends ResolversParentTypes['ResolvedAttack'] = ResolversParentTypes['ResolvedAttack']> = ResolversObject<{
+  damageDealt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  hitRoll?: Resolver<ResolversTypes['RollResult'], ParentType, ContextType>;
+  saveRoll?: Resolver<ResolversTypes['RollResult'], ParentType, ContextType>;
+  woundRoll?: Resolver<ResolversTypes['RollResult'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type RollResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RollResult'] = ResolversParentTypes['RollResult']> = ResolversObject<{
+  roll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type UnitResolvers<ContextType = any, ParentType extends ResolversParentTypes['Unit'] = ResolversParentTypes['Unit']> = ResolversObject<{
   armorSaveRoll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
@@ -635,6 +694,8 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Player?: PlayerResolvers<ContextType>;
   PlayerUnit?: PlayerUnitResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  ResolvedAttack?: ResolvedAttackResolvers<ContextType>;
+  RollResult?: RollResultResolvers<ContextType>;
   Unit?: UnitResolvers<ContextType>;
 }>;
 
