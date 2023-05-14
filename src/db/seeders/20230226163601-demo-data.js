@@ -20,10 +20,15 @@ module.exports = {
 
       await queryInterface.bulkInsert('Units', [{
         name: 'Spearman',
-        attackPower: 3,
-        armor: 1,
         maxHealth: 4,
         movementSpeed: 40,
+        pointsCost: 10,
+        armorSaveRoll: 5,
+        meleeNumAttacks: 3,
+        meleeHitRoll: 3,
+        meleeWoundRoll: 4,
+        meleeArmorPiercing: 1,
+        meleeDamage: 2,
         createdAt: new Date(),
         updatedAt: new Date()
       }]);

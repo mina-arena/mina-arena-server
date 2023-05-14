@@ -281,13 +281,25 @@ export type SubmitGamePhaseInput = {
 
 export type Unit = {
   __typename?: 'Unit';
-  armor: Scalars['Int'];
-  attackPower: Scalars['Int'];
+  armorSaveRoll: Scalars['Int'];
   createdAt: Scalars['Iso8601DateTime'];
   id: Scalars['ID'];
   maxHealth: Scalars['Int'];
+  meleeArmorPiercing: Scalars['Int'];
+  meleeDamage: Scalars['Int'];
+  meleeHitRoll: Scalars['Int'];
+  meleeNumAttacks: Scalars['Int'];
+  meleeWoundRoll: Scalars['Int'];
   movementSpeed: Scalars['Int'];
   name: Scalars['String'];
+  pointsCost: Scalars['Int'];
+  rangedAmmo?: Maybe<Scalars['Int']>;
+  rangedArmorPiercing?: Maybe<Scalars['Int']>;
+  rangedDamage?: Maybe<Scalars['Int']>;
+  rangedHitRoll?: Maybe<Scalars['Int']>;
+  rangedNumAttacks?: Maybe<Scalars['Int']>;
+  rangedRange?: Maybe<Scalars['Int']>;
+  rangedWoundRoll?: Maybe<Scalars['Int']>;
   updatedAt: Scalars['Iso8601DateTime'];
 };
 
@@ -582,13 +594,25 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 }>;
 
 export type UnitResolvers<ContextType = any, ParentType extends ResolversParentTypes['Unit'] = ResolversParentTypes['Unit']> = ResolversObject<{
-  armor?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  attackPower?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  armorSaveRoll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   maxHealth?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  meleeArmorPiercing?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  meleeDamage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  meleeHitRoll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  meleeNumAttacks?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  meleeWoundRoll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   movementSpeed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  pointsCost?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  rangedAmmo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedArmorPiercing?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedDamage?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedHitRoll?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedNumAttacks?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedRange?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedWoundRoll?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

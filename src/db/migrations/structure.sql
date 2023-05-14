@@ -404,12 +404,23 @@ ALTER TABLE public."SequelizeMeta" OWNER TO postgres;
 CREATE TABLE public."Units" (
     id integer NOT NULL,
     name character varying(255) NOT NULL,
-    "attackPower" integer NOT NULL,
-    armor integer NOT NULL,
     "maxHealth" integer NOT NULL,
     "movementSpeed" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
-    "updatedAt" timestamp with time zone NOT NULL
+    "updatedAt" timestamp with time zone NOT NULL,
+    "armorSaveRoll" integer DEFAULT 6 NOT NULL,
+    "meleeNumAttacks" integer DEFAULT 1 NOT NULL,
+    "meleeHitRoll" integer DEFAULT 4 NOT NULL,
+    "meleeWoundRoll" integer DEFAULT 4 NOT NULL,
+    "meleeArmorPiercing" integer DEFAULT 0 NOT NULL,
+    "meleeDamage" integer DEFAULT 1 NOT NULL,
+    "rangedRange" integer,
+    "rangedNumAttacks" integer,
+    "rangedHitRoll" integer,
+    "rangedWoundRoll" integer,
+    "rangedArmorPiercing" integer,
+    "rangedDamage" integer,
+    "rangedAmmo" integer
 );
 
 

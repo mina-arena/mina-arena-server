@@ -82,10 +82,22 @@ type GameArena {
 type Unit {
   id: ID!
   name: String!
-  attackPower: Int!
-  armor: Int!
   maxHealth: Int!
   movementSpeed: Int!
+  armorSaveRoll: Int!
+  pointsCost: Int!
+  meleeNumAttacks: Int!
+  meleeHitRoll: Int!
+  meleeWoundRoll: Int!
+  meleeArmorPiercing: Int!
+  meleeDamage: Int!
+  rangedRange: Int
+  rangedNumAttacks: Int
+  rangedHitRoll: Int
+  rangedWoundRoll: Int
+  rangedArmorPiercing: Int
+  rangedDamage: Int
+  rangedAmmo: Int
   createdAt: Iso8601DateTime!
   updatedAt: Iso8601DateTime!
 }
