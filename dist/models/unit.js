@@ -8,8 +8,12 @@ class Unit extends Model {
         return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
     }
     canMakeRangedAttack() {
-        return this.rangedNumAttacks != undefined &&
-            this.rangedNumAttacks > 0;
+        if (this.rangedNumAttacks) {
+            return this.rangedNumAttacks > 0;
+        }
+        else {
+            return false;
+        }
     }
 }
 Unit.init({

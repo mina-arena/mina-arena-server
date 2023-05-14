@@ -35,8 +35,11 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   }
 
   canMakeRangedAttack(): Boolean {
-    return this.rangedNumAttacks != undefined &&
-           this.rangedNumAttacks > 0;
+    if(this.rangedNumAttacks) {
+      return this.rangedNumAttacks > 0;
+    } else {
+      return false;
+    }
   }
 }
 

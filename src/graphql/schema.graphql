@@ -245,17 +245,17 @@ input GamePieceMeleeAttackActionInput {
 }
 
 input DiceRollInput {
-  publicKey: DiceRollPublicKeyInput!
+  publicKey: PublicKeyGroupInput!
   cipherText: String!
-  signature: DiceRollSignatureInput!
+  signature: SignatureInput!
 }
 
-input DiceRollPublicKeyInput {
+input PublicKeyGroupInput {
   x: String!
   y: String!
 }
 
-input DiceRollSignatureInput {
+input SignatureInput {
   r: String!
   s: String!
 }

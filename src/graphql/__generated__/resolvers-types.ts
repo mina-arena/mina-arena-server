@@ -63,18 +63,8 @@ export type CreatePlayerUnitInput = {
 
 export type DiceRollInput = {
   cipherText: Scalars['String'];
-  publicKey: DiceRollPublicKeyInput;
-  signature: DiceRollSignatureInput;
-};
-
-export type DiceRollPublicKeyInput = {
-  x: Scalars['String'];
-  y: Scalars['String'];
-};
-
-export type DiceRollSignatureInput = {
-  r: Scalars['String'];
-  s: Scalars['String'];
+  publicKey: PublicKeyGroupInput;
+  signature: SignatureInput;
 };
 
 export type Game = {
@@ -271,6 +261,11 @@ export type PlayerUnit = {
   updatedAt: Scalars['Iso8601DateTime'];
 };
 
+export type PublicKeyGroupInput = {
+  x: Scalars['String'];
+  y: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
   game?: Maybe<Game>;
@@ -301,6 +296,11 @@ export type RollResult = {
   __typename?: 'RollResult';
   roll: Scalars['Int'];
   success: Scalars['Boolean'];
+};
+
+export type SignatureInput = {
+  r: Scalars['String'];
+  s: Scalars['String'];
 };
 
 export type StartGameInput = {
@@ -415,8 +415,6 @@ export type ResolversTypes = ResolversObject<{
   CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   DiceRollInput: DiceRollInput;
-  DiceRollPublicKeyInput: DiceRollPublicKeyInput;
-  DiceRollSignatureInput: DiceRollSignatureInput;
   Game: ResolverTypeWrapper<GameModel>;
   GameArena: ResolverTypeWrapper<GameArenaModel>;
   GamePhase: ResolverTypeWrapper<GamePhaseModel>;
@@ -441,9 +439,11 @@ export type ResolversTypes = ResolversObject<{
   Mutation: ResolverTypeWrapper<{}>;
   Player: ResolverTypeWrapper<PlayerModel>;
   PlayerUnit: ResolverTypeWrapper<PlayerUnitModel>;
+  PublicKeyGroupInput: PublicKeyGroupInput;
   Query: ResolverTypeWrapper<{}>;
   ResolvedAttack: ResolverTypeWrapper<ResolvedAttack>;
   RollResult: ResolverTypeWrapper<RollResult>;
+  SignatureInput: SignatureInput;
   StartGameInput: StartGameInput;
   String: ResolverTypeWrapper<Scalars['String']>;
   SubmitGamePhaseInput: SubmitGamePhaseInput;
@@ -461,8 +461,6 @@ export type ResolversParentTypes = ResolversObject<{
   CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   DiceRollInput: DiceRollInput;
-  DiceRollPublicKeyInput: DiceRollPublicKeyInput;
-  DiceRollSignatureInput: DiceRollSignatureInput;
   Game: GameModel;
   GameArena: GameArenaModel;
   GamePhase: GamePhaseModel;
@@ -484,9 +482,11 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   Player: PlayerModel;
   PlayerUnit: PlayerUnitModel;
+  PublicKeyGroupInput: PublicKeyGroupInput;
   Query: {};
   ResolvedAttack: ResolvedAttack;
   RollResult: RollResult;
+  SignatureInput: SignatureInput;
   StartGameInput: StartGameInput;
   String: Scalars['String'];
   SubmitGamePhaseInput: SubmitGamePhaseInput;
