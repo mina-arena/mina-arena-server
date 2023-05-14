@@ -9,7 +9,7 @@
     "dev": "npm run compile && npm run start",
     "start": "node ./dist/app.js",
     "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql skirmish_server_poc_development --schema-only",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand --detectOpenHandles --forceExit"
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,10 @@
     "@graphql-codegen/cli": "^3.0.0",
     "@graphql-codegen/typescript": "^3.0.0",
     "@graphql-codegen/typescript-resolvers": "^3.0.0",
+    "@types/jest": "^29.5.1",
     "@types/node": "^18.13.0",
-    "sequelize-cli": "^6.6.0"
+    "jest": "^29.5.0",
+    "sequelize-cli": "^6.6.0",
+    "ts-jest": "^29.1.0"
   }
 }

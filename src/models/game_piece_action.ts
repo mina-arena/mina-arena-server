@@ -37,14 +37,14 @@ export type RollResult = {
 }
 
 class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreationAttributes<GamePieceAction>> {
-  declare id: number;
+  declare id: CreationOptional<number>;
   declare gamePhaseId: number;
   declare gamePlayerId: number;
   declare gamePieceId: number;
   declare actionType: GamePieceActionType;
   declare actionData: GamePieceActionData;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 
   async gamePhase(): Promise<Models.GamePhase> {
     return await Models.GamePhase.findByPk(this.gamePhaseId);
@@ -61,7 +61,7 @@ class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreat
 
 GamePieceAction.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },

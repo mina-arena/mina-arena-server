@@ -1,5 +1,5 @@
 import * as Models from '../../models/index.js';
-import resolveAttacks from './attack_resolver';
+import resolveAttacks from './attack_resolver.js';
 export async function validateRangedAttackAction(attackingGamePiece, targetGamePieceId, resolving, transaction) {
     // Confirm target GamePiece exists and is a valid target
     const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction: transaction });
@@ -45,7 +45,7 @@ export default async function resolveRangedAttackAction(action, transaction) {
     const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
     // Resolve attack sequence
     const encodedDiceRolls = actionData.encodedDiceRolls;
-    const resolvedAttacks = resolveAttacks(attackingUnit, targetUnit, encodedDiceRolls);
+    const resolvedAttacks = resolveAttacks(attackingUnit.rangedNumAttacks, attackingUnit.rangedHitRoll, attackingUnit.rangedWoundRoll, targetUnit.armorSaveRoll, attackingUnit.rangedArmorPiercing, attackingUnit.rangedDamage, encodedDiceRolls);
     const totalDamage = resolvedAttacks.reduce((sum, attack) => sum + attack.damageDealt, 0);
     // Update target GamePiece with damage dealt
     if (totalDamage > 0) {
@@ -54,9 +54,10 @@ export default async function resolveRangedAttackAction(action, transaction) {
         await targetGamePiece.save({ transaction: transaction });
     }
     // Update action record as resolved
-    actionData.resolved = true;
-    actionData.resolvedAttacks = resolvedAttacks;
-    action.actionData = actionData;
+    let newActionData = JSON.parse(JSON.stringify(actionData));
+    newActionData.resolved = true;
+    newActionData.resolvedAttacks = resolvedAttacks;
+    action.actionData = newActionData;
     await action.save({ transaction });
 }
 //# sourceMappingURL=ranged_attack_resolver.js.map

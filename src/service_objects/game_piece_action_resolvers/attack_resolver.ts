@@ -1,34 +1,36 @@
-import * as Types from '../../graphql/__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
-import { diceRoll } from '../../graphql/helpers';
-import { EncodedDiceRolls, ResolvedAttack } from '../../models/game_piece_action';
+import { diceRoll } from '../../graphql/helpers.js';
+import { EncodedDiceRolls, ResolvedAttack } from '../../models/game_piece_action.js';
 
 export default function resolveAttacks(
-  attackingUnit: Models.Unit,
-  targetUnit: Models.Unit,
+  numAttacks: number,
+  attackerHitRollStat: number,
+  attackerWoundRollStat: number,
+  targetSaveRollStat: number,
+  attackerArmorPiercingStat: number,
+  attackerDamageStat: number,
   encodedDiceRolls: EncodedDiceRolls
 ): ResolvedAttack[] {
   // TODO: Decode dice roll results using private key
   //  For now just simulate rolls here
-  const decodedDiceRolls = simulateDiceRolls(attackingUnit.rangedNumAttacks);
+  const decodedDiceRolls = simulateDiceRolls(numAttacks);
 
   // Gather details of each attack and determine damage
   let attacks = [];
-  let totalDamage = 0;
-  for (var i = 0; i < attackingUnit.rangedNumAttacks; i++) {
+  for (var i = 0; i < numAttacks; i++) {
     const rollsOffset = i * 3;
     const hitRoll = decodedDiceRolls[rollsOffset];
     const woundRoll = decodedDiceRolls[rollsOffset + 1];
     const saveRoll = decodedDiceRolls[rollsOffset + 2];
 
-    const hitRollSuccess = hitRoll >= attackingUnit.rangedHitRoll;
-    const woundRollSuccess = woundRoll >= attackingUnit.rangedWoundRoll;
+    const hitRollSuccess = hitRoll >= attackerHitRollStat;
+    const woundRollSuccess = woundRoll >= attackerWoundRollStat;
 
-    const armorPiercing = attackingUnit.rangedArmorPiercing || 0;
-    const modifiedSave = targetUnit.armorSaveRoll + armorPiercing;
+    const armorPiercing = attackerArmorPiercingStat || 0;
+    const modifiedSave = targetSaveRollStat + armorPiercing;
     const saveRollSuccess = saveRoll >= modifiedSave;
 
-    const damageDealt = hitRollSuccess && woundRollSuccess && !saveRollSuccess ? attackingUnit.rangedDamage : 0;
+    const damageDealt = hitRollSuccess && woundRollSuccess && !saveRollSuccess ? attackerDamageStat : 0;
 
     attacks.push({
       hitRoll: { roll: hitRoll, success: hitRollSuccess },
@@ -36,7 +38,6 @@ export default function resolveAttacks(
       saveRoll: { roll: saveRoll, success: saveRollSuccess },
       damageDealt: damageDealt
     });
-    if (damageDealt > 0) totalDamage += damageDealt;
   }
   return attacks;
 }

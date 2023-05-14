@@ -3,12 +3,12 @@ import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
 class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Player>> {
-  declare id: number
-  declare name: string
+  declare id: CreationOptional<number>;
+  declare name: string;
   declare minaPublicKey: string;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
-  declare readonly deletedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
+  declare readonly deletedAt: CreationOptional<Date>;
 
   async playerUnits(): Promise<Models.PlayerUnit[]> {
     return await Models.PlayerUnit.findAll({ where: { playerId: this.id } });
@@ -21,7 +21,7 @@ class Player extends Model<InferAttributes<Player>, InferCreationAttributes<Play
 
 Player.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
