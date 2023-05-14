@@ -7,6 +7,14 @@ class Unit extends Model {
     async playerUnits() {
         return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
     }
+    canMakeRangedAttack() {
+        if (this.rangedNumAttacks) {
+            return this.rangedNumAttacks > 0;
+        }
+        else {
+            return false;
+        }
+    }
 }
 Unit.init({
     id: {

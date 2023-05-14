@@ -20,6 +20,14 @@ export function snakeToCamel(str: string): string {
     );
 }
 
+export function diceRoll() {
+  return randomInt(1, 6);
+}
+
+export function randomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 export function shuffle(array: any[]): any[] {
   let currentIndex = array.length, randomIndex;
 

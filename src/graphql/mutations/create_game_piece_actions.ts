@@ -4,7 +4,7 @@ import sequelizeConnection from '../../db/config.js';
 import { unique, snakeToCamel, enforceOneOf } from '../helpers.js';
 
 import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver';
-import resolveRangedAttackAction from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver';
+import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver';
 import resolveMeleeAttackAction from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver';
 
 export default async (
@@ -113,16 +113,15 @@ async function handleRangedAttackAction(
   rangedAttackInput: Types.GamePieceRangedAttackActionInput,
   transaction
 ): Promise<Models.GamePieceAction> {
-  const targetGamePiece = await Models.GamePiece.findByPk(rangedAttackInput.targetGamePieceId, { transaction: transaction });
-
   // Validate attack data, raises exception if not valid
-  await resolveRangedAttackAction(
+  await validateRangedAttackAction(
     gamePiece,
     rangedAttackInput.targetGamePieceId,
-    false, // commitChanges: false so we do a dry run
+    false,
     transaction
   );
 
+  // Create GamePieceAction record in unresolved state
   return await Models.GamePieceAction.create(
     {
       gamePhaseId: gamePhase.id,
@@ -131,7 +130,9 @@ async function handleRangedAttackAction(
       actionType: 'rangedAttack',
       actionData: {
         actionType: 'rangedAttack',
-        targetGamePieceId: targetGamePiece.id,
+        resolved: false,
+        targetGamePieceId: rangedAttackInput.targetGamePieceId,
+        encodedDiceRolls: rangedAttackInput.diceRoll
       }
     },
     { transaction: transaction }

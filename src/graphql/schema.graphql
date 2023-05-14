@@ -159,10 +159,24 @@ type GamePieceMoveAction {
 
 type GamePieceRangedAttackAction {
   targetGamePiece: GamePiece!
+  resolved: Boolean!
+  resolvedAttacks: [ResolvedAttack!]
 }
 
 type GamePieceMeleeAttackAction {
   targetGamePiece: GamePiece!
+}
+
+type ResolvedAttack {
+  hitRoll: RollResult!,
+  woundRoll: RollResult!,
+  saveRoll: RollResult!,
+  damageDealt: Int!
+}
+
+type RollResult {
+  roll: Int!
+  success: Boolean!
 }
 
 input CreateGameInput {
@@ -222,11 +236,28 @@ input GamePieceCoordinatesInput {
 }
 
 input GamePieceRangedAttackActionInput {
-  targetGamePieceId: ID!
+  targetGamePieceId: Int!
+  diceRoll: DiceRollInput!
 }
 
 input GamePieceMeleeAttackActionInput {
   targetGamePieceId: ID!
+}
+
+input DiceRollInput {
+  publicKey: PublicKeyGroupInput!
+  cipherText: String!
+  signature: SignatureInput!
+}
+
+input PublicKeyGroupInput {
+  x: String!
+  y: String!
+}
+
+input SignatureInput {
+  r: String!
+  s: String!
 }
 
 input SubmitGamePhaseInput {

@@ -29,12 +29,7 @@ export default async (
         );
         break;
       case 'rangedAttack':
-        gamePiece = await resolveRangedAttackAction(
-          gamePiece,
-          action.actionData.targetGamePieceId,
-          commitChanges,
-          t
-        );
+        await resolveRangedAttackAction(action, t);
         break;
       case 'meleeAttack':
         gamePiece = await resolveMeleeAttackAction(
