@@ -1,6 +1,5 @@
 import 'jest';
 import resolveAttack from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
-// import { Unit } from '../../../src/models';
 import { EncodedDiceRolls } from '../../../src/models/game_piece_action.js';
 
 describe('resolveAttack', () => {
@@ -20,57 +19,12 @@ describe('resolveAttack', () => {
     attackerArmorPiercingStat = 1;
     attackerDamageStat = 1;
 
-    // Clear all units before test
-    // await Unit.destroy({where: {}});
-
-    // attackingUnit = await Unit.create({
-    //   id: 1,
-    //   name: 'Archer',
-    //   maxHealth: 2,
-    //   movementSpeed: 10,
-    //   armorSaveRoll: 6,
-    //   pointsCost: 10,
-    //   meleeNumAttacks: 1,
-    //   meleeHitRoll: 4,
-    //   meleeWoundRoll: 5,
-    //   meleeArmorPiercing: 0,
-    //   meleeDamage: 1,
-    //   rangedNumAttacks: 3,
-    //   rangedHitRoll: 3,
-    //   rangedWoundRoll: 4,
-    //   rangedArmorPiercing: 1,
-    //   rangedDamage: 1,
-    //   rangedAmmo: 5,
-    //   createdAt: new Date(),
-    //   updatedAt: new Date()
-    // });
-
-    // targetUnit = await Unit.create({
-    //   id: 2,
-    //   name: 'Swordsman',
-    //   maxHealth: 4,
-    //   movementSpeed: 10,
-    //   armorSaveRoll: 5,
-    //   pointsCost: 10,
-    //   meleeNumAttacks: 3,
-    //   meleeHitRoll: 3,
-    //   meleeWoundRoll: 3,
-    //   meleeArmorPiercing: 1,
-    //   meleeDamage: 2,
-    //   createdAt: new Date(),
-    //   updatedAt: new Date()
-    // });
-
     encodedDiceRolls = {
       publicKey: { x: 'xValue', y: 'yValue' },
       cipherText: 'secret',
       signature: { r: 'rValue', s: 'sValue' }
     };
   });
-
-  // afterAll(async () => {
-  //   await Unit.destroy({where: {}});
-  // });
 
   it('resolves attack sequences correctly', async () => {
     const resolvedAttacks = resolveAttack(
@@ -111,32 +65,4 @@ describe('resolveAttack', () => {
       }
     });
   });
-
-    // beforeEach(() => {
-    //     instance = new Environment('local');
-    // });
-
-    // it('should get the current environment', async () => {
-    //     expect(instance).toBeInstanceOf(Environment);
-    //     const environment = instance.currentEnvironment();
-    //     expect(environment).toBeDefined();
-    //     expect(environment).toBe(Environments.LOCAL);
-    // });
-
-    // it('should check if environement is production or not', async () => {
-    //     const result = instance.isProduction();
-    //     expect(result).toBe(false);
-    // });
-
-    // it('should check if environement is production or not', async () => {
-    //     const result = instance.isProduction();
-    //     expect(result).toBe(false);
-    // });
-
-    // it('should set the current environment', async () => {
-    //     instance.setEnvironment('local');
-    //     const environment = instance.currentEnvironment();
-    //     expect(environment).toBeDefined();
-    //     expect(environment).toBe(Environments.LOCAL);
-    // });
 });

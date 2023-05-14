@@ -1,5 +1,4 @@
 import 'jest';
-// import * as RangedAttackResolver from '../../../src/service_objects/game_piece_action_resolvers/ranged_attack_resolver';
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
 import resolveRangedAttackAction, { validateRangedAttackAction } from '../../../src/service_objects/game_piece_action_resolvers/ranged_attack_resolver';
