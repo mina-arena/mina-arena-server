@@ -3,7 +3,7 @@ import sequelizeConnection from '../../db/config.js';
 import { snakeToCamel, enforceOneOf } from '../helpers.js';
 import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
-import resolveMeleeAttackAction from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
+import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
 export default async (parent, args, contextValue, info) => {
     return await sequelizeConnection.transaction(async (t) => {
         // Validate that Player exists
@@ -95,8 +95,7 @@ async function handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, ranged
 async function handleMeleeAttackAction(gamePlayer, gamePhase, gamePiece, meleeAttackInput, transaction) {
     const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction: transaction });
     // Validate attack data, raises exception if not valid
-    await resolveMeleeAttackAction(gamePiece, meleeAttackInput.targetGamePieceId, false, // commitChanges: false so we do a dry run
-    transaction);
+    await validateMeleeAttackAction(gamePiece, meleeAttackInput.targetGamePieceId, false, transaction);
     return await Models.GamePieceAction.create({
         gamePhaseId: gamePhase.id,
         gamePlayerId: gamePlayer.id,
@@ -104,7 +103,9 @@ async function handleMeleeAttackAction(gamePlayer, gamePhase, gamePiece, meleeAt
         actionType: 'meleeAttack',
         actionData: {
             actionType: 'meleeAttack',
+            resolved: false,
             targetGamePieceId: targetGamePiece.id,
+            encodedDiceRolls: meleeAttackInput.diceRoll,
         }
     }, { transaction: transaction });
 }

@@ -5,7 +5,7 @@ import { unique, snakeToCamel, enforceOneOf } from '../helpers.js';
 
 import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
-import resolveMeleeAttackAction from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
+import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
 
 export default async (
   parent,
@@ -149,10 +149,10 @@ async function handleMeleeAttackAction(
   const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction: transaction });
   
   // Validate attack data, raises exception if not valid
-  await resolveMeleeAttackAction(
+  await validateMeleeAttackAction(
     gamePiece,
     meleeAttackInput.targetGamePieceId,
-    false, // commitChanges: false so we do a dry run
+    false,
     transaction
   );
 
@@ -164,7 +164,9 @@ async function handleMeleeAttackAction(
       actionType: 'meleeAttack',
       actionData: {
         actionType: 'meleeAttack',
+        resolved: false,
         targetGamePieceId: targetGamePiece.id,
+        encodedDiceRolls: meleeAttackInput.diceRoll,
       }
     },
     { transaction: transaction }
