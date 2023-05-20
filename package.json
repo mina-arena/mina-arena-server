@@ -8,7 +8,7 @@
     "compile": "npm run generate && tsc --project tsconfig.json",
     "dev": "npm run compile && npm run start",
     "start": "node ./dist/app.js",
-    "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql skirmish_server_poc_development --schema-only",
+    "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql mina_arena_development --schema-only",
     "test": "jest --runInBand --detectOpenHandles --forceExit"
   },
   "repository": {
