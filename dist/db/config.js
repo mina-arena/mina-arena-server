@@ -44,7 +44,8 @@ else {
     const dbDriver = 'postgres';
     sequelizeConnection = new Sequelize(dbName, dbUser, dbPassword, {
         host: dbHost,
-        dialect: dbDriver
+        dialect: dbDriver,
+        logging: environment == 'development'
     });
 }
 export default sequelizeConnection;

@@ -11,15 +11,15 @@ export const MAX_POINTS = 25;
 export const MAX_PIECES = 6;
 
 class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
-  declare id: number;
+  declare id: CreationOptional<number>;
   declare status: GameStatus;
   declare turnNumber: CreationOptional<number>;
   declare phase: CreationOptional<GamePhaseName>;
   declare turnPlayerOrder: CreationOptional<string>;
   declare turnGamePlayerId: CreationOptional<number>;
   declare winningGamePlayerId: CreationOptional<number>;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 
   async gamePlayers(): Promise<Models.GamePlayer[]> {
     return await Models.GamePlayer.findAll({ where: { gameId: this.id } });
@@ -111,7 +111,7 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
 
 Game.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },

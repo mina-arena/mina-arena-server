@@ -1,5 +1,5 @@
 import * as Models from '../../models/index.js';
-import resolveAttacks from './attack_resolver';
+import resolveAttacks from './attack_resolver.js';
 
 export type ValidateRangedAttackActionResult = {
   targetGamePiece: Models.GamePiece,
@@ -71,7 +71,15 @@ export default async function resolveRangedAttackAction(
 
   // Resolve attack sequence
   const encodedDiceRolls = actionData.encodedDiceRolls;
-  const resolvedAttacks = resolveAttacks(attackingUnit, targetUnit, encodedDiceRolls);
+  const resolvedAttacks = resolveAttacks(
+    attackingUnit.rangedNumAttacks,
+    attackingUnit.rangedHitRoll,
+    attackingUnit.rangedWoundRoll,
+    targetUnit.armorSaveRoll,
+    attackingUnit.rangedArmorPiercing,
+    attackingUnit.rangedDamage,
+    encodedDiceRolls
+  );
   const totalDamage = resolvedAttacks.reduce((sum, attack) => sum + attack.damageDealt, 0);
 
   // Update target GamePiece with damage dealt
@@ -82,8 +90,9 @@ export default async function resolveRangedAttackAction(
   }
 
   // Update action record as resolved
-  actionData.resolved = true;
-  actionData.resolvedAttacks = resolvedAttacks;
-  action.actionData = actionData;
+  let newActionData = JSON.parse(JSON.stringify(actionData));
+  newActionData.resolved = true;
+  newActionData.resolvedAttacks = resolvedAttacks;
+  action.actionData = newActionData;
   await action.save({ transaction });
 }

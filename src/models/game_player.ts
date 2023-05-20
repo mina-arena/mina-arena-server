@@ -4,12 +4,12 @@ import * as Models from './index.js';
 import { Op } from 'sequelize';
 
 class GamePlayer extends Model<InferAttributes<GamePlayer>, InferCreationAttributes<GamePlayer>> {
-  declare id: number;
+  declare id: CreationOptional<number>;
   declare gameId: number;
   declare playerId: number;
   declare playerNumber: number;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 
   async game(): Promise<Models.Game> {
     return await Models.Game.findByPk(this.gameId);
@@ -32,7 +32,7 @@ class GamePlayer extends Model<InferAttributes<GamePlayer>, InferCreationAttribu
 
 GamePlayer.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },

@@ -6,7 +6,7 @@ export const MELEE_ATTACK_RANGE = 5;
 export const RANGED_ATTACK_RANGE = 35;
 
 class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
-  declare id: number;
+  declare id: CreationOptional<number>;
   declare name: string;
   declare maxHealth: number;
   declare movementSpeed: number;
@@ -19,16 +19,16 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   declare meleeArmorPiercing: number;
   declare meleeDamage: number;
 
-  declare rangedRange: number;
-  declare rangedNumAttacks: number;
-  declare rangedHitRoll: number;
-  declare rangedWoundRoll: number;
-  declare rangedArmorPiercing: number;
-  declare rangedDamage: number;
-  declare rangedAmmo: number;
+  declare rangedRange: CreationOptional<number>;
+  declare rangedNumAttacks: CreationOptional<number>;
+  declare rangedHitRoll: CreationOptional<number>;
+  declare rangedWoundRoll: CreationOptional<number>;
+  declare rangedArmorPiercing: CreationOptional<number>;
+  declare rangedDamage: CreationOptional<number>;
+  declare rangedAmmo: CreationOptional<number>;
 
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 
   async playerUnits(): Promise<Models.PlayerUnit[]> {
     return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });
@@ -45,7 +45,7 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
 
 Unit.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },

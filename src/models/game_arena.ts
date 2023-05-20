@@ -3,12 +3,12 @@ import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
 class GameArena extends Model<InferAttributes<GameArena>, InferCreationAttributes<GameArena>> {
-  declare id: number;
+  declare id: CreationOptional<number>;
   declare gameId: number;
   declare width: number;
   declare height: number;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 
   async game(): Promise<Models.Game> {
     return await Models.Game.findByPk(this.gameId);
@@ -17,7 +17,7 @@ class GameArena extends Model<InferAttributes<GameArena>, InferCreationAttribute
 
 GameArena.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },

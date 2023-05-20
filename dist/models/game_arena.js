@@ -8,7 +8,7 @@ class GameArena extends Model {
 }
 GameArena.init({
     id: {
-        type: DataTypes.INTEGER.UNSIGNED,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
     },

@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "target": "ESNext",
+    "target": "es2020",
+    "module": "es2022",
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
-    "module": "ESNext"
+    "allowJs": true,
   },
   "files": [
     "./node_modules/@types/express/index.d.ts",
     "./node_modules/@types/node/index.d.ts"
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts", "tests/**/*.ts"
   ],
   "exclude": [
     "node_modules"

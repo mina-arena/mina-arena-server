@@ -32,8 +32,8 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
   declare positionX: CreationOptional<number>;
   declare positionY: CreationOptional<number>;
   declare health: number;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
+  declare readonly updatedAt: CreationOptional<Date>;
 
   async game(): Promise<Models.Game> {
     return await Models.Game.findByPk(this.gameId);
@@ -104,7 +104,7 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
 
 GamePiece.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },

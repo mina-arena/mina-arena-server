@@ -50,7 +50,8 @@ if (environment == 'production') {
   const dbDriver: Dialect = 'postgres';
   sequelizeConnection = new Sequelize(dbName, dbUser, dbPassword, {
     host: dbHost,
-    dialect: dbDriver
+    dialect: dbDriver,
+    logging: environment == 'development'
   });
 }
 
