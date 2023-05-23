@@ -158,11 +158,14 @@ export type GamePieceCoordinatesInput = {
 
 export type GamePieceMeleeAttackAction = {
   __typename?: 'GamePieceMeleeAttackAction';
+  resolved: Scalars['Boolean'];
+  resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
   targetGamePiece: GamePiece;
 };
 
 export type GamePieceMeleeAttackActionInput = {
-  targetGamePieceId: Scalars['ID'];
+  diceRoll: DiceRollInput;
+  targetGamePieceId: Scalars['Int'];
 };
 
 export type GamePieceMoveAction = {
@@ -570,6 +573,8 @@ export type GamePieceCoordinatesResolvers<ContextType = any, ParentType extends 
 }>;
 
 export type GamePieceMeleeAttackActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceMeleeAttackAction'] = ResolversParentTypes['GamePieceMeleeAttackAction']> = ResolversObject<{
+  resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
   targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

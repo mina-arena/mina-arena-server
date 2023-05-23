@@ -15,7 +15,13 @@ export type GamePieceRangedAttackAction = {
   encodedDiceRolls: EncodedDiceRolls,
   resolvedAttacks?: ResolvedAttack[]
 };
-export type GamePieceMeleeAttackAction = { actionType: 'meleeAttack', targetGamePieceId: number };
+export type GamePieceMeleeAttackAction = {
+  actionType: 'meleeAttack',
+  resolved: Boolean,
+  targetGamePieceId: number,
+  encodedDiceRolls: EncodedDiceRolls,
+  resolvedAttacks?: ResolvedAttack[]
+};
 export type GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction;
 
 export type EncodedDiceRolls = {

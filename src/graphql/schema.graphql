@@ -165,6 +165,8 @@ type GamePieceRangedAttackAction {
 
 type GamePieceMeleeAttackAction {
   targetGamePiece: GamePiece!
+  resolved: Boolean!
+  resolvedAttacks: [ResolvedAttack!]
 }
 
 type ResolvedAttack {
@@ -241,7 +243,8 @@ input GamePieceRangedAttackActionInput {
 }
 
 input GamePieceMeleeAttackActionInput {
-  targetGamePieceId: ID!
+  targetGamePieceId: Int!
+  diceRoll: DiceRollInput!
 }
 
 input DiceRollInput {

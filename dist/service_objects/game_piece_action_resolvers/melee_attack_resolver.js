@@ -1,6 +1,7 @@
 import * as Models from '../../models/index.js';
 import { MELEE_ATTACK_RANGE } from '../../models/unit.js';
-export default async function resolveMeleeAttackAction(attackingGamePiece, targetGamePieceId, commitChanges = false, transaction) {
+import resolveAttacks from './attack_resolver.js';
+export async function validateMeleeAttackAction(attackingGamePiece, targetGamePieceId, resolving, transaction) {
     // Confirm target GamePiece exists and is a valid target
     const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction: transaction });
     if (!targetGamePiece)
@@ -9,33 +10,54 @@ export default async function resolveMeleeAttackAction(attackingGamePiece, targe
         throw new Error(`Target GamePiece ${targetGamePiece.id} is not in the same Game as attacking GamePiece ${attackingGamePiece.id}`);
     if (targetGamePiece.gamePlayerId == attackingGamePiece.gamePlayerId)
         throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${attackingGamePiece.id}`);
-    // Confirm target GamePiece is in range, use const range for melee for now
+    // Confirm target GamePiece is in range
     const distanceToTarget = attackingGamePiece.distanceTo(targetGamePiece.coordinates());
-    const attackerRange = MELEE_ATTACK_RANGE;
-    if (distanceToTarget > attackerRange)
-        throw new Error(`GamePiece ${attackingGamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than attacker's max range of ${attackerRange}`);
-    if (commitChanges) {
-        // Validations done, modify state
-        if (targetGamePiece.isDead())
-            return attackingGamePiece;
-        const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
-        const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction: transaction });
-        const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
-        const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
-        // TODO: Removed attackPower and armor, stub this as 1 for now.
-        //   Need to implement dice rolls and attack sequence.
-        // const damageSubtotal = attackingUnit.attackPower - targetUnit.armor;
-        const damageSubtotal = 1;
-        const damage = Math.max(damageSubtotal, 1);
-        const newHealth = Math.max(targetGamePiece.health - damage, 0);
-        targetGamePiece.health = newHealth;
-        await targetGamePiece.save({ transaction: transaction });
-    }
-    else {
+    if (distanceToTarget > MELEE_ATTACK_RANGE)
+        throw new Error(`GamePiece ${attackingGamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than melee range of ${MELEE_ATTACK_RANGE}`);
+    if (!resolving) {
         // Any validation which should only be performed in dry runs
         if (targetGamePiece.isDead())
             throw new Error(`Target GamePiece ${targetGamePieceId} is already dead`);
     }
-    return attackingGamePiece;
+    // Fetch some additional info
+    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
+    const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction: transaction });
+    return {
+        targetGamePiece,
+        attackingPlayerUnit,
+        attackingUnit,
+        distanceToTarget
+    };
+}
+export default async function resolveMeleeAttackAction(action, transaction) {
+    const actionData = action.actionData;
+    if (actionData.actionType !== 'meleeAttack')
+        throw new Error(`Unable to resolve melee attack action with actionType: ${actionData.actionType}`);
+    const attackingGamePiece = await action.gamePiece();
+    const targetGamePieceId = actionData.targetGamePieceId;
+    // Validate action inputs and capture queried data
+    const { targetGamePiece, attackingUnit, } = await validateMeleeAttackAction(attackingGamePiece, targetGamePieceId, true, transaction);
+    // If target is already dead just abort
+    if (targetGamePiece.isDead())
+        return;
+    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
+    const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
+    const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
+    // Resolve attack sequence
+    const encodedDiceRolls = actionData.encodedDiceRolls;
+    const resolvedAttacks = resolveAttacks(attackingUnit.meleeNumAttacks, attackingUnit.meleeHitRoll, attackingUnit.meleeWoundRoll, targetUnit.armorSaveRoll, attackingUnit.meleeArmorPiercing, attackingUnit.meleeDamage, encodedDiceRolls);
+    const totalDamage = resolvedAttacks.reduce((sum, attack) => sum + attack.damageDealt, 0);
+    // Update target GamePiece with damage dealt
+    if (totalDamage > 0) {
+        const newHealth = Math.max(targetGamePiece.health - totalDamage, 0);
+        targetGamePiece.health = newHealth;
+        await targetGamePiece.save({ transaction: transaction });
+    }
+    // Update action record as resolved
+    let newActionData = JSON.parse(JSON.stringify(actionData));
+    newActionData.resolved = true;
+    newActionData.resolvedAttacks = resolvedAttacks;
+    action.actionData = newActionData;
+    await action.save({ transaction });
 }
 //# sourceMappingURL=melee_attack_resolver.js.map
