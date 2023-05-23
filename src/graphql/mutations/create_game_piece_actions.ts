@@ -3,7 +3,7 @@ import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { unique, snakeToCamel, enforceOneOf } from '../helpers.js';
 
-import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
+import { validateMoveAction } from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
 import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
 
@@ -82,11 +82,10 @@ async function handleMoveAction(
   transaction
 ): Promise<Models.GamePieceAction> {
   // Validate move data, raises exception if not valid
-  await resolveMoveAction(
+  await validateMoveAction(
     gamePiece,
     moveInput.moveFrom,
     moveInput.moveTo,
-    false, // commitChanges: false so we do a dry run
     transaction
   );
 
@@ -98,6 +97,7 @@ async function handleMoveAction(
       actionType: 'move',
       actionData: {
         actionType: 'move',
+        resolved: false,
         moveFrom: gamePiece.coordinates(),
         moveTo: moveInput.moveTo
       }

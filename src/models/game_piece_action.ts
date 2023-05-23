@@ -7,7 +7,12 @@ type GamePieceActionTypeTuple = typeof ACTION_TYPES;
 export type GamePieceActionType = GamePieceActionTypeTuple[number];
 
 export type GameArenaCoordinates = { x: number, y: number };
-export type GamePieceMoveAction = { actionType: 'move', moveFrom: GameArenaCoordinates, moveTo: GameArenaCoordinates };
+export type GamePieceMoveAction = {
+  actionType: 'move',
+  resolved: Boolean,
+  moveFrom: GameArenaCoordinates,
+  moveTo: GameArenaCoordinates
+};
 export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack',
   resolved: Boolean,

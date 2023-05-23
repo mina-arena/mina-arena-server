@@ -18,7 +18,7 @@ export default async (
     transaction: transaction
   });
   for (const action of actions) {
-    await resolveGamePieceAction(action, true, transaction);
+    await resolveGamePieceAction(action, transaction);
   }
 
   // Check if any player has won
