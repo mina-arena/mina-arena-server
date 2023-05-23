@@ -408,6 +408,7 @@ CREATE TABLE public."Units" (
     "movementSpeed" integer NOT NULL,
     "createdAt" timestamp with time zone NOT NULL,
     "updatedAt" timestamp with time zone NOT NULL,
+    "pointsCost" integer DEFAULT 10 NOT NULL,
     "armorSaveRoll" integer DEFAULT 6 NOT NULL,
     "meleeNumAttacks" integer DEFAULT 1 NOT NULL,
     "meleeHitRoll" integer DEFAULT 4 NOT NULL,

@@ -18,21 +18,6 @@ module.exports = {
         updatedAt: new Date()
       }]);
 
-      await queryInterface.bulkInsert('Units', [{
-        name: 'Spearman',
-        maxHealth: 4,
-        movementSpeed: 40,
-        pointsCost: 10,
-        armorSaveRoll: 5,
-        meleeNumAttacks: 3,
-        meleeHitRoll: 3,
-        meleeWoundRoll: 4,
-        meleeArmorPiercing: 1,
-        meleeDamage: 2,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }]);
-
       await queryInterface.bulkInsert('Games', [{
         status: 'pending',
         createdAt: new Date(),
