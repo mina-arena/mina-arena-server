@@ -7,7 +7,7 @@ type GameStatus = 'pending' | 'inProgress' | 'completed' | 'canceled';
 
 export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 2;
-export const MAX_POINTS = 25;
+export const MAX_POINTS = 100;
 export const MAX_PIECES = 6;
 
 class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
