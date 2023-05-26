@@ -1,7 +1,7 @@
 {
-  "name": "skirmish-server-poc",
+  "name": "mina-arena-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Server component for Mina Arena",
   "main": "app.js",
   "scripts": {
     "generate": "graphql-codegen --config codegen.yml",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/trumpet-zk-ignite-1/skirmish-server-poc.git"
+    "url": "git+https://github.com/trumpet-zk-ignite-1/mina-arena-server.git"
   },
-  "author": "",
+  "author": "louiswheeleriv",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/trumpet-zk-ignite-1/skirmish-server-poc/issues"
+    "url": "https://github.com/trumpet-zk-ignite-1/mina-arena-server/issues"
   },
-  "homepage": "https://github.com/trumpet-zk-ignite-1/skirmish-server-poc#readme",
+  "homepage": "https://github.com/trumpet-zk-ignite-1/mina-arena-server#readme",
   "dependencies": {
     "@apollo/server": "^4.4.0",
     "@types/express": "^4.17.17",
