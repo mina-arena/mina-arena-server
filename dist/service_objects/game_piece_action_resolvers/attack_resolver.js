@@ -16,11 +16,28 @@ export default function resolveAttacks(numAttacks, attackerHitRollStat, attacker
         const modifiedSave = targetSaveRollStat + armorPiercing;
         const saveRollSuccess = saveRoll >= modifiedSave;
         const damageDealt = hitRollSuccess && woundRollSuccess && !saveRollSuccess ? attackerDamageStat : 0;
+        const oddsOfHitting = ((7 - attackerHitRollStat) / 6);
+        const oddsOfWounding = ((7 - attackerWoundRollStat) / 6);
+        const oddsOfPassingArmorSave = (Math.max(7 - modifiedSave, 0) / 6);
+        const averageDamage = oddsOfHitting * oddsOfWounding * (1 - oddsOfPassingArmorSave) * attackerDamageStat;
         attacks.push({
-            hitRoll: { roll: hitRoll, success: hitRollSuccess },
-            woundRoll: { roll: woundRoll, success: woundRollSuccess },
-            saveRoll: { roll: saveRoll, success: saveRollSuccess },
-            damageDealt: damageDealt
+            hitRoll: {
+                roll: hitRoll,
+                rollNeeded: attackerHitRollStat,
+                success: hitRollSuccess
+            },
+            woundRoll: {
+                roll: woundRoll,
+                rollNeeded: attackerWoundRollStat,
+                success: woundRollSuccess
+            },
+            saveRoll: {
+                roll: saveRoll,
+                rollNeeded: modifiedSave,
+                success: saveRollSuccess
+            },
+            damageDealt: damageDealt,
+            averageDamage: averageDamage,
         });
     }
     return attacks;

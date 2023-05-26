@@ -38,6 +38,18 @@ describe('resolveAttack', () => {
     );
     expect(resolvedAttacks.length).toBe(numAttacks);
     resolvedAttacks.forEach(resolvedAttack => {
+      
+      expect(resolvedAttack.hitRoll.rollNeeded).toBe(attackerHitRollStat);
+      expect(resolvedAttack.woundRoll.rollNeeded).toBe(attackerWoundRollStat);
+      expect(resolvedAttack.saveRoll.rollNeeded).toBe(targetSaveRollStat + attackerArmorPiercingStat);
+
+      const oddsOfHitting = ((7 - attackerHitRollStat) / 6);
+      const oddsOfWounding = ((7 - attackerWoundRollStat) / 6);
+      const modifiedSave = targetSaveRollStat + attackerArmorPiercingStat;
+      const oddsOfPassingArmorSave = (Math.max(7 - modifiedSave, 0) / 6);
+      const expectedAverageDamage = (oddsOfHitting * oddsOfWounding * (1 - oddsOfPassingArmorSave) * attackerDamageStat).toFixed(2);
+      expect(resolvedAttack.averageDamage).toBe(expectedAverageDamage)
+
       if (resolvedAttack.hitRoll.roll >= attackerHitRollStat) {
         expect(resolvedAttack.hitRoll.success).toBe(true);
       } else {

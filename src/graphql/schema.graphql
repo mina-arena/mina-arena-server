@@ -171,14 +171,16 @@ type GamePieceMeleeAttackAction {
 }
 
 type ResolvedAttack {
-  hitRoll: RollResult!,
-  woundRoll: RollResult!,
-  saveRoll: RollResult!,
+  hitRoll: RollResult!
+  woundRoll: RollResult!
+  saveRoll: RollResult!
   damageDealt: Int!
+  averageDamage: Float!
 }
 
 type RollResult {
   roll: Int!
+  rollNeeded: Int!
   success: Boolean!
 }
 

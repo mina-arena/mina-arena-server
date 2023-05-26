@@ -39,11 +39,13 @@ export type ResolvedAttack = {
   hitRoll: RollResult,
   woundRoll: RollResult,
   saveRoll: RollResult,
-  damageDealt: number
+  damageDealt: number,
+  averageDamage: number,
 }
 
 export type RollResult = {
   roll: number,
+  rollNeeded: number,
   success: Boolean
 }
 
