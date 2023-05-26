@@ -1,5 +1,9 @@
-import { MELEE_ATTACK_RANGE } from "./models/unit";
+import { UNIT_RADIUS, MELEE_ATTACK_RANGE } from "./models/unit";
+import { MAX_POINTS, MAX_PIECES } from "./models/game";
 
 export {
-  MELEE_ATTACK_RANGE
+  UNIT_RADIUS,
+  MELEE_ATTACK_RANGE,
+  MAX_POINTS,
+  MAX_PIECES,
 };

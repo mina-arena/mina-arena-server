@@ -3,8 +3,8 @@ import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 2;
-export const MAX_POINTS = 25;
-export const MAX_PIECES = 6;
+export const MAX_POINTS = 100;
+export const MAX_PIECES = 10;
 class Game extends Model {
     async gamePlayers() {
         return await Models.GamePlayer.findAll({ where: { gameId: this.id } });
