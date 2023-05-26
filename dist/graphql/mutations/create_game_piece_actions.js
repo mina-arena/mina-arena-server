@@ -1,7 +1,7 @@
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { snakeToCamel, enforceOneOf } from '../helpers.js';
-import resolveMoveAction from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
+import { validateMoveAction } from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
 import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
 export default async (parent, args, contextValue, info) => {
@@ -61,8 +61,7 @@ export default async (parent, args, contextValue, info) => {
 };
 async function handleMoveAction(gamePlayer, gamePhase, gamePiece, moveInput, transaction) {
     // Validate move data, raises exception if not valid
-    await resolveMoveAction(gamePiece, moveInput.moveFrom, moveInput.moveTo, false, // commitChanges: false so we do a dry run
-    transaction);
+    await validateMoveAction(gamePiece, moveInput.moveFrom, moveInput.moveTo, transaction);
     return await Models.GamePieceAction.create({
         gamePhaseId: gamePhase.id,
         gamePlayerId: gamePlayer.id,
@@ -70,6 +69,7 @@ async function handleMoveAction(gamePlayer, gamePhase, gamePiece, moveInput, tra
         actionType: 'move',
         actionData: {
             actionType: 'move',
+            resolved: false,
             moveFrom: gamePiece.coordinates(),
             moveTo: moveInput.moveTo
         }

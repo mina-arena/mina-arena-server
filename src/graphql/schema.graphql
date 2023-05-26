@@ -155,6 +155,7 @@ union GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | 
 type GamePieceMoveAction {
   moveFrom: GamePieceCoordinates!
   moveTo: GamePieceCoordinates!
+  resolved: Boolean!
 }
 
 type GamePieceRangedAttackAction {

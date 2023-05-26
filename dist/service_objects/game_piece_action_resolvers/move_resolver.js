@@ -1,4 +1,4 @@
-export default async function resolveMoveAction(gamePiece, moveFrom, moveTo, commitChanges = false, transaction) {
+export async function validateMoveAction(gamePiece, moveFrom, moveTo, transaction) {
     const currentPos = gamePiece.coordinates();
     if (moveFrom.x != currentPos.x || moveFrom.y != currentPos.y) {
         throw new Error(`GamePiece ${gamePiece.id} is at ${JSON.stringify(currentPos)} ` +
@@ -15,12 +15,25 @@ export default async function resolveMoveAction(gamePiece, moveFrom, moveTo, com
                 `to ${JSON.stringify(moveTo)} because this collides with another GamePiece`);
         }
     }
-    if (commitChanges) {
-        // Validations done, modify state
-        gamePiece.positionX = moveTo.x;
-        gamePiece.positionY = moveTo.y;
-        await gamePiece.save({ transaction: transaction });
-    }
+    return {
+        distance: moveValidityResult.distance
+    };
+}
+export default async function resolveMoveAction(action, transaction) {
+    const gamePiece = await action.gamePiece();
+    const actionData = action.actionData;
+    if (actionData.actionType !== 'move')
+        throw new Error(`Unable to resolve move action with actionType ${actionData.actionType}`);
+    await validateMoveAction(gamePiece, actionData.moveFrom, actionData.moveTo, transaction);
+    // Validations done, modify state
+    gamePiece.positionX = actionData.moveTo.x;
+    gamePiece.positionY = actionData.moveTo.y;
+    await gamePiece.save({ transaction: transaction });
+    // Update action record as resolved
+    let newActionData = JSON.parse(JSON.stringify(actionData));
+    newActionData.resolved = true;
+    action.actionData = newActionData;
+    await action.save({ transaction });
     return gamePiece;
 }
 //# sourceMappingURL=move_resolver.js.map

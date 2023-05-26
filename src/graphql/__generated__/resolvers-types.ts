@@ -172,6 +172,7 @@ export type GamePieceMoveAction = {
   __typename?: 'GamePieceMoveAction';
   moveFrom: GamePieceCoordinates;
   moveTo: GamePieceCoordinates;
+  resolved: Scalars['Boolean'];
 };
 
 export type GamePieceMoveActionInput = {
@@ -582,6 +583,7 @@ export type GamePieceMeleeAttackActionResolvers<ContextType = any, ParentType ex
 export type GamePieceMoveActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceMoveAction'] = ResolversParentTypes['GamePieceMoveAction']> = ResolversObject<{
   moveFrom?: Resolver<ResolversTypes['GamePieceCoordinates'], ParentType, ContextType>;
   moveTo?: Resolver<ResolversTypes['GamePieceCoordinates'], ParentType, ContextType>;
+  resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
