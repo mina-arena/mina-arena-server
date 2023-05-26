@@ -19,7 +19,7 @@ export default function resolveAttacks(numAttacks, attackerHitRollStat, attacker
         const oddsOfHitting = ((7 - attackerHitRollStat) / 6);
         const oddsOfWounding = ((7 - attackerWoundRollStat) / 6);
         const oddsOfPassingArmorSave = (Math.max(7 - modifiedSave, 0) / 6);
-        const averageDamage = oddsOfHitting * oddsOfWounding * (1 - oddsOfPassingArmorSave) * attackerDamageStat;
+        const averageDamage = (oddsOfHitting * oddsOfWounding * (1 - oddsOfPassingArmorSave) * attackerDamageStat).toFixed(2);
         attacks.push({
             hitRoll: {
                 roll: hitRoll,

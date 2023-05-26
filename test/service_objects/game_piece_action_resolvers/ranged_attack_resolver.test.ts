@@ -197,6 +197,8 @@ describe('resolveRangedAttackAction', () => {
       expect(savedResolvedAttacks[0].saveRoll.success).toBe(false)
       expect(savedResolvedAttacks[0].damageDealt).toBe(1)
 
+      expect(action.actionData['totalDamageDealt']).toBe(1);
+
       // Check targetGamePiece new health
       await targetGamePiece.reload();
       expect(targetGamePiece.health).toBe(2);

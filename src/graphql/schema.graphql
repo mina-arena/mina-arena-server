@@ -162,12 +162,16 @@ type GamePieceRangedAttackAction {
   targetGamePiece: GamePiece!
   resolved: Boolean!
   resolvedAttacks: [ResolvedAttack!]
+  totalDamageDealt: Int
+  totalDamageAverage: Float
 }
 
 type GamePieceMeleeAttackAction {
   targetGamePiece: GamePiece!
   resolved: Boolean!
   resolvedAttacks: [ResolvedAttack!]
+  totalDamageDealt: Int
+  totalDamageAverage: Float
 }
 
 type ResolvedAttack {

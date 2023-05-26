@@ -238,6 +238,8 @@ describe('resolveMeleeAttackAction', () => {
       expect(savedResolvedAttacks[2].saveRoll.success).toBe(false)
       expect(savedResolvedAttacks[2].damageDealt).toBe(0)
 
+      expect(action.actionData['totalDamageDealt']).toBe(1);
+
       // Check targetGamePiece new health
       await targetGamePiece.reload();
       expect(targetGamePiece.health).toBe(2);

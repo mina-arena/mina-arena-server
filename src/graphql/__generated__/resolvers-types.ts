@@ -161,6 +161,8 @@ export type GamePieceMeleeAttackAction = {
   resolved: Scalars['Boolean'];
   resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
   targetGamePiece: GamePiece;
+  totalDamageAverage?: Maybe<Scalars['Float']>;
+  totalDamageDealt?: Maybe<Scalars['Int']>;
 };
 
 export type GamePieceMeleeAttackActionInput = {
@@ -185,6 +187,8 @@ export type GamePieceRangedAttackAction = {
   resolved: Scalars['Boolean'];
   resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
   targetGamePiece: GamePiece;
+  totalDamageAverage?: Maybe<Scalars['Float']>;
+  totalDamageDealt?: Maybe<Scalars['Int']>;
 };
 
 export type GamePieceRangedAttackActionInput = {
@@ -581,6 +585,8 @@ export type GamePieceMeleeAttackActionResolvers<ContextType = any, ParentType ex
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
   targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
+  totalDamageAverage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalDamageDealt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -595,6 +601,8 @@ export type GamePieceRangedAttackActionResolvers<ContextType = any, ParentType e
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
   targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
+  totalDamageAverage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalDamageDealt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

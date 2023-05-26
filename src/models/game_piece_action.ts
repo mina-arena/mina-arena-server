@@ -18,14 +18,18 @@ export type GamePieceRangedAttackAction = {
   resolved: Boolean,
   targetGamePieceId: number,
   encodedDiceRolls: EncodedDiceRolls,
-  resolvedAttacks?: ResolvedAttack[]
+  resolvedAttacks?: ResolvedAttack[],
+  totalDamageDealt?: number,
+  totalDamageAverage?: number,
 };
 export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack',
   resolved: Boolean,
   targetGamePieceId: number,
   encodedDiceRolls: EncodedDiceRolls,
-  resolvedAttacks?: ResolvedAttack[]
+  resolvedAttacks?: ResolvedAttack[],
+  totalDamageDealt?: number,
+  totalDamageAverage?: number,
 };
 export type GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction;
 
