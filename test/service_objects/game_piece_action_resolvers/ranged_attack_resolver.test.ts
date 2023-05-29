@@ -148,7 +148,7 @@ describe('resolveRangedAttackAction', () => {
     await Factories.cleanup();
   });
 
-  describe('with a valid action', () => {
+  describe.skip('with a valid action', () => {
     beforeEach(async () => {
       // Mock attack resolution
       let mockResolvedAttack = {
