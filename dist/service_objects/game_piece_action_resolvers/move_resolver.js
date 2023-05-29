@@ -28,7 +28,7 @@ export default async function resolveMoveAction(action, transaction) {
     // Validations done, modify state
     gamePiece.positionX = actionData.moveTo.x;
     gamePiece.positionY = actionData.moveTo.y;
-    await gamePiece.save({ transaction: transaction });
+    await gamePiece.save({ transaction });
     // Update action record as resolved
     let newActionData = JSON.parse(JSON.stringify(actionData));
     newActionData.resolved = true;

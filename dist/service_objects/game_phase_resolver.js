@@ -3,14 +3,14 @@ import resolveGamePieceAction from './game_piece_action_resolver.js';
 import { GAME_PHASE_ORDER } from '../models/game_phase.js';
 export default async (gamePhase, transaction) => {
     // Validate that Game is in progress
-    const game = await Models.Game.findByPk(gamePhase.gameId, { transaction: transaction });
+    const game = await Models.Game.findByPk(gamePhase.gameId, { transaction });
     if (game.status != 'inProgress')
         throw new Error(`Game ${game.id} is not in progress, status: ${game.status}`);
     // Gather actions and resolve them in order
     const actions = await Models.GamePieceAction.findAll({
         where: { gamePhaseId: gamePhase.id },
         order: [['id', 'ASC']],
-        transaction: transaction
+        transaction
     });
     for (const action of actions) {
         await resolveGamePieceAction(action, transaction);
@@ -23,7 +23,7 @@ export default async (gamePhase, transaction) => {
         if (checkForWinnerResult.winningGamePlayer) {
             game.winningGamePlayerId = checkForWinnerResult.winningGamePlayer.id;
         }
-        await game.save({ transaction: transaction });
+        await game.save({ transaction });
     }
     else {
         // Game continues, create the next GamePhase
@@ -31,14 +31,14 @@ export default async (gamePhase, transaction) => {
         game.phase = nextPhase.phase;
         game.turnNumber = nextPhase.turnNumber;
         game.turnGamePlayerId = nextPhase.gamePlayerId;
-        await game.save({ transaction: transaction });
+        await game.save({ transaction });
     }
     return game;
 };
 async function checkForWinner(game, transaction) {
     const gamePlayers = await Models.GamePlayer.findAll({
         where: { gameId: game.id },
-        transaction: transaction
+        transaction
     });
     let livingGamePlayers = [];
     for (const gamePlayer of gamePlayers) {
@@ -78,6 +78,6 @@ async function createNextGamePhase(game, currentPhase, transaction) {
         gamePlayerId: nextGamePlayerId,
         turnNumber: nextTurnNumber,
         phase: nextPhase
-    }, { transaction: transaction });
+    }, { transaction });
 }
 //# sourceMappingURL=game_phase_resolver.js.map

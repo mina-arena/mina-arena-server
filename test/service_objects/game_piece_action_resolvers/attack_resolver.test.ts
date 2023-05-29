@@ -1,4 +1,3 @@
-import 'jest';
 import resolveAttack from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
 import { EncodedDiceRolls } from '../../../src/models/game_piece_action.js';
 
