@@ -15,10 +15,9 @@ describe('Arena Tree Serlializer', () => {
   beforeEach(async () => {
     await Factories.cleanup();
 
+    // Can only use one position for now, since creating multiple game pieces ends up using the same id
     positions = [
       [10, 10],
-      [50, 10],
-      [100, 10],
     ]
 
     // Populate a game
