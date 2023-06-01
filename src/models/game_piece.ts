@@ -51,9 +51,23 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
     return await (await this.playerUnit()).unit();
   }
 
+  // Returns the number of this game piece in the game, starting from 1
+  async gamePieceNumber(): Promise<number> {
+    const gamePieces = await Models.GamePiece.findAll({
+      where: {
+        gameId: this.gameId,
+      },
+      order: [
+        ['playerUnitId', 'ASC'], // hopefully this never changes?
+      ],
+    });
+
+    return gamePieces.findIndex((gamePiece) => gamePiece.id == this.id) + 1;
+  }
+
   coordinates(): GamePieceCoordinates {
     if (this.positionX == undefined && this.positionY == undefined) return null;
-    
+
     return { x: this.positionX, y: this.positionY };
   }
 
@@ -83,7 +97,7 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
         invalidReason: 'beyondMaxRange',
       };
     }
-    
+
     // TODO: For now we are just looking for units which are literally
     // on this exact spot. We probably want to enforce more space
     // around a unit, giving them some radius.
