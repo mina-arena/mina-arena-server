@@ -139,7 +139,8 @@ describe('resolveRangedAttackAction', () => {
           publicKey: { x: 'xValue', y: 'yValue' },
           cipherText: 'supersecret',
           signature: { r: 'rValue', s: 'sValue' }
-        }
+        },
+        resolvedAttacks: undefined
       }
     });
   });
