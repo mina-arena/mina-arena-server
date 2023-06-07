@@ -23,6 +23,18 @@ class GamePiece extends Model {
     async unit() {
         return await (await this.playerUnit()).unit();
     }
+    // Returns the number of this game piece in the game, starting from 1
+    async gamePieceNumber() {
+        const gamePieces = await Models.GamePiece.findAll({
+            where: {
+                gameId: this.gameId,
+            },
+            order: [
+                ['playerUnitId', 'ASC'], // hopefully this never changes?
+            ],
+        });
+        return gamePieces.findIndex((gamePiece) => gamePiece.id == this.id) + 1;
+    }
     coordinates() {
         if (this.positionX == undefined && this.positionY == undefined)
             return null;
