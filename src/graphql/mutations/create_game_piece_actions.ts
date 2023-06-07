@@ -2,6 +2,7 @@ import * as Types from '../__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { unique, snakeToCamel, enforceOneOf } from '../helpers.js';
+import { Transaction } from 'sequelize';
 
 import { validateMoveAction } from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
@@ -52,7 +53,7 @@ export default async (
       if (!gamePiece) throw new Error(`GamePiece with ID ${actionInput.gamePieceId} not found`);
       if (gamePiece.gamePlayerId != gamePlayer.id) throw new Error(`GamePiece ${gamePiece.id} does not belong to you`);
 
-      switch(actionType) {
+      switch (actionType) {
         case 'move':
           createdGamePieceActions.push(
             await handleMoveAction(gamePlayer, gamePhase, gamePiece, actionInput.moveInput, t)
@@ -79,7 +80,7 @@ async function handleMoveAction(
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
   moveInput: Types.GamePieceMoveActionInput,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
   // Validate move data, raises exception if not valid
   await validateMoveAction(
@@ -102,7 +103,7 @@ async function handleMoveAction(
         moveTo: moveInput.moveTo
       }
     },
-    { transaction: transaction }
+    { transaction }
   );
 }
 
@@ -111,7 +112,7 @@ async function handleRangedAttackAction(
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
   rangedAttackInput: Types.GamePieceRangedAttackActionInput,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
   // Validate attack data, raises exception if not valid
   await validateRangedAttackAction(
@@ -135,7 +136,7 @@ async function handleRangedAttackAction(
         encodedDiceRolls: rangedAttackInput.diceRoll
       }
     },
-    { transaction: transaction }
+    { transaction }
   );
 }
 
@@ -144,10 +145,10 @@ async function handleMeleeAttackAction(
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
   meleeAttackInput: Types.GamePieceMeleeAttackActionInput,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
-  const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction: transaction });
-  
+  const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction });
+
   // Validate attack data, raises exception if not valid
   await validateMeleeAttackAction(
     gamePiece,
@@ -169,6 +170,6 @@ async function handleMeleeAttackAction(
         encodedDiceRolls: meleeAttackInput.diceRoll,
       }
     },
-    { transaction: transaction }
+    { transaction }
   );
 }

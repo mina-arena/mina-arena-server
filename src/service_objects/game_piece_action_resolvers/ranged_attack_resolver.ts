@@ -1,5 +1,6 @@
 import * as Models from '../../models/index.js';
 import resolveAttacks from './attack_resolver.js';
+import { Transaction } from 'sequelize';
 
 export type ValidateRangedAttackActionResult = {
   targetGamePiece: Models.GamePiece,
@@ -12,17 +13,17 @@ export async function validateRangedAttackAction(
   attackingGamePiece: Models.GamePiece,
   targetGamePieceId: number,
   resolving: Boolean,
-  transaction
+  transaction?: Transaction
 ): Promise<ValidateRangedAttackActionResult> {
   // Confirm target GamePiece exists and is a valid target
-  const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction: transaction });
+  const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction });
   if (!targetGamePiece) throw new Error(`No GamePiece found for targetGamePieceId ${targetGamePieceId}`);
   if (targetGamePiece.gameId != attackingGamePiece.gameId) throw new Error(`Target GamePiece ${targetGamePiece.id} is not in the same Game as attacking GamePiece ${attackingGamePiece.id}`);
   if (targetGamePiece.gamePlayerId == attackingGamePiece.gamePlayerId) throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${attackingGamePiece.id}`);
 
   // Confirm attacking GamePiece can perform ranged attacks
-  const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
-  const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction: transaction });
+  const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction });
+  const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction });
   if (!attackingUnit.canMakeRangedAttack()) throw new Error(`GamePiece ${attackingGamePiece.id} of Unit "${attackingUnit.name}" cannot perform ranged attacks`);
 
   // Confirm target GamePiece is in range
@@ -44,7 +45,7 @@ export async function validateRangedAttackAction(
 
 export default async function resolveRangedAttackAction(
   action: Models.GamePieceAction,
-  transaction
+  transaction?: Transaction
 ) {
   const actionData = action.actionData;
   if (actionData.actionType !== 'rangedAttack') throw new Error(`Unable to resolve ranged attack action with actionType: ${actionData.actionType}`);
@@ -66,8 +67,8 @@ export default async function resolveRangedAttackAction(
   // If target is already dead just abort
   if (targetGamePiece.isDead()) return;
 
-  const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
-  const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
+  const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction });
+  const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction });
 
   // Resolve attack sequence
   const encodedDiceRolls = actionData.encodedDiceRolls;
@@ -86,7 +87,7 @@ export default async function resolveRangedAttackAction(
   if (totalDamage > 0) {
     const newHealth = Math.max(targetGamePiece.health - totalDamage, 0);
     targetGamePiece.health = newHealth;
-    await targetGamePiece.save({ transaction: transaction });
+    await targetGamePiece.save({ transaction });
   }
 
   // Update action record as resolved

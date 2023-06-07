@@ -3,7 +3,6 @@ import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 // TODO: Explore making different units have different base sizes (i.e. radius)
 export const UNIT_RADIUS = 12;
-export const MELEE_ATTACK_RANGE = 24;
 class Unit extends Model {
     async playerUnits() {
         return await Models.PlayerUnit.findAll({ where: { unitId: this.id } });

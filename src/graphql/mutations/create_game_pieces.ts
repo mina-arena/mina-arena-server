@@ -2,6 +2,7 @@ import * as Types from '../__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { unique } from '../helpers.js';
+import { Transaction } from 'sequelize';
 
 export default async (
   parent,
@@ -70,12 +71,12 @@ async function createGamePieceForPlayerUnit(
   game: Models.Game,
   gamePlayer: Models.GamePlayer,
   playerUnitId: string,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePiece> {
-  let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction: transaction });
+  let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction });
   if (!playerUnit) throw new Error(`No PlayerUnit found with ID ${playerUnitId}`);
 
-  let unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction: transaction });
+  let unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction });
   return await Models.GamePiece.create(
     {
       gameId: game.id,
@@ -83,7 +84,7 @@ async function createGamePieceForPlayerUnit(
       playerUnitId: playerUnit.id,
       health: unit.maxHealth
     },
-    { transaction: transaction }
+    { transaction }
   );
 }
 
@@ -92,9 +93,9 @@ async function createGamePieceForUnit(
   gamePlayer: Models.GamePlayer,
   unitId: string | number,
   playerUnitName: string,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePiece> {
-  let unit = await Models.Unit.findByPk(unitId, { transaction: transaction });
+  let unit = await Models.Unit.findByPk(unitId, { transaction });
   if (!unit) throw new Error(`No Unit found with ID ${unitId}`);
 
   let playerUnit = await Models.PlayerUnit.create(
@@ -103,7 +104,7 @@ async function createGamePieceForUnit(
       unitId: unit.id,
       name: playerUnitName
     },
-    { transaction: transaction }
+    { transaction }
   );
 
   return await Models.GamePiece.create(
@@ -113,6 +114,6 @@ async function createGamePieceForUnit(
       playerUnitId: playerUnit.id,
       health: unit.maxHealth
     },
-    { transaction: transaction }
+    { transaction }
   );
 }

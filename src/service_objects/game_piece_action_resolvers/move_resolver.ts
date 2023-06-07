@@ -1,5 +1,6 @@
 import * as Models from '../../models/index.js';
 import { GamePieceCoordinates } from '../../graphql/__generated__/resolvers-types.js';
+import { Transaction } from 'sequelize';
 
 export type ValidateMoveActionResult = {
   distance: number
@@ -9,7 +10,7 @@ export async function validateMoveAction(
   gamePiece: Models.GamePiece,
   moveFrom: GamePieceCoordinates,
   moveTo: GamePieceCoordinates,
-  transaction
+  transaction?: Transaction
 ): Promise<ValidateMoveActionResult> {
   const currentPos = gamePiece.coordinates();
 
@@ -19,7 +20,7 @@ export async function validateMoveAction(
       `but you are attempting to move it from ${JSON.stringify(moveFrom)}`
     );
   }
-  
+
   const moveValidityResult = await gamePiece.checkMoveValidity(moveTo);
   if (!moveValidityResult.valid) {
     if (moveValidityResult.invalidReason == 'beyondMaxRange') {
@@ -43,7 +44,7 @@ export async function validateMoveAction(
 
 export default async function resolveMoveAction(
   action: Models.GamePieceAction,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePiece> {
   const gamePiece = await action.gamePiece();
   const actionData = action.actionData;
@@ -54,7 +55,7 @@ export default async function resolveMoveAction(
   // Validations done, modify state
   gamePiece.positionX = actionData.moveTo.x;
   gamePiece.positionY = actionData.moveTo.y;
-  await gamePiece.save({ transaction: transaction });
+  await gamePiece.save({ transaction });
 
   // Update action record as resolved
   let newActionData = JSON.parse(JSON.stringify(actionData));

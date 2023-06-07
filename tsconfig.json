@@ -7,13 +7,15 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
   },
   "files": [
     "./node_modules/@types/express/index.d.ts",
     "./node_modules/@types/node/index.d.ts"
   ],
   "include": [
-    "src/**/*.ts", "tests/**/*.ts"
+    "src/**/*.ts",
+    "tests/**/*.ts"
   ],
   "exclude": [
     "node_modules"

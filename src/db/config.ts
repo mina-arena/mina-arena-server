@@ -32,7 +32,7 @@ if (environment == 'production') {
   var dbName: string;
   var dbUser: string;
   var dbPassword: string;
-  
+
   if (environment == 'development') {
     dbHost = process.env.DEV_DB_HOST || 'localhost';
     dbName = process.env.DEV_DB_NAME || 'skirmish_server_poc_development';
@@ -46,7 +46,7 @@ if (environment == 'production') {
   } else {
     throw new Error(`Invalid NODE_ENV ${environment}, must be one of: [development, test, production]`);
   }
-  
+
   const dbDriver: Dialect = 'postgres';
   sequelizeConnection = new Sequelize(dbName, dbUser, dbPassword, {
     host: dbHost,

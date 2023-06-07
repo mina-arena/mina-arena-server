@@ -9,7 +9,7 @@
     "dev": "npm run compile && npm run start",
     "start": "node ./dist/app.js",
     "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql mina_arena_development --schema-only",
-    "test": "jest --runInBand --detectOpenHandles --forceExit"
+    "test": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "http": "^0.0.1-security",
-    "mina-arena-contracts": "^0.1.0",
+    "mina-arena-contracts": "^0.2.1",
     "pg": "^8.9.0",
     "sequelize": "^6.31.0"
   },
