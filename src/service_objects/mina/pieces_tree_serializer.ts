@@ -31,7 +31,7 @@ export default async function serializePiecesTree(gameId: string | number, trans
     const snarkyUnit = new Unit({
       stats: new UnitStats({
         health: UInt32.from(gamePiece.health),
-        movement: UInt32.from(unit.movementSpeed), // TODO: How does this work?  Currently getting `Property 'unit' does not exist on type '() => Promise<PlayerUnit>'`
+        movement: UInt32.from(unit.movementSpeed),
         rangedAttackRange: UInt32.from(unit.rangedRange),
         rangedHitRoll: UInt32.from(unit.rangedHitRoll),
         rangedWoundRoll: UInt32.from(unit.rangedWoundRoll),
