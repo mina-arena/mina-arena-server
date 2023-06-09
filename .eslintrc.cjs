@@ -16,6 +16,7 @@ module.exports = {
     ecmaVersion: 'latest',
   },
   plugins: ['@typescript-eslint', 'snarkyjs'],
+  ignorePatterns: ['**/dist/*', '**/node_modules/*'],
   rules: {
     'no-constant-condition': 'off',
     'prefer-const': 'off',

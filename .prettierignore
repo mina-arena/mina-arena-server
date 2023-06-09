@@ -1,6 +1,7 @@
 # NodeJS
 node_modules
 build
+dist
 coverage
 .husky
 
