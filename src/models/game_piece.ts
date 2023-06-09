@@ -78,14 +78,14 @@ class GamePiece extends Model<
       stats: new UnitStats({
         health: UInt32.from(this.health),
         movement: UInt32.from(unit.movementSpeed),
-        rangedAttackRange: UInt32.from(unit.rangedRange),
-        rangedHitRoll: UInt32.from(unit.rangedHitRoll),
-        rangedWoundRoll: UInt32.from(unit.rangedWoundRoll),
-        saveRoll: UInt32.from(unit.armorSaveRoll),
-        rangedDamage: UInt32.from(unit.rangedDamage),
-        meleeHitRoll: UInt32.from(unit.meleeHitRoll),
-        meleeWoundRoll: UInt32.from(unit.meleeWoundRoll),
-        meleeDamage: UInt32.from(unit.meleeDamage),
+        rangedAttackRange: UInt32.from(unit.rangedRange || 0),
+        rangedHitRoll: UInt32.from(unit.rangedHitRoll || 0),
+        rangedWoundRoll: UInt32.from(unit.rangedWoundRoll || 0),
+        saveRoll: UInt32.from(unit.armorSaveRoll || 0),
+        rangedDamage: UInt32.from(unit.rangedDamage || 0),
+        meleeHitRoll: UInt32.from(unit.meleeHitRoll || 0),
+        meleeWoundRoll: UInt32.from(unit.meleeWoundRoll || 0),
+        meleeDamage: UInt32.from(unit.meleeDamage || 0),
       }),
     });
 
