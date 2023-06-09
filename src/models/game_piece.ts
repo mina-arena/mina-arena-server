@@ -2,6 +2,8 @@ import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOpt
 import sequelizeConnection from '../db/config.js';
 import { GamePieceCoordinates } from '../graphql/__generated__/resolvers-types.js';
 import * as Models from './index.js';
+import { Action, PhaseState, Position, Piece, Unit, UnitStats } from 'mina-arena-contracts';
+import { UInt32 } from 'snarkyjs';
 
 export function distanceBetweenPoints(point1: GamePieceCoordinates, point2: GamePieceCoordinates): number {
   let dx = point2.x - point1.x;
@@ -49,6 +51,36 @@ class GamePiece extends Model<InferAttributes<GamePiece>, InferCreationAttribute
 
   async unit(): Promise<Models.Unit> {
     return await (await this.playerUnit()).unit();
+  }
+
+  async toSnarkyPiece(): Promise<Piece> {
+    const playerUnit = await this.playerUnit();
+    const unit = await playerUnit.unit();
+    const gamePlayer = await this.gamePlayer();
+    const player = await gamePlayer.player();
+    const snarkyUnit = new Unit({
+      stats: new UnitStats({
+        health: UInt32.from(this.health),
+        movement: UInt32.from(unit.movementSpeed),
+        rangedAttackRange: UInt32.from(unit.rangedRange),
+        rangedHitRoll: UInt32.from(unit.rangedHitRoll),
+        rangedWoundRoll: UInt32.from(unit.rangedWoundRoll),
+        saveRoll: UInt32.from(unit.armorSaveRoll),
+        rangedDamage: UInt32.from(unit.rangedDamage),
+        meleeHitRoll: UInt32.from(unit.meleeHitRoll),
+        meleeWoundRoll: UInt32.from(unit.meleeWoundRoll),
+        meleeDamage: UInt32.from(unit.meleeDamage),
+      })
+    });
+
+    const snarkyPosition = Position.fromXY(gamePiece.positionX, gamePiece.positionY);
+    const gamePieceNumber = await gamePiece.gamePieceNumber();
+    const snarkyPiece = new Piece(
+      Field(gamePieceNumber),
+      PublicKey.fromBase58(player.minaPublicKey),
+      snarkyPosition,
+      snarkyUnit,
+    );
   }
 
   // Returns the number of this game piece in the game, starting from 1

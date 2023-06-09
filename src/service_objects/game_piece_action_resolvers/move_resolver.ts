@@ -1,6 +1,10 @@
 import * as Models from '../../models/index.js';
 import { GamePieceCoordinates } from '../../graphql/__generated__/resolvers-types.js';
 import { Transaction } from 'sequelize';
+import serializePiecesTree from '../mina/pieces_tree_serializer.js';
+import serializeArenaTree from '../mina/arena_tree_serializer.js';
+import { PhaseState } from 'mina-arena-contracts';
+import { Field, PublicKey } from 'snarkyjs';
 
 export type ValidateMoveActionResult = {
   distance: number
@@ -47,6 +51,21 @@ export default async function resolveMoveAction(
   transaction?: Transaction
 ): Promise<Models.GamePiece> {
   const gamePiece = await action.gamePiece();
+  const playerPublicKey = (await (await gamePiece.gamePlayer()).player()).minaPublicKey;
+
+  const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
+  const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
+
+  const snarkyGameState = new PhaseState(
+    Field(0),
+    Field(0),
+    startingGamePiecesTree.tree.getRoot(),
+    startingGamePiecesTree.tree.getRoot(),
+    startingGameArenaTree.tree.getRoot(),
+    startingGameArenaTree.tree.getRoot(),
+    PublicKey.fromBase58(playerPublicKey)
+  )
+
   const actionData = action.actionData;
   if (actionData.actionType !== 'move') throw new Error(`Unable to resolve move action with actionType ${actionData.actionType}`);
 
