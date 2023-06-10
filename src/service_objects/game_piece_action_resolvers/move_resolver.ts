@@ -57,8 +57,14 @@ export default async function resolveMoveAction(
   transaction?: Transaction
 ): Promise<Models.GamePiece> {
   const gamePiece = await action.gamePiece();
-  const playerPublicKey = (await (await gamePiece.gamePlayer()).player())
-    .minaPublicKey;
+
+  // const playerPublicKey = (await (await gamePiece.gamePlayer()).player())
+  //   .minaPublicKey;
+
+  // TODO: replace this with the public key from the DB once we have signing enabled
+  const playerPrivateKey = PrivateKey.random();
+  const playerPublicKey = playerPrivateKey.toPublicKey();
+  const playerPublicKeyString = playerPublicKey.toBase58();
 
   const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
   const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
@@ -70,7 +76,7 @@ export default async function resolveMoveAction(
     startingGamePiecesTree.tree.getRoot(),
     startingGameArenaTree.tree.getRoot(),
     startingGameArenaTree.tree.getRoot(),
-    PublicKey.fromBase58(playerPublicKey)
+    playerPublicKey
   );
 
   const actionData = action.actionData;
@@ -79,7 +85,7 @@ export default async function resolveMoveAction(
       `Unable to resolve move action with actionType ${actionData.actionType}`
     );
 
-  await validateMoveAction(
+  const moveValidity = await validateMoveAction(
     gamePiece,
     actionData.moveFrom,
     actionData.moveTo,
@@ -87,7 +93,7 @@ export default async function resolveMoveAction(
   );
 
   const actionParam = Position.fromXY(actionData.moveTo.x, actionData.moveTo.y);
-  const snarkyPiece = await gamePiece.toSnarkyPiece();
+  const snarkyPiece = await gamePiece.toSnarkyPiece(playerPublicKey);
   const snarkyAction = new Action(
     Field(1),
     Field(0),
@@ -100,9 +106,12 @@ export default async function resolveMoveAction(
   let snarkySuccess = false;
   let stateAfterMove: PhaseState;
   try {
+    console.log('distance:', Math.floor(moveValidity.distance));
+    console.log('current pos', gamePiece.positionX, gamePiece.positionY);
+    console.log('move to', actionData.moveTo.x, actionData.moveTo.y);
     stateAfterMove = snarkyGameState.applyMoveAction(
       snarkyAction,
-      snarkyAction.sign(PrivateKey.random()), // we need the user's private key here, or the user needs to sign their own action
+      snarkyAction.sign(playerPrivateKey),
       snarkyPiece,
       startingGamePiecesTree.getWitness(snarkyPiece.id.toBigInt()),
       startingGameArenaTree.getWitness(
@@ -114,14 +123,19 @@ export default async function resolveMoveAction(
         actionData.moveTo.y
       ),
       actionParam,
-      UInt32.from(10) // we need the true distance here
+      UInt32.from(Math.floor(moveValidity.distance)) // we need the true distance here
     );
     snarkySuccess = true;
+    console.log(
+      `Successfully applied snarky move action ${JSON.stringify(
+        actionData
+      )} to game ${gamePiece.gameId} piece ${gamePiece.id}`
+    );
   } catch (e) {
     console.warn(
       `Unable to apply snarky move action ${JSON.stringify(
         actionData
-      )} to game ${gamePiece.gameId} piece ${gamePiece.id}`
+      )} to game ${gamePiece.gameId} piece ${gamePiece.id} - ${e}`
     );
   }
 
@@ -147,7 +161,7 @@ export default async function resolveMoveAction(
       endingGamePiecesTree.tree.getRoot(),
       startingGameArenaTree.tree.getRoot(),
       endingGameArenaTree.tree.getRoot(),
-      PublicKey.fromBase58(playerPublicKey)
+      playerPublicKey
     )
       .hash()
       .toString();
@@ -155,6 +169,10 @@ export default async function resolveMoveAction(
     if (snarkyGameStateAfter != stateAfterMove.hash().toString()) {
       console.warn(
         `Snarky game state after move action does not match expected state!`
+      );
+    } else {
+      console.log(
+        `Snarky game state after move action matches expected state!`
       );
     }
   }
