@@ -65,6 +65,9 @@ export default async function resolveMoveAction(
   const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
   const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
 
+  // TODO, there is some race condition in the serializers, and this sleep is a hack to fix it
+  await new Promise((r) => setTimeout(r, 2000));
+
   const snarkyGameState = new PhaseState(
     Field(0),
     Field(0),
@@ -102,9 +105,9 @@ export default async function resolveMoveAction(
   let snarkySuccess = false;
   let stateAfterMove: PhaseState;
   try {
-    console.log('distance:', Math.floor(moveValidity.distance));
-    console.log('current pos', gamePiece.positionX, gamePiece.positionY);
-    console.log('move to', actionData.moveTo.x, actionData.moveTo.y);
+    const arenaTreeAfterMove = startingGameArenaTree.clone();
+    arenaTreeAfterMove.set(gamePiece.positionX, gamePiece.positionY, Field(0));
+
     stateAfterMove = snarkyGameState.applyMoveAction(
       snarkyAction,
       Signature.fromJSON(action.signature),
@@ -114,10 +117,7 @@ export default async function resolveMoveAction(
         gamePiece.positionX,
         gamePiece.positionY
       ),
-      startingGameArenaTree.getWitness(
-        actionData.moveTo.x,
-        actionData.moveTo.y
-      ),
+      arenaTreeAfterMove.getWitness(actionData.moveTo.x, actionData.moveTo.y),
       actionParam,
       UInt32.from(Math.floor(moveValidity.distance)) // we need the true distance here
     );
