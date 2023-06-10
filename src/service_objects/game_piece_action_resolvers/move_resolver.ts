@@ -4,7 +4,7 @@ import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
 import { Action, PhaseState, Position, Piece } from 'mina-arena-contracts';
-import { Field, PublicKey, UInt32, PrivateKey } from 'snarkyjs';
+import { Field, PublicKey, UInt32, PrivateKey, Signature } from 'snarkyjs';
 
 export type ValidateMoveActionResult = {
   distance: number;
@@ -58,13 +58,9 @@ export default async function resolveMoveAction(
 ): Promise<Models.GamePiece> {
   const gamePiece = await action.gamePiece();
 
-  // const playerPublicKey = (await (await gamePiece.gamePlayer()).player())
-  //   .minaPublicKey;
-
-  // TODO: replace this with the public key from the DB once we have signing enabled
-  const playerPrivateKey = PrivateKey.random();
-  const playerPublicKey = playerPrivateKey.toPublicKey();
-  const playerPublicKeyString = playerPublicKey.toBase58();
+  const playerPublicKeyString = (await (await gamePiece.gamePlayer()).player())
+    .minaPublicKey;
+  const playerPublicKey = PublicKey.fromBase58(playerPublicKeyString);
 
   const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
   const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
@@ -93,12 +89,12 @@ export default async function resolveMoveAction(
   );
 
   const actionParam = Position.fromXY(actionData.moveTo.x, actionData.moveTo.y);
-  const snarkyPiece = await gamePiece.toSnarkyPiece(playerPublicKey);
+  const snarkyPiece = await gamePiece.toSnarkyPiece();
   const snarkyAction = new Action(
     Field(1),
     Field(0),
     actionParam.hash(),
-    snarkyPiece.hash()
+    snarkyPiece.id
   );
 
   // Attempt to apply the move action to the game state
@@ -111,7 +107,7 @@ export default async function resolveMoveAction(
     console.log('move to', actionData.moveTo.x, actionData.moveTo.y);
     stateAfterMove = snarkyGameState.applyMoveAction(
       snarkyAction,
-      snarkyAction.sign(playerPrivateKey),
+      Signature.fromJSON(action.signature),
       snarkyPiece,
       startingGamePiecesTree.getWitness(snarkyPiece.id.toBigInt()),
       startingGameArenaTree.getWitness(

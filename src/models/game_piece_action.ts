@@ -1,4 +1,10 @@
-import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import {
+  DataTypes,
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+} from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
@@ -6,54 +12,61 @@ const ACTION_TYPES = ['move', 'rangedAttack', 'meleeAttack'];
 type GamePieceActionTypeTuple = typeof ACTION_TYPES;
 export type GamePieceActionType = GamePieceActionTypeTuple[number];
 
-export type GameArenaCoordinates = { x: number, y: number };
+export type GameArenaCoordinates = { x: number; y: number };
 export type GamePieceMoveAction = {
-  actionType: 'move',
-  resolved: Boolean,
-  moveFrom: GameArenaCoordinates,
-  moveTo: GameArenaCoordinates
+  actionType: 'move';
+  resolved: boolean;
+  moveFrom: GameArenaCoordinates;
+  moveTo: GameArenaCoordinates;
 };
 export type GamePieceRangedAttackAction = {
-  actionType: 'rangedAttack',
-  resolved: Boolean,
-  targetGamePieceId: number,
-  encodedDiceRolls: EncodedDiceRolls,
-  resolvedAttacks?: ResolvedAttack[]
+  actionType: 'rangedAttack';
+  resolved: boolean;
+  targetGamePieceId: number;
+  encodedDiceRolls: EncodedDiceRolls;
+  resolvedAttacks?: ResolvedAttack[];
 };
 export type GamePieceMeleeAttackAction = {
-  actionType: 'meleeAttack',
-  resolved: Boolean,
-  targetGamePieceId: number,
-  encodedDiceRolls: EncodedDiceRolls,
-  resolvedAttacks?: ResolvedAttack[]
+  actionType: 'meleeAttack';
+  resolved: boolean;
+  targetGamePieceId: number;
+  encodedDiceRolls: EncodedDiceRolls;
+  resolvedAttacks?: ResolvedAttack[];
 };
-export type GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction;
+export type GamePieceActionData =
+  | GamePieceMoveAction
+  | GamePieceRangedAttackAction
+  | GamePieceMeleeAttackAction;
 
 export type EncodedDiceRolls = {
-  publicKey: { x: String, y: String },
-  cipherText: String,
-  signature: { r: String, s: String }
-}
+  publicKey: { x: string; y: string };
+  cipherText: string;
+  signature: { r: string; s: string };
+};
 
 export type ResolvedAttack = {
-  hitRoll: RollResult,
-  woundRoll: RollResult,
-  saveRoll: RollResult,
-  damageDealt: number
-}
+  hitRoll: RollResult;
+  woundRoll: RollResult;
+  saveRoll: RollResult;
+  damageDealt: number;
+};
 
 export type RollResult = {
-  roll: number,
-  success: Boolean
-}
+  roll: number;
+  success: boolean;
+};
 
-class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreationAttributes<GamePieceAction>> {
+class GamePieceAction extends Model<
+  InferAttributes<GamePieceAction>,
+  InferCreationAttributes<GamePieceAction>
+> {
   declare id: CreationOptional<number>;
   declare gamePhaseId: number;
   declare gamePlayerId: number;
   declare gamePieceId: number;
   declare actionType: GamePieceActionType;
   declare actionData: GamePieceActionData;
+  declare signature: { r: string; s: string } | null;
   declare readonly createdAt: CreationOptional<Date>;
   declare readonly updatedAt: CreationOptional<Date>;
 
@@ -70,42 +83,49 @@ class GamePieceAction extends Model<InferAttributes<GamePieceAction>, InferCreat
   }
 }
 
-GamePieceAction.init({
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
+GamePieceAction.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    gamePhaseId: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+    gamePlayerId: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+    gamePieceId: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+    actionType: {
+      allowNull: false,
+      type: DataTypes.ENUM('move', 'rangedAttack', 'meleeAttack'),
+    },
+    actionData: {
+      allowNull: false,
+      type: DataTypes.JSONB,
+    },
+    signature: {
+      allowNull: true,
+      type: DataTypes.JSONB,
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
   },
-  gamePhaseId: {
-    allowNull: false,
-    type: DataTypes.INTEGER
-  },
-  gamePlayerId: {
-    allowNull: false,
-    type: DataTypes.INTEGER
-  },
-  gamePieceId: {
-    allowNull: false,
-    type: DataTypes.INTEGER
-  },
-  actionType: {
-    allowNull: false,
-    type: DataTypes.ENUM('move', 'rangedAttack', 'meleeAttack')
-  },
-  actionData: {
-    allowNull: false,
-    type: DataTypes.JSONB
-  },
-  createdAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-  },
-  updatedAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-  },
-}, {
-  sequelize: sequelizeConnection
-});
+  {
+    sequelize: sequelizeConnection,
+  }
+);
 
 export default GamePieceAction;

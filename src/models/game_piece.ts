@@ -69,7 +69,7 @@ class GamePiece extends Model<
     return await (await this.playerUnit()).unit();
   }
 
-  async toSnarkyPiece(playerPublicKey?: PublicKey): Promise<Piece> {
+  async toSnarkyPiece(): Promise<Piece> {
     const playerUnit = await this.playerUnit();
     const unit = await playerUnit.unit();
     const gamePlayer = await this.gamePlayer();
@@ -77,8 +77,7 @@ class GamePiece extends Model<
     const snarkyUnit = unit.toSnarkyUnit();
 
     // TODO: temporary hack to get the correct public key into the proof
-    const minaPublicKey =
-      playerPublicKey || PublicKey.fromBase58(player.minaPublicKey);
+    const minaPublicKey = PublicKey.fromBase58(player.minaPublicKey);
 
     const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
     const gamePieceNumber = await this.gamePieceNumber();

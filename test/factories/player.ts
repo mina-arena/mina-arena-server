@@ -1,9 +1,13 @@
 import * as Models from '../../src/models';
-import { PrivateKey } from 'snarkyjs';
+import { PrivateKey, PublicKey } from 'snarkyjs';
 
-export default async function createPlayer(): Promise<Models.Player> {
+export default async function createPlayer(
+  minaPublicKey?: PublicKey
+): Promise<Models.Player> {
   return await Models.Player.create({
     name: 'John Smith',
-    minaPublicKey: PrivateKey.random().toPublicKey().toBase58()
+    minaPublicKey: (
+      minaPublicKey || PrivateKey.random().toPublicKey()
+    ).toBase58(),
   });
 }
