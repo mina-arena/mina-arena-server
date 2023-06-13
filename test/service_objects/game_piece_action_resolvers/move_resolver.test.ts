@@ -1,13 +1,23 @@
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
-import resolveMoveAction, { validateMoveAction } from '../../../src/service_objects/game_piece_action_resolvers/move_resolver';
+import resolveMoveAction, {
+  validateMoveAction,
+} from '../../../src/service_objects/game_piece_action_resolvers/move_resolver';
+import { PrivateKey, Field } from 'snarkyjs';
+import { Action, Position } from 'mina-arena-contracts';
 
 describe('validateMoveAction', () => {
   let movingGamePiece: Models.GamePiece;
   let enemyGamePiece: Models.GamePiece;
 
+  let p1PrivateKey;
+  let p2PrivateKey;
+
   beforeEach(async () => {
     await Factories.cleanup();
+
+    p1PrivateKey = PrivateKey.random();
+    p2PrivateKey = PrivateKey.random();
 
     let game = await Factories.createGame();
 
@@ -28,19 +38,35 @@ describe('validateMoveAction', () => {
       rangedWoundRoll: 4,
       rangedArmorPiercing: 1,
       rangedDamage: 1,
-      rangedAmmo: 5
+      rangedAmmo: 5,
     });
 
     let enemyUnit = await Factories.createUnit();
-    let movingPlayer = await Factories.createPlayer();
-    let enemyPlayer = await Factories.createPlayer();
-    let movingPlayerUnit = await Factories.createPlayerUnit(movingPlayer, movingUnit);
-    let enemyPlayerUnit = await Factories.createPlayerUnit(enemyPlayer, enemyUnit);
+    let movingPlayer = await Factories.createPlayer(p1PrivateKey.toPublicKey());
+    let enemyPlayer = await Factories.createPlayer(p2PrivateKey.toPublicKey());
+    let movingPlayerUnit = await Factories.createPlayerUnit(
+      movingPlayer,
+      movingUnit
+    );
+    let enemyPlayerUnit = await Factories.createPlayerUnit(
+      enemyPlayer,
+      enemyUnit
+    );
     let movingGamePlayer = await Factories.createGamePlayer(game, movingPlayer);
     let enemyGamePlayer = await Factories.createGamePlayer(game, enemyPlayer);
 
-    movingGamePiece = await Factories.createGamePiece(movingGamePlayer, movingPlayerUnit, 10, 10);
-    enemyGamePiece = await Factories.createGamePiece(enemyGamePlayer, enemyPlayerUnit, 10, 15);
+    movingGamePiece = await Factories.createGamePiece(
+      movingGamePlayer,
+      movingPlayerUnit,
+      10,
+      10
+    );
+    enemyGamePiece = await Factories.createGamePiece(
+      enemyGamePlayer,
+      enemyPlayerUnit,
+      10,
+      15
+    );
   });
 
   afterAll(async () => {
@@ -102,8 +128,14 @@ describe('resolveMoveAction', () => {
   let movingGamePiece: Models.GamePiece;
   let enemyGamePiece: Models.GamePiece;
 
+  let p1PrivateKey;
+  let p2PrivateKey;
+
   beforeEach(async () => {
     await Factories.cleanup();
+
+    p1PrivateKey = PrivateKey.random();
+    p2PrivateKey = PrivateKey.random();
 
     let game = await Factories.createGame();
 
@@ -124,28 +156,54 @@ describe('resolveMoveAction', () => {
       rangedWoundRoll: 4,
       rangedArmorPiercing: 1,
       rangedDamage: 1,
-      rangedAmmo: 5
+      rangedAmmo: 5,
     });
 
     let enemyUnit = await Factories.createUnit();
-    let movingPlayer = await Factories.createPlayer();
-    let enemyPlayer = await Factories.createPlayer();
-    let movingPlayerUnit = await Factories.createPlayerUnit(movingPlayer, movingUnit);
-    let enemyPlayerUnit = await Factories.createPlayerUnit(enemyPlayer, enemyUnit);
+    let movingPlayer = await Factories.createPlayer(p1PrivateKey.toPublicKey());
+    let enemyPlayer = await Factories.createPlayer(p2PrivateKey.toPublicKey());
+    let movingPlayerUnit = await Factories.createPlayerUnit(
+      movingPlayer,
+      movingUnit
+    );
+    let enemyPlayerUnit = await Factories.createPlayerUnit(
+      enemyPlayer,
+      enemyUnit
+    );
     let movingGamePlayer = await Factories.createGamePlayer(game, movingPlayer);
     let enemyGamePlayer = await Factories.createGamePlayer(game, enemyPlayer);
 
-    movingGamePiece = await Factories.createGamePiece(movingGamePlayer, movingPlayerUnit, 10, 10);
-    enemyGamePiece = await Factories.createGamePiece(enemyGamePlayer, enemyPlayerUnit, 10, 15);
+    movingGamePiece = await Factories.createGamePiece(
+      movingGamePlayer,
+      movingPlayerUnit,
+      10,
+      10
+    );
+    enemyGamePiece = await Factories.createGamePiece(
+      enemyGamePlayer,
+      enemyPlayerUnit,
+      10,
+      15
+    );
 
     let gamePhase = await Models.GamePhase.create({
       gameId: game.id,
       gamePlayerId: movingGamePlayer.id,
       turnNumber: 1,
-      phase: 'movement'
+      phase: 'movement',
     });
 
     let currentPos = movingGamePiece.coordinates();
+
+    const snarkyAction = new Action(
+      Field(1),
+      Field(0),
+      Position.fromXY(currentPos.x + 5, currentPos.y).hash(),
+      Field(await movingGamePiece.gamePieceNumber())
+    );
+    const signature = snarkyAction.sign(p1PrivateKey);
+    console.log(signature.toJSON());
+
     action = await Models.GamePieceAction.create({
       gamePhaseId: gamePhase.id,
       gamePlayerId: movingGamePlayer.id,
@@ -155,8 +213,9 @@ describe('resolveMoveAction', () => {
         actionType: 'move',
         resolved: false,
         moveFrom: { x: currentPos.x, y: currentPos.y },
-        moveTo: { x: currentPos.x + 5, y: currentPos.y }
-      }
+        moveTo: { x: currentPos.x + 5, y: currentPos.y },
+      },
+      signature: signature.toJSON(),
     });
   });
 
@@ -173,7 +232,7 @@ describe('resolveMoveAction', () => {
 
       // Check action to now be resolved with saved results
       await action.reload();
-      expect(action.actionData['resolved']).toBe(true)
+      expect(action.actionData['resolved']).toBe(true);
 
       // Check targetGamePiece new health
       await movingGamePiece.reload();
@@ -186,7 +245,10 @@ describe('resolveMoveAction', () => {
   describe('trying to move beyond max range', () => {
     it('throws error', async () => {
       let newActionData = JSON.parse(JSON.stringify(action.actionData));
-      newActionData.moveTo = { x: movingGamePiece.coordinates().x + 1000, y: movingGamePiece.coordinates().y };
+      newActionData.moveTo = {
+        x: movingGamePiece.coordinates().x + 1000,
+        y: movingGamePiece.coordinates().y,
+      };
       action.actionData = newActionData;
       await action.save();
 

@@ -1,15 +1,14 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
+import { Position, Piece, Unit, UnitStats, } from 'mina-arena-contracts';
+import { UInt32, PublicKey, Field } from 'snarkyjs';
 export function distanceBetweenPoints(point1, point2) {
     let dx = point2.x - point1.x;
     let dy = point2.y - point1.y;
     return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 }
-const INVALID_MOVE_REASONS = [
-    'beyondMaxRange',
-    'collidesWithOtherPiece'
-];
+const INVALID_MOVE_REASONS = ['beyondMaxRange', 'collidesWithOtherPiece'];
 class GamePiece extends Model {
     async game() {
         return await Models.Game.findByPk(this.gameId);
@@ -22,6 +21,29 @@ class GamePiece extends Model {
     }
     async unit() {
         return await (await this.playerUnit()).unit();
+    }
+    async toSnarkyPiece() {
+        const playerUnit = await this.playerUnit();
+        const unit = await playerUnit.unit();
+        const gamePlayer = await this.gamePlayer();
+        const player = await gamePlayer.player();
+        const snarkyUnit = new Unit({
+            stats: new UnitStats({
+                health: UInt32.from(this.health),
+                movement: UInt32.from(unit.movementSpeed),
+                rangedAttackRange: UInt32.from(unit.rangedRange || 0),
+                rangedHitRoll: UInt32.from(unit.rangedHitRoll || 0),
+                rangedWoundRoll: UInt32.from(unit.rangedWoundRoll || 0),
+                saveRoll: UInt32.from(unit.armorSaveRoll || 0),
+                rangedDamage: UInt32.from(unit.rangedDamage || 0),
+                meleeHitRoll: UInt32.from(unit.meleeHitRoll || 0),
+                meleeWoundRoll: UInt32.from(unit.meleeWoundRoll || 0),
+                meleeDamage: UInt32.from(unit.meleeDamage || 0),
+            }),
+        });
+        const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
+        const gamePieceNumber = await this.gamePieceNumber();
+        return new Piece(Field(gamePieceNumber), PublicKey.fromBase58(player.minaPublicKey), snarkyPosition, snarkyUnit);
     }
     // Returns the number of this game piece in the game, starting from 1
     async gamePieceNumber() {
@@ -66,7 +88,7 @@ class GamePiece extends Model {
         // on this exact spot. We probably want to enforce more space
         // around a unit, giving them some radius.
         const collidingUnits = await Models.GamePiece.findAll({
-            where: { gameId: this.gameId, positionX: moveTo.x, positionY: moveTo.y }
+            where: { gameId: this.gameId, positionX: moveTo.x, positionY: moveTo.y },
         });
         if (collidingUnits.length > 0) {
             return {
@@ -86,25 +108,25 @@ GamePiece.init({
     },
     gameId: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     gamePlayerId: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     playerUnitId: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     positionX: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     positionY: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     health: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     createdAt: {
         allowNull: false,
@@ -115,7 +137,7 @@ GamePiece.init({
         type: DataTypes.DATE,
     },
 }, {
-    sequelize: sequelizeConnection
+    sequelize: sequelizeConnection,
 });
 export default GamePiece;
 //# sourceMappingURL=game_piece.js.map
