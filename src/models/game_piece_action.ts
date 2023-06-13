@@ -21,17 +21,21 @@ export type GamePieceMoveAction = {
 };
 export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack';
-  resolved: boolean;
+  resolved: Boolean;
   targetGamePieceId: number;
   encodedDiceRolls: EncodedDiceRolls;
   resolvedAttacks?: ResolvedAttack[];
+  totalDamageDealt?: number;
+  totalDamageAverage?: number;
 };
 export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack';
-  resolved: boolean;
+  resolved: Boolean;
   targetGamePieceId: number;
   encodedDiceRolls: EncodedDiceRolls;
   resolvedAttacks?: ResolvedAttack[];
+  totalDamageDealt?: number;
+  totalDamageAverage?: number;
 };
 export type GamePieceActionData =
   | GamePieceMoveAction
@@ -49,12 +53,14 @@ export type ResolvedAttack = {
   woundRoll: RollResult;
   saveRoll: RollResult;
   damageDealt: number;
-};
+  averageDamage: number;
+}
 
 export type RollResult = {
   roll: number;
-  success: boolean;
-};
+  rollNeeded: number;
+  success: Boolean;
+}
 
 class GamePieceAction extends Model<
   InferAttributes<GamePieceAction>,

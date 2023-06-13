@@ -162,23 +162,29 @@ type GamePieceRangedAttackAction {
   targetGamePiece: GamePiece!
   resolved: Boolean!
   resolvedAttacks: [ResolvedAttack!]
+  totalDamageDealt: Int
+  totalDamageAverage: Float
 }
 
 type GamePieceMeleeAttackAction {
   targetGamePiece: GamePiece!
   resolved: Boolean!
   resolvedAttacks: [ResolvedAttack!]
+  totalDamageDealt: Int
+  totalDamageAverage: Float
 }
 
 type ResolvedAttack {
-  hitRoll: RollResult!,
-  woundRoll: RollResult!,
-  saveRoll: RollResult!,
+  hitRoll: RollResult!
+  woundRoll: RollResult!
+  saveRoll: RollResult!
   damageDealt: Int!
+  averageDamage: Float!
 }
 
 type RollResult {
   roll: Int!
+  rollNeeded: Int!
   success: Boolean!
 }
 

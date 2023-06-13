@@ -81,6 +81,8 @@ describe('validateRangedAttackAction', () => {
 
 describe('resolveRangedAttackAction', () => {
   let action: Models.GamePieceAction;
+  let attackingUnit: Models.Unit;
+  let targetUnit: Models.Unit;
   let targetGamePiece: Models.GamePiece;
 
   beforeEach(async () => {
@@ -108,7 +110,7 @@ describe('resolveRangedAttackAction', () => {
       rangedAmmo: 5
     });
 
-    let targetUnit = await Factories.createUnit();
+    targetUnit = await Factories.createUnit();
     let attackingPlayer = await Factories.createPlayer();
     let targetPlayer = await Factories.createPlayer();
     let attackingPlayerUnit = await Factories.createPlayerUnit(attackingPlayer, attackingUnit);
@@ -153,10 +155,23 @@ describe('resolveRangedAttackAction', () => {
     beforeEach(async () => {
       // Mock attack resolution
       let mockResolvedAttack = {
-        hitRoll: { roll: 6, success: true },
-        woundRoll: { roll: 6, success: true },
-        saveRoll: { roll: 1, success: false },
-        damageDealt: 1
+        hitRoll: {
+          roll: 6,
+          rollNeeded: attackingUnit.rangedHitRoll,
+          success: true
+        },
+        woundRoll: {
+          roll: 6,
+          rollNeeded: attackingUnit.rangedWoundRoll,
+          success: true
+        },
+        saveRoll: {
+          roll: 1,
+          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.rangedArmorPiercing,
+          success: false
+        },
+        damageDealt: 1,
+        averageDamage: 0.2,
       };
       jest.spyOn(AttackResolver, 'default').mockImplementation(() => [mockResolvedAttack]);
     });
@@ -179,6 +194,8 @@ describe('resolveRangedAttackAction', () => {
       expect(savedResolvedAttacks[0].saveRoll.roll).toBe(1)
       expect(savedResolvedAttacks[0].saveRoll.success).toBe(false)
       expect(savedResolvedAttacks[0].damageDealt).toBe(1)
+
+      expect(action.actionData['totalDamageDealt']).toBe(1);
 
       // Check targetGamePiece new health
       await targetGamePiece.reload();

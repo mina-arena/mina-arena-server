@@ -101,6 +101,8 @@ describe('validateMeleeAttackAction', () => {
 describe('resolveMeleeAttackAction', () => {
   let action: Models.GamePieceAction;
   let targetGamePiece: Models.GamePiece;
+  let targetUnit: Models.Unit;
+  let attackingUnit: Models.Unit;
 
   beforeEach(async () => {
     await Factories.cleanup();
@@ -120,7 +122,7 @@ describe('resolveMeleeAttackAction', () => {
       meleeDamage: 1,
     });
 
-    let targetUnit = await Factories.createUnit();
+    targetUnit = await Factories.createUnit();
     let attackingPlayer = await Factories.createPlayer();
     let targetPlayer = await Factories.createPlayer();
     let attackingPlayerUnit = await Factories.createPlayerUnit(
@@ -186,22 +188,61 @@ describe('resolveMeleeAttackAction', () => {
     beforeEach(async () => {
       // Mock attack resolution
       let mockResolvedAttackOne = {
-        hitRoll: { roll: 6, success: true },
-        woundRoll: { roll: 6, success: true },
-        saveRoll: { roll: 1, success: false },
+        hitRoll: {
+          roll: 6,
+          rollNeeded: attackingUnit.meleeHitRoll,
+          success: true
+        },
+        woundRoll: {
+          roll: 6,
+          rollNeeded: attackingUnit.meleeWoundRoll,
+          success: true
+        },
+        saveRoll: {
+          roll: 1,
+          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.meleeArmorPiercing,
+          success: false
+        },
         damageDealt: 1,
+        averageDamage: 0.2,
       };
       let mockResolvedAttackTwo = {
-        hitRoll: { roll: 1, success: false },
-        woundRoll: { roll: 6, success: true },
-        saveRoll: { roll: 1, success: false },
+        hitRoll: {
+          roll: 1,
+          rollNeeded: attackingUnit.meleeHitRoll,
+          success: false
+        },
+        woundRoll: {
+          roll: 6,
+          rollNeeded: attackingUnit.meleeWoundRoll,
+          success: true
+        },
+        saveRoll: {
+          roll: 1,
+          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.meleeArmorPiercing,
+          success: false
+        },
         damageDealt: 0,
+        averageDamage: 0.2,
       };
       let mockResolvedAttackThree = {
-        hitRoll: { roll: 6, success: true },
-        woundRoll: { roll: 1, success: false },
-        saveRoll: { roll: 1, success: false },
+        hitRoll: {
+          roll: 6,
+          rollNeeded: attackingUnit.meleeHitRoll,
+          success: true
+        },
+        woundRoll: {
+          roll: 1,
+          rollNeeded: attackingUnit.meleeWoundRoll,
+          success: false
+        },
+        saveRoll: {
+          roll: 1,
+          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.meleeArmorPiercing,
+          success: false
+        },
         damageDealt: 0,
+        averageDamage: 0.2,
       };
       jest
         .spyOn(AttackResolver, 'default')
@@ -244,6 +285,8 @@ describe('resolveMeleeAttackAction', () => {
       expect(savedResolvedAttacks[2].saveRoll.roll).toBe(1);
       expect(savedResolvedAttacks[2].saveRoll.success).toBe(false);
       expect(savedResolvedAttacks[2].damageDealt).toBe(0);
+
+      expect(action.actionData['totalDamageDealt']).toBe(1);
 
       // Check targetGamePiece new health
       await targetGamePiece.reload();

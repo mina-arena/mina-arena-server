@@ -46,10 +46,11 @@ export default async function resolveMeleeAttackAction(action, transaction) {
     // Resolve attack sequence
     const encodedDiceRolls = actionData.encodedDiceRolls;
     const resolvedAttacks = resolveAttacks(attackingUnit.meleeNumAttacks, attackingUnit.meleeHitRoll, attackingUnit.meleeWoundRoll, targetUnit.armorSaveRoll, attackingUnit.meleeArmorPiercing, attackingUnit.meleeDamage, encodedDiceRolls);
-    const totalDamage = resolvedAttacks.reduce((sum, attack) => sum + attack.damageDealt, 0);
+    const totalDamageDealt = resolvedAttacks.reduce((sum, attack) => sum + attack.damageDealt, 0);
+    const totalDamageAverage = resolvedAttacks.reduce((sum, attack) => sum + attack.averageDamage, 0);
     // Update target GamePiece with damage dealt
-    if (totalDamage > 0) {
-        const newHealth = Math.max(targetGamePiece.health - totalDamage, 0);
+    if (totalDamageDealt > 0) {
+        const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
         targetGamePiece.health = newHealth;
         await targetGamePiece.save({ transaction });
     }
@@ -57,6 +58,8 @@ export default async function resolveMeleeAttackAction(action, transaction) {
     let newActionData = JSON.parse(JSON.stringify(actionData));
     newActionData.resolved = true;
     newActionData.resolvedAttacks = resolvedAttacks;
+    newActionData.totalDamageDealt = totalDamageDealt;
+    newActionData.totalDamageAverage = totalDamageAverage;
     action.actionData = newActionData;
     await action.save({ transaction });
 }

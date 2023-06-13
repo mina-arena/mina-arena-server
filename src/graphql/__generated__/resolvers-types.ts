@@ -161,6 +161,8 @@ export type GamePieceMeleeAttackAction = {
   resolved: Scalars['Boolean'];
   resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
   targetGamePiece: GamePiece;
+  totalDamageAverage?: Maybe<Scalars['Float']>;
+  totalDamageDealt?: Maybe<Scalars['Int']>;
 };
 
 export type GamePieceMeleeAttackActionInput = {
@@ -185,6 +187,8 @@ export type GamePieceRangedAttackAction = {
   resolved: Scalars['Boolean'];
   resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
   targetGamePiece: GamePiece;
+  totalDamageAverage?: Maybe<Scalars['Float']>;
+  totalDamageDealt?: Maybe<Scalars['Int']>;
 };
 
 export type GamePieceRangedAttackActionInput = {
@@ -290,6 +294,7 @@ export type QueryPlayerArgs = {
 
 export type ResolvedAttack = {
   __typename?: 'ResolvedAttack';
+  averageDamage: Scalars['Float'];
   damageDealt: Scalars['Int'];
   hitRoll: RollResult;
   saveRoll: RollResult;
@@ -299,6 +304,7 @@ export type ResolvedAttack = {
 export type RollResult = {
   __typename?: 'RollResult';
   roll: Scalars['Int'];
+  rollNeeded: Scalars['Int'];
   success: Scalars['Boolean'];
 };
 
@@ -419,6 +425,7 @@ export type ResolversTypes = ResolversObject<{
   CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   DiceRollInput: DiceRollInput;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
   Game: ResolverTypeWrapper<GameModel>;
   GameArena: ResolverTypeWrapper<GameArenaModel>;
   GamePhase: ResolverTypeWrapper<GamePhaseModel>;
@@ -465,6 +472,7 @@ export type ResolversParentTypes = ResolversObject<{
   CreateGamePlayerInput: CreateGamePlayerInput;
   CreatePlayerUnitInput: CreatePlayerUnitInput;
   DiceRollInput: DiceRollInput;
+  Float: Scalars['Float'];
   Game: GameModel;
   GameArena: GameArenaModel;
   GamePhase: GamePhaseModel;
@@ -577,6 +585,8 @@ export type GamePieceMeleeAttackActionResolvers<ContextType = any, ParentType ex
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
   targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
+  totalDamageAverage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalDamageDealt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -591,6 +601,8 @@ export type GamePieceRangedAttackActionResolvers<ContextType = any, ParentType e
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
   targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
+  totalDamageAverage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  totalDamageDealt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -646,6 +658,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 }>;
 
 export type ResolvedAttackResolvers<ContextType = any, ParentType extends ResolversParentTypes['ResolvedAttack'] = ResolversParentTypes['ResolvedAttack']> = ResolversObject<{
+  averageDamage?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   damageDealt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   hitRoll?: Resolver<ResolversTypes['RollResult'], ParentType, ContextType>;
   saveRoll?: Resolver<ResolversTypes['RollResult'], ParentType, ContextType>;
@@ -655,6 +668,7 @@ export type ResolvedAttackResolvers<ContextType = any, ParentType extends Resolv
 
 export type RollResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RollResult'] = ResolversParentTypes['RollResult']> = ResolversObject<{
   roll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  rollNeeded?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
