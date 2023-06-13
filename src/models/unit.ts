@@ -4,7 +4,6 @@ import * as Models from './index.js';
 
 // TODO: Explore making different units have different base sizes (i.e. radius)
 export const UNIT_RADIUS = 12;
-export const MELEE_ATTACK_RANGE = 24;
 
 class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   declare id: CreationOptional<number>;
@@ -36,7 +35,7 @@ class Unit extends Model<InferAttributes<Unit>, InferCreationAttributes<Unit>> {
   }
 
   canMakeRangedAttack(): Boolean {
-    if(this.rangedNumAttacks) {
+    if (this.rangedNumAttacks) {
       return this.rangedNumAttacks > 0;
     } else {
       return false;

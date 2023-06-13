@@ -47,31 +47,31 @@ export default async (parent, args, contextValue, info) => {
     });
 };
 async function createGamePieceForPlayerUnit(game, gamePlayer, playerUnitId, transaction) {
-    let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction: transaction });
+    let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction });
     if (!playerUnit)
         throw new Error(`No PlayerUnit found with ID ${playerUnitId}`);
-    let unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction: transaction });
+    let unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction });
     return await Models.GamePiece.create({
         gameId: game.id,
         gamePlayerId: gamePlayer.id,
         playerUnitId: playerUnit.id,
         health: unit.maxHealth
-    }, { transaction: transaction });
+    }, { transaction });
 }
 async function createGamePieceForUnit(game, gamePlayer, unitId, playerUnitName, transaction) {
-    let unit = await Models.Unit.findByPk(unitId, { transaction: transaction });
+    let unit = await Models.Unit.findByPk(unitId, { transaction });
     if (!unit)
         throw new Error(`No Unit found with ID ${unitId}`);
     let playerUnit = await Models.PlayerUnit.create({
         playerId: gamePlayer.playerId,
         unitId: unit.id,
         name: playerUnitName
-    }, { transaction: transaction });
+    }, { transaction });
     return await Models.GamePiece.create({
         gameId: game.id,
         gamePlayerId: gamePlayer.id,
         playerUnitId: playerUnit.id,
         health: unit.maxHealth
-    }, { transaction: transaction });
+    }, { transaction });
 }
 //# sourceMappingURL=create_game_piece_action.js.map

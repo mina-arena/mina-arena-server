@@ -2,20 +2,21 @@ import * as Models from '../models/index.js';
 import sequelizeConnection from '../db/config.js';
 import resolveGamePieceAction from './game_piece_action_resolver.js';
 import { GamePhaseName, GAME_PHASE_ORDER } from '../models/game_phase.js';
+import { Transaction } from 'sequelize';
 
 export default async (
   gamePhase: Models.GamePhase,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.Game> => {
   // Validate that Game is in progress
-  const game = await Models.Game.findByPk(gamePhase.gameId, { transaction: transaction });
+  const game = await Models.Game.findByPk(gamePhase.gameId, { transaction });
   if (game.status != 'inProgress') throw new Error(`Game ${game.id} is not in progress, status: ${game.status}`);
 
   // Gather actions and resolve them in order
   const actions = await Models.GamePieceAction.findAll({
     where: { gamePhaseId: gamePhase.id },
     order: [['id', 'ASC']],
-    transaction: transaction
+    transaction
   });
   for (const action of actions) {
     await resolveGamePieceAction(action, transaction);
@@ -29,14 +30,14 @@ export default async (
     if (checkForWinnerResult.winningGamePlayer) {
       game.winningGamePlayerId = checkForWinnerResult.winningGamePlayer.id;
     }
-    await game.save({ transaction: transaction });
+    await game.save({ transaction });
   } else {
     // Game continues, create the next GamePhase
     const nextPhase = await createNextGamePhase(game, gamePhase, transaction);
     game.phase = nextPhase.phase;
     game.turnNumber = nextPhase.turnNumber;
     game.turnGamePlayerId = nextPhase.gamePlayerId;
-    await game.save({ transaction: transaction });
+    await game.save({ transaction });
   }
 
   return game;
@@ -49,11 +50,11 @@ type CheckForWinnerResult = {
 
 async function checkForWinner(
   game: Models.Game,
-  transaction
+  transaction?: Transaction
 ): Promise<CheckForWinnerResult> {
   const gamePlayers = await Models.GamePlayer.findAll({
     where: { gameId: game.id },
-    transaction: transaction
+    transaction
   });
 
   let livingGamePlayers = [];
@@ -75,7 +76,7 @@ async function checkForWinner(
 async function createNextGamePhase(
   game: Models.Game,
   currentPhase: Models.GamePhase,
-  transaction
+  transaction?: Transaction
 ): Promise<Models.GamePhase> {
   let nextTurnNumber: number;
   let nextPhase: GamePhaseName;
@@ -103,5 +104,5 @@ async function createNextGamePhase(
     gamePlayerId: nextGamePlayerId,
     turnNumber: nextTurnNumber,
     phase: nextPhase
-  }, { transaction: transaction });
+  }, { transaction });
 }

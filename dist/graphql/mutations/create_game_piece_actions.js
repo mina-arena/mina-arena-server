@@ -73,7 +73,7 @@ async function handleMoveAction(gamePlayer, gamePhase, gamePiece, moveInput, tra
             moveFrom: gamePiece.coordinates(),
             moveTo: moveInput.moveTo
         }
-    }, { transaction: transaction });
+    }, { transaction });
 }
 async function handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, rangedAttackInput, transaction) {
     // Validate attack data, raises exception if not valid
@@ -90,10 +90,10 @@ async function handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, ranged
             targetGamePieceId: rangedAttackInput.targetGamePieceId,
             encodedDiceRolls: rangedAttackInput.diceRoll
         }
-    }, { transaction: transaction });
+    }, { transaction });
 }
 async function handleMeleeAttackAction(gamePlayer, gamePhase, gamePiece, meleeAttackInput, transaction) {
-    const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction: transaction });
+    const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction });
     // Validate attack data, raises exception if not valid
     await validateMeleeAttackAction(gamePiece, meleeAttackInput.targetGamePieceId, false, transaction);
     return await Models.GamePieceAction.create({
@@ -107,6 +107,6 @@ async function handleMeleeAttackAction(gamePlayer, gamePhase, gamePiece, meleeAt
             targetGamePieceId: targetGamePiece.id,
             encodedDiceRolls: meleeAttackInput.diceRoll,
         }
-    }, { transaction: transaction });
+    }, { transaction });
 }
 //# sourceMappingURL=create_game_piece_actions.js.map

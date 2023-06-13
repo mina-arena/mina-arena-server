@@ -2,7 +2,7 @@ import * as Models from '../../models/index.js';
 import resolveAttacks from './attack_resolver.js';
 export async function validateRangedAttackAction(attackingGamePiece, targetGamePieceId, resolving, transaction) {
     // Confirm target GamePiece exists and is a valid target
-    const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction: transaction });
+    const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction });
     if (!targetGamePiece)
         throw new Error(`No GamePiece found for targetGamePieceId ${targetGamePieceId}`);
     if (targetGamePiece.gameId != attackingGamePiece.gameId)
@@ -10,8 +10,8 @@ export async function validateRangedAttackAction(attackingGamePiece, targetGameP
     if (targetGamePiece.gamePlayerId == attackingGamePiece.gamePlayerId)
         throw new Error(`Target GamePiece ${targetGamePiece.id} is on the same team as attacking GamePiece ${attackingGamePiece.id}`);
     // Confirm attacking GamePiece can perform ranged attacks
-    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
-    const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction: transaction });
+    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction });
+    const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction });
     if (!attackingUnit.canMakeRangedAttack())
         throw new Error(`GamePiece ${attackingGamePiece.id} of Unit "${attackingUnit.name}" cannot perform ranged attacks`);
     // Confirm target GamePiece is in range
@@ -41,8 +41,8 @@ export default async function resolveRangedAttackAction(action, transaction) {
     // If target is already dead just abort
     if (targetGamePiece.isDead())
         return;
-    const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
-    const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
+    const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction });
+    const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction });
     // Resolve attack sequence
     const encodedDiceRolls = actionData.encodedDiceRolls;
     const resolvedAttacks = resolveAttacks(attackingUnit.rangedNumAttacks, attackingUnit.rangedHitRoll, attackingUnit.rangedWoundRoll, targetUnit.armorSaveRoll, attackingUnit.rangedArmorPiercing, attackingUnit.rangedDamage, encodedDiceRolls);
@@ -52,7 +52,7 @@ export default async function resolveRangedAttackAction(action, transaction) {
     if (totalDamageDealt > 0) {
         const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
         targetGamePiece.health = newHealth;
-        await targetGamePiece.save({ transaction: transaction });
+        await targetGamePiece.save({ transaction });
     }
     // Update action record as resolved
     let newActionData = JSON.parse(JSON.stringify(actionData));

@@ -1,4 +1,3 @@
-import 'jest';
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
 import resolveMoveAction, { validateMoveAction } from '../../../src/service_objects/game_piece_action_resolvers/move_resolver';
@@ -11,7 +10,7 @@ describe('validateMoveAction', () => {
     await Factories.cleanup();
 
     let game = await Factories.createGame();
-    
+
     let movingUnit = await Models.Unit.create({
       name: 'Archer',
       maxHealth: 2,
@@ -39,7 +38,7 @@ describe('validateMoveAction', () => {
     let enemyPlayerUnit = await Factories.createPlayerUnit(enemyPlayer, enemyUnit);
     let movingGamePlayer = await Factories.createGamePlayer(game, movingPlayer);
     let enemyGamePlayer = await Factories.createGamePlayer(game, enemyPlayer);
-    
+
     movingGamePiece = await Factories.createGamePiece(movingGamePlayer, movingPlayerUnit, 10, 10);
     enemyGamePiece = await Factories.createGamePiece(enemyGamePlayer, enemyPlayerUnit, 10, 15);
   });
@@ -54,8 +53,7 @@ describe('validateMoveAction', () => {
       let result = await validateMoveAction(
         movingGamePiece,
         { x: currentPos.x, y: currentPos.y },
-        { x: currentPos.x + 5, y: currentPos.y },
-        null
+        { x: currentPos.x + 5, y: currentPos.y }
       );
       expect(result.distance).toBe(5);
     });
@@ -68,12 +66,11 @@ describe('validateMoveAction', () => {
         await validateMoveAction(
           movingGamePiece,
           { x: currentPos.x, y: currentPos.y },
-          { x: currentPos.x + 1000, y: currentPos.y },
-          null
+          { x: currentPos.x + 1000, y: currentPos.y }
         );
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
-      } catch(e) {
+      } catch (e) {
         expect(e.message).toContain('cannot be moved');
         expect(e.message).toContain('because the distance is');
       }
@@ -88,12 +85,11 @@ describe('validateMoveAction', () => {
         await validateMoveAction(
           movingGamePiece,
           { x: currentPos.x, y: currentPos.y },
-          { x: enemyPiecePos.x, y: enemyPiecePos.y },
-          null
+          { x: enemyPiecePos.x, y: enemyPiecePos.y }
         );
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
-      } catch(e) {
+      } catch (e) {
         expect(e.message).toContain('cannot be moved');
         expect(e.message).toContain('because this collides');
       }
@@ -110,7 +106,7 @@ describe('resolveMoveAction', () => {
     await Factories.cleanup();
 
     let game = await Factories.createGame();
-    
+
     let movingUnit = await Models.Unit.create({
       name: 'Archer',
       maxHealth: 2,
@@ -138,7 +134,7 @@ describe('resolveMoveAction', () => {
     let enemyPlayerUnit = await Factories.createPlayerUnit(enemyPlayer, enemyUnit);
     let movingGamePlayer = await Factories.createGamePlayer(game, movingPlayer);
     let enemyGamePlayer = await Factories.createGamePlayer(game, enemyPlayer);
-    
+
     movingGamePiece = await Factories.createGamePiece(movingGamePlayer, movingPlayerUnit, 10, 10);
     enemyGamePiece = await Factories.createGamePiece(enemyGamePlayer, enemyPlayerUnit, 10, 15);
 
@@ -173,8 +169,8 @@ describe('resolveMoveAction', () => {
       await movingGamePiece.reload();
       let prevPos = movingGamePiece.coordinates();
 
-      await resolveMoveAction(action, null);
-      
+      await resolveMoveAction(action);
+
       // Check action to now be resolved with saved results
       await action.reload();
       expect(action.actionData['resolved']).toBe(true)
@@ -187,7 +183,7 @@ describe('resolveMoveAction', () => {
     });
   });
 
-  describe('trying to move beyond max range', () => {    
+  describe('trying to move beyond max range', () => {
     it('throws error', async () => {
       let newActionData = JSON.parse(JSON.stringify(action.actionData));
       newActionData.moveTo = { x: movingGamePiece.coordinates().x + 1000, y: movingGamePiece.coordinates().y };
@@ -195,10 +191,10 @@ describe('resolveMoveAction', () => {
       await action.save();
 
       try {
-        await resolveMoveAction(action, null);
+        await resolveMoveAction(action);
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
-      } catch(e) {
+      } catch (e) {
         expect(e.message).toContain('cannot be moved');
         expect(e.message).toContain('because the distance is');
       }

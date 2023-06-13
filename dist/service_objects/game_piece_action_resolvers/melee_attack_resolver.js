@@ -1,9 +1,9 @@
 import * as Models from '../../models/index.js';
-import { MELEE_ATTACK_RANGE } from '../../models/unit.js';
+import { MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
 import resolveAttacks from './attack_resolver.js';
 export async function validateMeleeAttackAction(attackingGamePiece, targetGamePieceId, resolving, transaction) {
     // Confirm target GamePiece exists and is a valid target
-    const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction: transaction });
+    const targetGamePiece = await Models.GamePiece.findByPk(targetGamePieceId, { transaction });
     if (!targetGamePiece)
         throw new Error(`No GamePiece found for targetGamePieceId ${targetGamePieceId}`);
     if (targetGamePiece.gameId != attackingGamePiece.gameId)
@@ -20,8 +20,8 @@ export async function validateMeleeAttackAction(attackingGamePiece, targetGamePi
             throw new Error(`Target GamePiece ${targetGamePieceId} is already dead`);
     }
     // Fetch some additional info
-    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
-    const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction: transaction });
+    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction });
+    const attackingUnit = await Models.Unit.findByPk(attackingPlayerUnit.unitId, { transaction });
     return {
         targetGamePiece,
         attackingPlayerUnit,
@@ -40,9 +40,9 @@ export default async function resolveMeleeAttackAction(action, transaction) {
     // If target is already dead just abort
     if (targetGamePiece.isDead())
         return;
-    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction: transaction });
-    const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction: transaction });
-    const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction: transaction });
+    const attackingPlayerUnit = await Models.PlayerUnit.findByPk(attackingGamePiece.playerUnitId, { transaction });
+    const targetPlayerUnit = await Models.PlayerUnit.findByPk(targetGamePiece.playerUnitId, { transaction });
+    const targetUnit = await Models.Unit.findByPk(targetPlayerUnit.unitId, { transaction });
     // Resolve attack sequence
     const encodedDiceRolls = actionData.encodedDiceRolls;
     const resolvedAttacks = resolveAttacks(attackingUnit.meleeNumAttacks, attackingUnit.meleeHitRoll, attackingUnit.meleeWoundRoll, targetUnit.armorSaveRoll, attackingUnit.meleeArmorPiercing, attackingUnit.meleeDamage, encodedDiceRolls);
@@ -52,7 +52,7 @@ export default async function resolveMeleeAttackAction(action, transaction) {
     if (totalDamageDealt > 0) {
         const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
         targetGamePiece.health = newHealth;
-        await targetGamePiece.save({ transaction: transaction });
+        await targetGamePiece.save({ transaction });
     }
     // Update action record as resolved
     let newActionData = JSON.parse(JSON.stringify(actionData));
