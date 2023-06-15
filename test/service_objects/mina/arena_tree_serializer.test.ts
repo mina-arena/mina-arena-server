@@ -16,9 +16,7 @@ describe('Arena Tree Serlializer', () => {
     await Factories.cleanup();
 
     // Can only use one position for now, since creating multiple game pieces ends up using the same id
-    positions = [
-      [10, 10],
-    ]
+    positions = [[10, 10]];
 
     // Populate a game
     // Using only a single player since serializing the arena is independent of players
@@ -40,13 +38,13 @@ describe('Arena Tree Serlializer', () => {
       rangedWoundRoll: 4,
       rangedArmorPiercing: 1,
       rangedDamage: 1,
-      rangedAmmo: 5
+      rangedAmmo: 5,
     });
     somePlayer = await Factories.createPlayer();
     somePlayerUnit = await Factories.createPlayerUnit(somePlayer, someUnit);
     someGamePlayer = await Factories.createGamePlayer(game, somePlayer);
     gamePieces = [];
-    positions.forEach(async (position) => {
+    for (const position of positions) {
       const piece = await Factories.createGamePiece(
         someGamePlayer,
         somePlayerUnit,
@@ -55,7 +53,7 @@ describe('Arena Tree Serlializer', () => {
       );
 
       gamePieces.push(piece);
-    });
+    }
   });
 
   afterEach(async () => {
@@ -70,6 +68,8 @@ describe('Arena Tree Serlializer', () => {
 
     const serializedTree = await serializeArenaTree(game.id);
 
-    expect(serializedTree.tree.getRoot().toString()).toEqual(expectedTree.tree.getRoot().toString());
+    expect(serializedTree.tree.getRoot().toString()).toEqual(
+      expectedTree.tree.getRoot().toString()
+    );
   });
 });
