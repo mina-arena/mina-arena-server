@@ -1,7 +1,7 @@
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
 import { Action, PhaseState, Position } from 'mina-arena-contracts';
-import { Field, PublicKey, UInt32, PrivateKey } from 'snarkyjs';
+import { Field, PublicKey, UInt32, Signature } from 'snarkyjs';
 export async function validateMoveAction(gamePiece, moveFrom, moveTo, transaction) {
     const currentPos = gamePiece.coordinates();
     if (moveFrom.x != currentPos.x || moveFrom.y != currentPos.y) {
@@ -25,30 +25,35 @@ export async function validateMoveAction(gamePiece, moveFrom, moveTo, transactio
 }
 export default async function resolveMoveAction(action, transaction) {
     const gamePiece = await action.gamePiece();
-    const playerPublicKey = (await (await gamePiece.gamePlayer()).player())
+    const playerPublicKeyString = (await (await gamePiece.gamePlayer()).player())
         .minaPublicKey;
+    const playerPublicKey = PublicKey.fromBase58(playerPublicKeyString);
     const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
     const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-    const snarkyGameState = new PhaseState(Field(0), Field(0), startingGamePiecesTree.tree.getRoot(), startingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), PublicKey.fromBase58(playerPublicKey));
+    // TODO, there is some race condition in the serializers, and this sleep is a hack to fix it
+    await new Promise((r) => setTimeout(r, 2000));
+    const snarkyGameState = new PhaseState(Field(0), Field(0), startingGamePiecesTree.tree.getRoot(), startingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), playerPublicKey);
     const actionData = action.actionData;
     if (actionData.actionType !== 'move')
         throw new Error(`Unable to resolve move action with actionType ${actionData.actionType}`);
-    await validateMoveAction(gamePiece, actionData.moveFrom, actionData.moveTo, transaction);
+    const moveValidity = await validateMoveAction(gamePiece, actionData.moveFrom, actionData.moveTo, transaction);
     const actionParam = Position.fromXY(actionData.moveTo.x, actionData.moveTo.y);
     const snarkyPiece = await gamePiece.toSnarkyPiece();
-    const snarkyAction = new Action(Field(1), Field(0), actionParam.hash(), snarkyPiece.hash());
+    const snarkyAction = new Action(Field(1), Field(0), actionParam.hash(), snarkyPiece.id);
     // Attempt to apply the move action to the game state
     // Warn on console for failure
     let snarkySuccess = false;
     let stateAfterMove;
     try {
-        stateAfterMove = snarkyGameState.applyMoveAction(snarkyAction, snarkyAction.sign(PrivateKey.random()), // we need the user's private key here, or the user needs to sign their own action
-        snarkyPiece, startingGamePiecesTree.getWitness(snarkyPiece.id.toBigInt()), startingGameArenaTree.getWitness(gamePiece.positionX, gamePiece.positionY), startingGameArenaTree.getWitness(actionData.moveTo.x, actionData.moveTo.y), actionParam, UInt32.from(10) // we need the true distance here
+        const arenaTreeAfterMove = startingGameArenaTree.clone();
+        arenaTreeAfterMove.set(gamePiece.positionX, gamePiece.positionY, Field(0));
+        stateAfterMove = snarkyGameState.applyMoveAction(snarkyAction, Signature.fromJSON(action.signature), snarkyPiece, startingGamePiecesTree.getWitness(snarkyPiece.id.toBigInt()), startingGameArenaTree.getWitness(gamePiece.positionX, gamePiece.positionY), arenaTreeAfterMove.getWitness(actionData.moveTo.x, actionData.moveTo.y), actionParam, UInt32.from(Math.floor(moveValidity.distance)) // we need the true distance here
         );
         snarkySuccess = true;
+        console.log(`Successfully applied snarky move action ${JSON.stringify(actionData)} to game ${gamePiece.gameId} piece ${gamePiece.id}`);
     }
     catch (e) {
-        console.warn(`Unable to apply snarky move action ${JSON.stringify(actionData)} to game ${gamePiece.gameId} piece ${gamePiece.id}`);
+        console.warn(`Unable to apply snarky move action ${JSON.stringify(actionData)} to game ${gamePiece.gameId} piece ${gamePiece.id} - ${e}`);
     }
     // Validations done, modify state
     gamePiece.positionX = actionData.moveTo.x;
@@ -63,11 +68,14 @@ export default async function resolveMoveAction(action, transaction) {
     if (snarkySuccess) {
         const endingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
         const endingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-        const snarkyGameStateAfter = new PhaseState(Field(0), Field(0), startingGamePiecesTree.tree.getRoot(), endingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), endingGameArenaTree.tree.getRoot(), PublicKey.fromBase58(playerPublicKey))
+        const snarkyGameStateAfter = new PhaseState(Field(0), Field(0), startingGamePiecesTree.tree.getRoot(), endingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), endingGameArenaTree.tree.getRoot(), playerPublicKey)
             .hash()
             .toString();
         if (snarkyGameStateAfter != stateAfterMove.hash().toString()) {
             console.warn(`Snarky game state after move action does not match expected state!`);
+        }
+        else {
+            console.log(`Snarky game state after move action matches expected state!`);
         }
     }
     return gamePiece;

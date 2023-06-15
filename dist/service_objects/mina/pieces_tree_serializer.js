@@ -12,6 +12,7 @@ export default async function serializePiecesTree(gameId, transaction) {
     });
     const piecesTree = new PiecesMerkleTree();
     gamePieces.forEach(async (gamePiece) => {
+        console.log('setting game piece');
         const snarkyPiece = await gamePiece.toSnarkyPiece();
         piecesTree.set(snarkyPiece.id.toBigInt(), snarkyPiece.hash());
     });

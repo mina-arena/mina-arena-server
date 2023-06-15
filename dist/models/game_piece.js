@@ -1,8 +1,8 @@
 import { DataTypes, Model, } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
-import { Position, Piece, Unit, UnitStats, } from 'mina-arena-contracts';
-import { UInt32, PublicKey, Field } from 'snarkyjs';
+import { Position, Piece, } from 'mina-arena-contracts';
+import { PublicKey, Field } from 'snarkyjs';
 export function distanceBetweenPoints(point1, point2) {
     let dx = point2.x - point1.x;
     let dy = point2.y - point1.y;
@@ -27,23 +27,12 @@ class GamePiece extends Model {
         const unit = await playerUnit.unit();
         const gamePlayer = await this.gamePlayer();
         const player = await gamePlayer.player();
-        const snarkyUnit = new Unit({
-            stats: new UnitStats({
-                health: UInt32.from(this.health),
-                movement: UInt32.from(unit.movementSpeed),
-                rangedAttackRange: UInt32.from(unit.rangedRange || 0),
-                rangedHitRoll: UInt32.from(unit.rangedHitRoll || 0),
-                rangedWoundRoll: UInt32.from(unit.rangedWoundRoll || 0),
-                saveRoll: UInt32.from(unit.armorSaveRoll || 0),
-                rangedDamage: UInt32.from(unit.rangedDamage || 0),
-                meleeHitRoll: UInt32.from(unit.meleeHitRoll || 0),
-                meleeWoundRoll: UInt32.from(unit.meleeWoundRoll || 0),
-                meleeDamage: UInt32.from(unit.meleeDamage || 0),
-            }),
-        });
+        const snarkyUnit = unit.toSnarkyUnit();
+        // TODO: temporary hack to get the correct public key into the proof
+        const minaPublicKey = PublicKey.fromBase58(player.minaPublicKey);
         const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
         const gamePieceNumber = await this.gamePieceNumber();
-        return new Piece(Field(gamePieceNumber), PublicKey.fromBase58(player.minaPublicKey), snarkyPosition, snarkyUnit);
+        return new Piece(Field(gamePieceNumber), minaPublicKey, snarkyPosition, snarkyUnit);
     }
     // Returns the number of this game piece in the game, starting from 1
     async gamePieceNumber() {
