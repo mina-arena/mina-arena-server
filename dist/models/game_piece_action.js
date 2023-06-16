@@ -1,4 +1,4 @@
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, } from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 const ACTION_TYPES = ['move', 'rangedAttack', 'meleeAttack'];
@@ -21,23 +21,27 @@ GamePieceAction.init({
     },
     gamePhaseId: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     gamePlayerId: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     gamePieceId: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     actionType: {
         allowNull: false,
-        type: DataTypes.ENUM('move', 'rangedAttack', 'meleeAttack')
+        type: DataTypes.ENUM('move', 'rangedAttack', 'meleeAttack'),
     },
     actionData: {
         allowNull: false,
-        type: DataTypes.JSONB
+        type: DataTypes.JSONB,
+    },
+    signature: {
+        allowNull: true,
+        type: DataTypes.JSONB,
     },
     createdAt: {
         allowNull: false,
@@ -48,7 +52,7 @@ GamePieceAction.init({
         type: DataTypes.DATE,
     },
 }, {
-    sequelize: sequelizeConnection
+    sequelize: sequelizeConnection,
 });
 export default GamePieceAction;
 //# sourceMappingURL=game_piece_action.js.map

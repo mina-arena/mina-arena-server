@@ -11,10 +11,10 @@ export default async function serializePiecesTree(gameId, transaction) {
         where: { gameId },
     });
     const piecesTree = new PiecesMerkleTree();
-    gamePieces.forEach(async (gamePiece) => {
+    for (const gamePiece of gamePieces) {
         const snarkyPiece = await gamePiece.toSnarkyPiece();
         piecesTree.set(snarkyPiece.id.toBigInt(), snarkyPiece.hash());
-    });
+    }
     return piecesTree;
 }
 //# sourceMappingURL=pieces_tree_serializer.js.map
