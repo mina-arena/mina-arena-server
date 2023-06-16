@@ -29,11 +29,10 @@ export default async function serializePiecesTree(
   });
 
   const piecesTree = new PiecesMerkleTree();
-  gamePieces.forEach(async (gamePiece) => {
-    console.log('setting game piece');
+  for (const gamePiece of gamePieces) {
     const snarkyPiece = await gamePiece.toSnarkyPiece();
     piecesTree.set(snarkyPiece.id.toBigInt(), snarkyPiece.hash());
-  });
+  }
 
   return piecesTree;
 }
