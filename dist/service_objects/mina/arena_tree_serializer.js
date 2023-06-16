@@ -9,15 +9,14 @@ export default async function serializeArenaTree(gameId, transaction) {
     if (game.status != 'inProgress')
         throw new Error(`Game ${game.id} is not in progress, status: ${game.status}`);
     const gamePieces = await Models.GamePiece.findAll({
-        where: { gameId }
+        where: { gameId },
     });
     const arenaTree = new ArenaMerkleTree();
-    gamePieces.forEach((gamePiece) => {
+    for (const gamePiece of gamePieces) {
         const x = gamePiece.positionX;
         const y = gamePiece.positionY;
         arenaTree.set(x, y, Field(1));
-    });
+    }
     return arenaTree;
 }
-;
 //# sourceMappingURL=arena_tree_serializer.js.map

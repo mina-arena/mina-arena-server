@@ -28,11 +28,25 @@ class GamePiece extends Model {
         const gamePlayer = await this.gamePlayer();
         const player = await gamePlayer.player();
         const snarkyUnit = unit.toSnarkyUnit();
-        // TODO: temporary hack to get the correct public key into the proof
         const minaPublicKey = PublicKey.fromBase58(player.minaPublicKey);
         const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
         const gamePieceNumber = await this.gamePieceNumber();
-        return new Piece(Field(gamePieceNumber), minaPublicKey, snarkyPosition, snarkyUnit);
+        const p = new Piece(Field(gamePieceNumber), minaPublicKey, snarkyPosition, snarkyUnit);
+        console.log('Creating snarky piece', {
+            gamePieceNumber,
+            minaPublicKey: minaPublicKey.toBase58(),
+            snarkyPositionX: snarkyPosition.x.toString(),
+            snarkyPositionY: snarkyPosition.y.toString(),
+            snarkyUnit: snarkyUnit.hash().toString(),
+            hash: p.hash().toString(),
+        });
+        return p;
+        // return new Piece(
+        //   Field(gamePieceNumber),
+        //   minaPublicKey,
+        //   snarkyPosition,
+        //   snarkyUnit
+        // );
     }
     // Returns the number of this game piece in the game, starting from 1
     async gamePieceNumber() {

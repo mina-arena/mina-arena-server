@@ -1,7 +1,13 @@
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
 import serializePiecesTree from '../../../src/service_objects/mina/pieces_tree_serializer';
-import { PiecesMerkleTree, Piece, Position, Unit, UnitStats } from 'mina-arena-contracts';
+import {
+  PiecesMerkleTree,
+  Piece,
+  Position,
+  Unit,
+  UnitStats,
+} from 'mina-arena-contracts';
 import { Field, PublicKey, UInt32 } from 'snarkyjs';
 
 describe('Pieces Tree Serlializer', () => {
@@ -16,9 +22,7 @@ describe('Pieces Tree Serlializer', () => {
     await Factories.cleanup();
 
     // Can only use one position for now, since creating multiple game pieces ends up using the same id
-    positions = [
-      [10, 10],
-    ]
+    positions = [[10, 10]];
 
     // Populate a game
     // Using only a single player since serializing the pieces is independent of players
@@ -40,13 +44,13 @@ describe('Pieces Tree Serlializer', () => {
       rangedWoundRoll: 4,
       rangedArmorPiercing: 1,
       rangedDamage: 1,
-      rangedAmmo: 5
+      rangedAmmo: 5,
     });
     somePlayer = await Factories.createPlayer();
     somePlayerUnit = await Factories.createPlayerUnit(somePlayer, someUnit);
     someGamePlayer = await Factories.createGamePlayer(game, somePlayer);
     gamePieces = [];
-    positions.forEach(async (position) => {
+    for (const position of positions) {
       const piece = await Factories.createGamePiece(
         someGamePlayer,
         somePlayerUnit,
@@ -55,7 +59,7 @@ describe('Pieces Tree Serlializer', () => {
       );
 
       gamePieces.push(piece);
-    });
+    }
   });
 
   afterEach(async () => {
@@ -64,40 +68,28 @@ describe('Pieces Tree Serlializer', () => {
 
   it('serializes the correct merkle tree', async () => {
     const expectedTree = new PiecesMerkleTree();
-    gamePieces.forEach(async (gamePiece) => {
+    for (const gamePiece of gamePieces) {
       const gamePieceNumber = await gamePiece.gamePieceNumber();
       const playerUnit = await gamePiece.playerUnit();
       const unit = await playerUnit.unit();
       const gamePlayer = await gamePiece.gamePlayer();
       const player = await gamePlayer.player();
 
-      // todo: start adding `.toContractVersion` methods on these models
-      const snarkyUnit = new Unit({
-        stats: new UnitStats({
-          health: UInt32.from(unit.maxHealth),
-          movement: UInt32.from(unit.movementSpeed),
-          rangedAttackRange: UInt32.from(unit.rangedRange),
-          rangedHitRoll: UInt32.from(unit.rangedHitRoll),
-          rangedWoundRoll: UInt32.from(unit.rangedWoundRoll),
-          rangedDamage: UInt32.from(unit.rangedDamage),
-          saveRoll: UInt32.from(unit.armorSaveRoll),
-          meleeHitRoll: UInt32.from(unit.meleeHitRoll),
-          meleeWoundRoll: UInt32.from(unit.meleeWoundRoll),
-          meleeDamage: UInt32.from(unit.meleeDamage)
-        })
-      })
+      const snarkyUnit = unit.toSnarkyUnit();
       const snarkyPiece = new Piece(
         Field(gamePieceNumber),
         PublicKey.fromBase58(player.minaPublicKey),
         Position.fromXY(gamePiece.positionX, gamePiece.positionY),
         snarkyUnit
-      )
+      );
 
       expectedTree.set(BigInt(gamePieceNumber), snarkyPiece.hash());
-    });
+    }
 
     const serializedTree = await serializePiecesTree(game.id);
 
-    expect(serializedTree.tree.getRoot().toString()).toEqual(expectedTree.tree.getRoot().toString());
+    expect(serializedTree.tree.getRoot().toString()).toEqual(
+      expectedTree.tree.getRoot().toString()
+    );
   });
 });

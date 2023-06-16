@@ -3,8 +3,8 @@ import { GamePieceCoordinates } from '../../graphql/__generated__/resolvers-type
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState, Position, Piece } from 'mina-arena-contracts';
-import { Field, PublicKey, UInt32, PrivateKey, Signature } from 'snarkyjs';
+import { Action, PhaseState, Position } from 'mina-arena-contracts';
+import { Field, PublicKey, UInt32, Signature } from 'snarkyjs';
 
 export type ValidateMoveActionResult = {
   distance: number;
@@ -64,9 +64,6 @@ export default async function resolveMoveAction(
 
   const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
   const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-
-  // TODO, there is some race condition in the serializers, and this sleep is a hack to fix it
-  await new Promise((r) => setTimeout(r, 2000));
 
   const snarkyGameState = new PhaseState(
     Field(0),
@@ -152,7 +149,7 @@ export default async function resolveMoveAction(
     const endingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
     const snarkyGameStateAfter = new PhaseState(
       Field(0),
-      Field(0),
+      Field(1),
       startingGamePiecesTree.tree.getRoot(),
       endingGamePiecesTree.tree.getRoot(),
       startingGameArenaTree.tree.getRoot(),
@@ -164,7 +161,9 @@ export default async function resolveMoveAction(
 
     if (snarkyGameStateAfter != stateAfterMove.hash().toString()) {
       console.warn(
-        `Snarky game state after move action does not match expected state!`
+        `Snarky game state after move action does not match expected state! (${snarkyGameStateAfter} != ${stateAfterMove
+          .hash()
+          .toString()})`
       );
     } else {
       console.log(

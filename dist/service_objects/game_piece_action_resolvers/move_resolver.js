@@ -30,8 +30,6 @@ export default async function resolveMoveAction(action, transaction) {
     const playerPublicKey = PublicKey.fromBase58(playerPublicKeyString);
     const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
     const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-    // TODO, there is some race condition in the serializers, and this sleep is a hack to fix it
-    await new Promise((r) => setTimeout(r, 2000));
     const snarkyGameState = new PhaseState(Field(0), Field(0), startingGamePiecesTree.tree.getRoot(), startingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), playerPublicKey);
     const actionData = action.actionData;
     if (actionData.actionType !== 'move')
@@ -68,11 +66,13 @@ export default async function resolveMoveAction(action, transaction) {
     if (snarkySuccess) {
         const endingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
         const endingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-        const snarkyGameStateAfter = new PhaseState(Field(0), Field(0), startingGamePiecesTree.tree.getRoot(), endingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), endingGameArenaTree.tree.getRoot(), playerPublicKey)
+        const snarkyGameStateAfter = new PhaseState(Field(0), Field(1), startingGamePiecesTree.tree.getRoot(), endingGamePiecesTree.tree.getRoot(), startingGameArenaTree.tree.getRoot(), endingGameArenaTree.tree.getRoot(), playerPublicKey)
             .hash()
             .toString();
         if (snarkyGameStateAfter != stateAfterMove.hash().toString()) {
-            console.warn(`Snarky game state after move action does not match expected state!`);
+            console.warn(`Snarky game state after move action does not match expected state! (${snarkyGameStateAfter} != ${stateAfterMove
+                .hash()
+                .toString()})`);
         }
         else {
             console.log(`Snarky game state after move action matches expected state!`);
