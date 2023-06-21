@@ -1,5 +1,5 @@
 import resolveAttack from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
-import { EncodedDiceRolls } from '../../../src/models/game_piece_action.js';
+import { EncryptedDiceRolls } from '../../../src/models/game_piece_action.js';
 
 describe('resolveAttack', () => {
   let numAttacks: number;
@@ -8,7 +8,7 @@ describe('resolveAttack', () => {
   let targetSaveRollStat: number;
   let attackerArmorPiercingStat: number;
   let attackerDamageStat: number;
-  let encodedDiceRolls: EncodedDiceRolls;
+  let encodedDiceRolls: EncryptedDiceRolls;
 
   beforeEach(async () => {
     numAttacks = 100;
@@ -21,7 +21,7 @@ describe('resolveAttack', () => {
     encodedDiceRolls = {
       publicKey: { x: 'xValue', y: 'yValue' },
       cipherText: 'secret',
-      signature: { r: 'rValue', s: 'sValue' }
+      signature: { r: 'rValue', s: 'sValue' },
     };
   });
 
@@ -36,18 +36,24 @@ describe('resolveAttack', () => {
       encodedDiceRolls
     );
     expect(resolvedAttacks.length).toBe(numAttacks);
-    resolvedAttacks.forEach(resolvedAttack => {
-      
+    resolvedAttacks.forEach((resolvedAttack) => {
       expect(resolvedAttack.hitRoll.rollNeeded).toBe(attackerHitRollStat);
       expect(resolvedAttack.woundRoll.rollNeeded).toBe(attackerWoundRollStat);
-      expect(resolvedAttack.saveRoll.rollNeeded).toBe(targetSaveRollStat + attackerArmorPiercingStat);
+      expect(resolvedAttack.saveRoll.rollNeeded).toBe(
+        targetSaveRollStat + attackerArmorPiercingStat
+      );
 
-      const oddsOfHitting = ((7 - attackerHitRollStat) / 6);
-      const oddsOfWounding = ((7 - attackerWoundRollStat) / 6);
+      const oddsOfHitting = (7 - attackerHitRollStat) / 6;
+      const oddsOfWounding = (7 - attackerWoundRollStat) / 6;
       const modifiedSave = targetSaveRollStat + attackerArmorPiercingStat;
-      const oddsOfPassingArmorSave = (Math.max(7 - modifiedSave, 0) / 6);
-      const expectedAverageDamage = (oddsOfHitting * oddsOfWounding * (1 - oddsOfPassingArmorSave) * attackerDamageStat).toFixed(2);
-      expect(resolvedAttack.averageDamage).toBe(expectedAverageDamage)
+      const oddsOfPassingArmorSave = Math.max(7 - modifiedSave, 0) / 6;
+      const expectedAverageDamage = (
+        oddsOfHitting *
+        oddsOfWounding *
+        (1 - oddsOfPassingArmorSave) *
+        attackerDamageStat
+      ).toFixed(2);
+      expect(resolvedAttack.averageDamage).toBe(expectedAverageDamage);
 
       if (resolvedAttack.hitRoll.roll >= attackerHitRollStat) {
         expect(resolvedAttack.hitRoll.success).toBe(true);
@@ -61,7 +67,10 @@ describe('resolveAttack', () => {
         expect(resolvedAttack.woundRoll.success).toBe(false);
         expect(resolvedAttack.damageDealt).toBe(0);
       }
-      if (resolvedAttack.saveRoll.roll >= (targetSaveRollStat + attackerArmorPiercingStat)) {
+      if (
+        resolvedAttack.saveRoll.roll >=
+        targetSaveRollStat + attackerArmorPiercingStat
+      ) {
         expect(resolvedAttack.saveRoll.success).toBe(true);
         expect(resolvedAttack.damageDealt).toBe(0);
       } else {
