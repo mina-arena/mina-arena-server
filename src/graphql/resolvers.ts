@@ -6,12 +6,7 @@ import { camelToScreamingSnake } from './helpers.js';
 
 const resolvers: Resolvers = {
   Query: {
-    games: async (
-      parent,
-      args,
-      contextValue,
-      info
-    ): Promise<Models.Game[]> => {
+    games: async (parent, args, contextValue, info): Promise<Models.Game[]> => {
       return await Models.Game.findAll();
     },
     game: async (
@@ -22,12 +17,7 @@ const resolvers: Resolvers = {
     ): Promise<Models.Game> => {
       return await Models.Game.findByPk(args.id);
     },
-    units: async (
-      parent,
-      args,
-      contextValue,
-      info
-    ): Promise<Models.Unit[]> => {
+    units: async (parent, args, contextValue, info): Promise<Models.Unit[]> => {
       return await Models.Unit.findAll();
     },
     player: async (
@@ -36,7 +26,9 @@ const resolvers: Resolvers = {
       contextValue,
       info
     ): Promise<Models.Player> => {
-      return await Models.Player.findOne({ where: { minaPublicKey: args.minaPublicKey }});
+      return await Models.Player.findOne({
+        where: { minaPublicKey: args.minaPublicKey },
+      });
     },
   },
   Mutation: {
@@ -49,36 +41,34 @@ const resolvers: Resolvers = {
   // Define custom field resolvers for fields
   // which require some kind of transformation
   Game: {
-    id: game => game.id.toString(),
-    status: game => camelToScreamingSnake(game.status),
-    turnPlayerOrder: game => game.gamePlayersInTurnOrder(),
-    arena: game => game.gameArena(),
+    status: (game) => camelToScreamingSnake(game.status),
+    turnPlayerOrder: (game) => game.gamePlayersInTurnOrder(),
+    arena: (game) => game.gameArena(),
   },
   GamePhase: {
-    id: gamePhase => gamePhase.id.toString(),
-    name: gamePhase => camelToScreamingSnake(gamePhase.phase),
+    name: (gamePhase) => camelToScreamingSnake(gamePhase.phase),
   },
   GamePiece: {
-    coordinates: function(gamePiece) {
+    coordinates: function (gamePiece) {
       if (!gamePiece.positionX && !gamePiece.positionY) return null;
 
       return { x: gamePiece.positionX, y: gamePiece.positionY };
     },
   },
   GamePieceAction: {
-    actionType: action => camelToScreamingSnake(action.actionType),
+    actionType: (action) => camelToScreamingSnake(action.actionType),
   },
   GamePieceActionData: {
-    __resolveType(obj, contextValue, info){
-      switch(obj.actionType) {
+    __resolveType(obj, contextValue, info) {
+      switch (obj.actionType) {
         case 'move':
-          return 'GamePieceMoveAction'
+          return 'GamePieceMoveAction';
           break;
         case 'rangedAttack':
-          return 'GamePieceRangedAttackAction'
+          return 'GamePieceRangedAttackAction';
           break;
         case 'meleeAttack':
-          return 'GamePieceMeleeAttackAction'
+          return 'GamePieceMeleeAttackAction';
           break;
       }
     },

@@ -1,14 +1,42 @@
-import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { GameArena as GameArenaModel, GamePhase as GamePhaseModel, GamePieceAction as GamePieceActionModel, GamePiece as GamePieceModel, GamePlayer as GamePlayerModel, Game as GameModel, PlayerUnit as PlayerUnitModel, Player as PlayerModel, Unit as UnitModel } from '../../models/index.js';
+import {
+  GraphQLResolveInfo,
+  GraphQLScalarType,
+  GraphQLScalarTypeConfig,
+} from 'graphql';
+import {
+  GameArena as GameArenaModel,
+  GamePhase as GamePhaseModel,
+  GamePieceAction as GamePieceActionModel,
+  GamePiece as GamePieceModel,
+  GamePlayer as GamePlayerModel,
+  Game as GameModel,
+  PlayerUnit as PlayerUnitModel,
+  Player as PlayerModel,
+  Unit as UnitModel,
+} from '../../models/index.js';
 import { GamePhaseName as GamePhaseNameModel } from '../../models/game_phase.js';
-import { GamePieceActionData as GamePieceActionDataModel, GamePieceRangedAttackAction as GamePieceRangedAttackActionModel, GamePieceMeleeAttackAction as GamePieceMeleeAttackActionModel } from '../../models/game_piece_action.js';
+import {
+  GamePieceActionData as GamePieceActionDataModel,
+  GamePieceRangedAttackAction as GamePieceRangedAttackActionModel,
+  GamePieceMeleeAttackAction as GamePieceMeleeAttackActionModel,
+} from '../../models/game_piece_action.js';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type EnumResolverSignature<T, AllowedValues = any> = { [key in keyof T]?: AllowedValues };
-export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
+export type EnumResolverSignature<T, AllowedValues = any> = {
+  [key in keyof T]?: AllowedValues;
+};
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]-?: NonNullable<T[P]>;
+};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -75,7 +103,7 @@ export type Game = {
   gamePhases: Array<GamePhase>;
   gamePieces: Array<GamePiece>;
   gamePlayers: Array<GamePlayer>;
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   status: GameStatus;
   turnGamePlayer?: Maybe<GamePlayer>;
   turnNumber?: Maybe<Scalars['Int']>;
@@ -89,7 +117,7 @@ export type GameArena = {
   createdAt: Scalars['Iso8601DateTime'];
   game: Game;
   height: Scalars['Int'];
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   updatedAt: Scalars['Iso8601DateTime'];
   width: Scalars['Int'];
 };
@@ -100,7 +128,7 @@ export type GamePhase = {
   game: Game;
   gamePieceActions: Array<GamePieceAction>;
   gamePlayer: GamePlayer;
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   name: GamePhaseName;
   turnNumber: Scalars['Int'];
   updatedAt: Scalars['Iso8601DateTime'];
@@ -109,7 +137,7 @@ export type GamePhase = {
 export enum GamePhaseName {
   Melee = 'MELEE',
   Movement = 'MOVEMENT',
-  Shooting = 'SHOOTING'
+  Shooting = 'SHOOTING',
 }
 
 export type GamePiece = {
@@ -120,7 +148,7 @@ export type GamePiece = {
   gamePieceActions: Array<GamePieceAction>;
   gamePlayer: GamePlayer;
   health: Scalars['Int'];
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   playerUnit: PlayerUnit;
   updatedAt: Scalars['Iso8601DateTime'];
 };
@@ -133,16 +161,19 @@ export type GamePieceAction = {
   gamePhase: GamePhase;
   gamePiece: GamePiece;
   gamePlayer: GamePlayer;
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   updatedAt: Scalars['Iso8601DateTime'];
 };
 
-export type GamePieceActionData = GamePieceMeleeAttackAction | GamePieceMoveAction | GamePieceRangedAttackAction;
+export type GamePieceActionData =
+  | GamePieceMeleeAttackAction
+  | GamePieceMoveAction
+  | GamePieceRangedAttackAction;
 
 export enum GamePieceActionType {
   MeleeAttack = 'MELEE_ATTACK',
   Move = 'MOVE',
-  RangedAttack = 'RANGED_ATTACK'
+  RangedAttack = 'RANGED_ATTACK',
 }
 
 export type GamePieceCoordinates = {
@@ -202,7 +233,7 @@ export type GamePlayer = {
   game: Game;
   gamePhases: Array<GamePhase>;
   gamePieceActions: Array<GamePieceAction>;
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   player: Player;
   playerNumber: Scalars['Int'];
   updatedAt: Scalars['Iso8601DateTime'];
@@ -212,7 +243,7 @@ export enum GameStatus {
   Canceled = 'CANCELED',
   Completed = 'COMPLETED',
   InProgress = 'IN_PROGRESS',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
 }
 
 export type Mutation = {
@@ -224,26 +255,21 @@ export type Mutation = {
   submitGamePhase?: Maybe<Game>;
 };
 
-
 export type MutationCreateGameArgs = {
   input: CreateGameInput;
 };
-
 
 export type MutationCreateGamePieceActionsArgs = {
   input: CreateGamePieceActionsInput;
 };
 
-
 export type MutationCreateGamePiecesArgs = {
   input: CreateGamePiecesInput;
 };
 
-
 export type MutationStartGameArgs = {
   input: StartGameInput;
 };
-
 
 export type MutationSubmitGamePhaseArgs = {
   input: SubmitGamePhaseInput;
@@ -252,7 +278,7 @@ export type MutationSubmitGamePhaseArgs = {
 export type Player = {
   __typename?: 'Player';
   createdAt: Scalars['Iso8601DateTime'];
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   minaPublicKey: Scalars['String'];
   name: Scalars['String'];
   playerUnits: Array<PlayerUnit>;
@@ -262,7 +288,7 @@ export type Player = {
 export type PlayerUnit = {
   __typename?: 'PlayerUnit';
   createdAt: Scalars['Iso8601DateTime'];
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   name: Scalars['String'];
   player: Player;
   unit: Unit;
@@ -282,11 +308,9 @@ export type Query = {
   units: Array<Unit>;
 };
 
-
 export type QueryGameArgs = {
   id: Scalars['ID'];
 };
-
 
 export type QueryPlayerArgs = {
   minaPublicKey: Scalars['String'];
@@ -326,7 +350,7 @@ export type Unit = {
   __typename?: 'Unit';
   armorSaveRoll: Scalars['Int'];
   createdAt: Scalars['Iso8601DateTime'];
-  id: Scalars['ID'];
+  id: Scalars['Int'];
   maxHealth: Scalars['Int'];
   meleeArmorPiercing: Scalars['Int'];
   meleeDamage: Scalars['Int'];
@@ -351,11 +375,12 @@ export type ResolversObject<TObject> = WithIndex<TObject>;
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
-
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> =
+  | ResolverFn<TResult, TParent, TContext, TArgs>
+  | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -378,9 +403,25 @@ export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
-export interface SubscriptionSubscriberObject<TResult, TKey extends string, TParent, TContext, TArgs> {
-  subscribe: SubscriptionSubscribeFn<{ [key in TKey]: TResult }, TParent, TContext, TArgs>;
-  resolve?: SubscriptionResolveFn<TResult, { [key in TKey]: TResult }, TContext, TArgs>;
+export interface SubscriptionSubscriberObject<
+  TResult,
+  TKey extends string,
+  TParent,
+  TContext,
+  TArgs
+> {
+  subscribe: SubscriptionSubscribeFn<
+    { [key in TKey]: TResult },
+    TParent,
+    TContext,
+    TArgs
+  >;
+  resolve?: SubscriptionResolveFn<
+    TResult,
+    { [key in TKey]: TResult },
+    TContext,
+    TArgs
+  >;
 }
 
 export interface SubscriptionResolverObject<TResult, TParent, TContext, TArgs> {
@@ -388,12 +429,26 @@ export interface SubscriptionResolverObject<TResult, TParent, TContext, TArgs> {
   resolve: SubscriptionResolveFn<TResult, any, TContext, TArgs>;
 }
 
-export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, TArgs> =
+export type SubscriptionObject<
+  TResult,
+  TKey extends string,
+  TParent,
+  TContext,
+  TArgs
+> =
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
-  | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
+export type SubscriptionResolver<
+  TResult,
+  TKey extends string,
+  TParent = {},
+  TContext = {},
+  TArgs = {}
+> =
+  | ((
+      ...args: any[]
+    ) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
 export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
@@ -402,11 +457,20 @@ export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
   info: GraphQLResolveInfo
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = {}, TContext = {}> = (
+  obj: T,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
-export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+export type DirectiveResolverFn<
+  TResult = {},
+  TParent = {},
+  TContext = {},
+  TArgs = {}
+> = (
   next: NextResolverFn<TResult>,
   parent: TParent,
   args: TArgs,
@@ -505,159 +569,416 @@ export type ResolversParentTypes = ResolversObject<{
   Unit: UnitModel;
 }>;
 
-export type GameResolvers<ContextType = any, ParentType extends ResolversParentTypes['Game'] = ResolversParentTypes['Game']> = ResolversObject<{
+export type GameResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Game'] = ResolversParentTypes['Game']
+> = ResolversObject<{
   arena?: Resolver<Maybe<ResolversTypes['GameArena']>, ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
-  currentPhase?: Resolver<Maybe<ResolversTypes['GamePhase']>, ParentType, ContextType>;
-  gamePhases?: Resolver<Array<ResolversTypes['GamePhase']>, ParentType, ContextType>;
-  gamePieces?: Resolver<Array<ResolversTypes['GamePiece']>, ParentType, ContextType>;
-  gamePlayers?: Resolver<Array<ResolversTypes['GamePlayer']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
+  currentPhase?: Resolver<
+    Maybe<ResolversTypes['GamePhase']>,
+    ParentType,
+    ContextType
+  >;
+  gamePhases?: Resolver<
+    Array<ResolversTypes['GamePhase']>,
+    ParentType,
+    ContextType
+  >;
+  gamePieces?: Resolver<
+    Array<ResolversTypes['GamePiece']>,
+    ParentType,
+    ContextType
+  >;
+  gamePlayers?: Resolver<
+    Array<ResolversTypes['GamePlayer']>,
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['GameStatus'], ParentType, ContextType>;
-  turnGamePlayer?: Resolver<Maybe<ResolversTypes['GamePlayer']>, ParentType, ContextType>;
+  turnGamePlayer?: Resolver<
+    Maybe<ResolversTypes['GamePlayer']>,
+    ParentType,
+    ContextType
+  >;
   turnNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  turnPlayerOrder?: Resolver<Array<ResolversTypes['GamePlayer']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
-  winningGamePlayer?: Resolver<Maybe<ResolversTypes['GamePlayer']>, ParentType, ContextType>;
+  turnPlayerOrder?: Resolver<
+    Array<ResolversTypes['GamePlayer']>,
+    ParentType,
+    ContextType
+  >;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
+  winningGamePlayer?: Resolver<
+    Maybe<ResolversTypes['GamePlayer']>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GameArenaResolvers<ContextType = any, ParentType extends ResolversParentTypes['GameArena'] = ResolversParentTypes['GameArena']> = ResolversObject<{
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+export type GameArenaResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GameArena'] = ResolversParentTypes['GameArena']
+> = ResolversObject<{
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   game?: Resolver<ResolversTypes['Game'], ParentType, ContextType>;
   height?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   width?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePhaseResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePhase'] = ResolversParentTypes['GamePhase']> = ResolversObject<{
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+export type GamePhaseResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePhase'] = ResolversParentTypes['GamePhase']
+> = ResolversObject<{
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   game?: Resolver<ResolversTypes['Game'], ParentType, ContextType>;
-  gamePieceActions?: Resolver<Array<ResolversTypes['GamePieceAction']>, ParentType, ContextType>;
+  gamePieceActions?: Resolver<
+    Array<ResolversTypes['GamePieceAction']>,
+    ParentType,
+    ContextType
+  >;
   gamePlayer?: Resolver<ResolversTypes['GamePlayer'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['GamePhaseName'], ParentType, ContextType>;
   turnNumber?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePhaseNameResolvers = EnumResolverSignature<{ MELEE?: any, MOVEMENT?: any, SHOOTING?: any }, ResolversTypes['GamePhaseName']>;
+export type GamePhaseNameResolvers = EnumResolverSignature<
+  { MELEE?: any; MOVEMENT?: any; SHOOTING?: any },
+  ResolversTypes['GamePhaseName']
+>;
 
-export type GamePieceResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePiece'] = ResolversParentTypes['GamePiece']> = ResolversObject<{
-  coordinates?: Resolver<Maybe<ResolversTypes['GamePieceCoordinates']>, ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+export type GamePieceResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePiece'] = ResolversParentTypes['GamePiece']
+> = ResolversObject<{
+  coordinates?: Resolver<
+    Maybe<ResolversTypes['GamePieceCoordinates']>,
+    ParentType,
+    ContextType
+  >;
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   game?: Resolver<ResolversTypes['Game'], ParentType, ContextType>;
-  gamePieceActions?: Resolver<Array<ResolversTypes['GamePieceAction']>, ParentType, ContextType>;
+  gamePieceActions?: Resolver<
+    Array<ResolversTypes['GamePieceAction']>,
+    ParentType,
+    ContextType
+  >;
   gamePlayer?: Resolver<ResolversTypes['GamePlayer'], ParentType, ContextType>;
   health?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   playerUnit?: Resolver<ResolversTypes['PlayerUnit'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePieceActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceAction'] = ResolversParentTypes['GamePieceAction']> = ResolversObject<{
-  actionData?: Resolver<ResolversTypes['GamePieceActionData'], ParentType, ContextType>;
-  actionType?: Resolver<ResolversTypes['GamePieceActionType'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+export type GamePieceActionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePieceAction'] = ResolversParentTypes['GamePieceAction']
+> = ResolversObject<{
+  actionData?: Resolver<
+    ResolversTypes['GamePieceActionData'],
+    ParentType,
+    ContextType
+  >;
+  actionType?: Resolver<
+    ResolversTypes['GamePieceActionType'],
+    ParentType,
+    ContextType
+  >;
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   gamePhase?: Resolver<ResolversTypes['GamePhase'], ParentType, ContextType>;
   gamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
   gamePlayer?: Resolver<ResolversTypes['GamePlayer'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePieceActionDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceActionData'] = ResolversParentTypes['GamePieceActionData']> = ResolversObject<{
-  __resolveType: TypeResolveFn<'GamePieceMeleeAttackAction' | 'GamePieceMoveAction' | 'GamePieceRangedAttackAction', ParentType, ContextType>;
+export type GamePieceActionDataResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePieceActionData'] = ResolversParentTypes['GamePieceActionData']
+> = ResolversObject<{
+  __resolveType: TypeResolveFn<
+    | 'GamePieceMeleeAttackAction'
+    | 'GamePieceMoveAction'
+    | 'GamePieceRangedAttackAction',
+    ParentType,
+    ContextType
+  >;
 }>;
 
-export type GamePieceCoordinatesResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceCoordinates'] = ResolversParentTypes['GamePieceCoordinates']> = ResolversObject<{
+export type GamePieceCoordinatesResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePieceCoordinates'] = ResolversParentTypes['GamePieceCoordinates']
+> = ResolversObject<{
   x?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   y?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePieceMeleeAttackActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceMeleeAttackAction'] = ResolversParentTypes['GamePieceMeleeAttackAction']> = ResolversObject<{
+export type GamePieceMeleeAttackActionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePieceMeleeAttackAction'] = ResolversParentTypes['GamePieceMeleeAttackAction']
+> = ResolversObject<{
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
-  targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
-  totalDamageAverage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  totalDamageDealt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  resolvedAttacks?: Resolver<
+    Maybe<Array<ResolversTypes['ResolvedAttack']>>,
+    ParentType,
+    ContextType
+  >;
+  targetGamePiece?: Resolver<
+    ResolversTypes['GamePiece'],
+    ParentType,
+    ContextType
+  >;
+  totalDamageAverage?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalDamageDealt?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePieceMoveActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceMoveAction'] = ResolversParentTypes['GamePieceMoveAction']> = ResolversObject<{
-  moveFrom?: Resolver<ResolversTypes['GamePieceCoordinates'], ParentType, ContextType>;
-  moveTo?: Resolver<ResolversTypes['GamePieceCoordinates'], ParentType, ContextType>;
+export type GamePieceMoveActionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePieceMoveAction'] = ResolversParentTypes['GamePieceMoveAction']
+> = ResolversObject<{
+  moveFrom?: Resolver<
+    ResolversTypes['GamePieceCoordinates'],
+    ParentType,
+    ContextType
+  >;
+  moveTo?: Resolver<
+    ResolversTypes['GamePieceCoordinates'],
+    ParentType,
+    ContextType
+  >;
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePieceRangedAttackActionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePieceRangedAttackAction'] = ResolversParentTypes['GamePieceRangedAttackAction']> = ResolversObject<{
+export type GamePieceRangedAttackActionResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePieceRangedAttackAction'] = ResolversParentTypes['GamePieceRangedAttackAction']
+> = ResolversObject<{
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  resolvedAttacks?: Resolver<Maybe<Array<ResolversTypes['ResolvedAttack']>>, ParentType, ContextType>;
-  targetGamePiece?: Resolver<ResolversTypes['GamePiece'], ParentType, ContextType>;
-  totalDamageAverage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  totalDamageDealt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  resolvedAttacks?: Resolver<
+    Maybe<Array<ResolversTypes['ResolvedAttack']>>,
+    ParentType,
+    ContextType
+  >;
+  targetGamePiece?: Resolver<
+    ResolversTypes['GamePiece'],
+    ParentType,
+    ContextType
+  >;
+  totalDamageAverage?: Resolver<
+    Maybe<ResolversTypes['Float']>,
+    ParentType,
+    ContextType
+  >;
+  totalDamageDealt?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GamePlayerResolvers<ContextType = any, ParentType extends ResolversParentTypes['GamePlayer'] = ResolversParentTypes['GamePlayer']> = ResolversObject<{
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+export type GamePlayerResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['GamePlayer'] = ResolversParentTypes['GamePlayer']
+> = ResolversObject<{
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   game?: Resolver<ResolversTypes['Game'], ParentType, ContextType>;
-  gamePhases?: Resolver<Array<ResolversTypes['GamePhase']>, ParentType, ContextType>;
-  gamePieceActions?: Resolver<Array<ResolversTypes['GamePieceAction']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  gamePhases?: Resolver<
+    Array<ResolversTypes['GamePhase']>,
+    ParentType,
+    ContextType
+  >;
+  gamePieceActions?: Resolver<
+    Array<ResolversTypes['GamePieceAction']>,
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   player?: Resolver<ResolversTypes['Player'], ParentType, ContextType>;
   playerNumber?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export interface Iso8601DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Iso8601DateTime'], any> {
+export interface Iso8601DateTimeScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes['Iso8601DateTime'], any> {
   name: 'Iso8601DateTime';
 }
 
-export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  createGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationCreateGameArgs, 'input'>>;
-  createGamePieceActions?: Resolver<Maybe<Array<ResolversTypes['GamePieceAction']>>, ParentType, ContextType, RequireFields<MutationCreateGamePieceActionsArgs, 'input'>>;
-  createGamePieces?: Resolver<Maybe<Array<ResolversTypes['GamePiece']>>, ParentType, ContextType, RequireFields<MutationCreateGamePiecesArgs, 'input'>>;
-  startGame?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationStartGameArgs, 'input'>>;
-  submitGamePhase?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<MutationSubmitGamePhaseArgs, 'input'>>;
+export type MutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']
+> = ResolversObject<{
+  createGame?: Resolver<
+    Maybe<ResolversTypes['Game']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateGameArgs, 'input'>
+  >;
+  createGamePieceActions?: Resolver<
+    Maybe<Array<ResolversTypes['GamePieceAction']>>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateGamePieceActionsArgs, 'input'>
+  >;
+  createGamePieces?: Resolver<
+    Maybe<Array<ResolversTypes['GamePiece']>>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateGamePiecesArgs, 'input'>
+  >;
+  startGame?: Resolver<
+    Maybe<ResolversTypes['Game']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationStartGameArgs, 'input'>
+  >;
+  submitGamePhase?: Resolver<
+    Maybe<ResolversTypes['Game']>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationSubmitGamePhaseArgs, 'input'>
+  >;
 }>;
 
-export type PlayerResolvers<ContextType = any, ParentType extends ResolversParentTypes['Player'] = ResolversParentTypes['Player']> = ResolversObject<{
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+export type PlayerResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Player'] = ResolversParentTypes['Player']
+> = ResolversObject<{
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   minaPublicKey?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  playerUnits?: Resolver<Array<ResolversTypes['PlayerUnit']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  playerUnits?: Resolver<
+    Array<ResolversTypes['PlayerUnit']>,
+    ParentType,
+    ContextType
+  >;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type PlayerUnitResolvers<ContextType = any, ParentType extends ResolversParentTypes['PlayerUnit'] = ResolversParentTypes['PlayerUnit']> = ResolversObject<{
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+export type PlayerUnitResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['PlayerUnit'] = ResolversParentTypes['PlayerUnit']
+> = ResolversObject<{
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   player?: Resolver<ResolversTypes['Player'], ParentType, ContextType>;
   unit?: Resolver<ResolversTypes['Unit'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  game?: Resolver<Maybe<ResolversTypes['Game']>, ParentType, ContextType, RequireFields<QueryGameArgs, 'id'>>;
+export type QueryResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']
+> = ResolversObject<{
+  game?: Resolver<
+    Maybe<ResolversTypes['Game']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryGameArgs, 'id'>
+  >;
   games?: Resolver<Array<ResolversTypes['Game']>, ParentType, ContextType>;
-  player?: Resolver<Maybe<ResolversTypes['Player']>, ParentType, ContextType, RequireFields<QueryPlayerArgs, 'minaPublicKey'>>;
+  player?: Resolver<
+    Maybe<ResolversTypes['Player']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryPlayerArgs, 'minaPublicKey'>
+  >;
   units?: Resolver<Array<ResolversTypes['Unit']>, ParentType, ContextType>;
 }>;
 
-export type ResolvedAttackResolvers<ContextType = any, ParentType extends ResolversParentTypes['ResolvedAttack'] = ResolversParentTypes['ResolvedAttack']> = ResolversObject<{
+export type ResolvedAttackResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['ResolvedAttack'] = ResolversParentTypes['ResolvedAttack']
+> = ResolversObject<{
   averageDamage?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   damageDealt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   hitRoll?: Resolver<ResolversTypes['RollResult'], ParentType, ContextType>;
@@ -666,17 +987,27 @@ export type ResolvedAttackResolvers<ContextType = any, ParentType extends Resolv
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type RollResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RollResult'] = ResolversParentTypes['RollResult']> = ResolversObject<{
+export type RollResultResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['RollResult'] = ResolversParentTypes['RollResult']
+> = ResolversObject<{
   roll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   rollNeeded?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type UnitResolvers<ContextType = any, ParentType extends ResolversParentTypes['Unit'] = ResolversParentTypes['Unit']> = ResolversObject<{
+export type UnitResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['Unit'] = ResolversParentTypes['Unit']
+> = ResolversObject<{
   armorSaveRoll?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   maxHealth?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   meleeArmorPiercing?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   meleeDamage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -687,13 +1018,37 @@ export type UnitResolvers<ContextType = any, ParentType extends ResolversParentT
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   pointsCost?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   rangedAmmo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  rangedArmorPiercing?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  rangedDamage?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  rangedHitRoll?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  rangedNumAttacks?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rangedArmorPiercing?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  rangedDamage?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  rangedHitRoll?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  rangedNumAttacks?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
   rangedRange?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  rangedWoundRoll?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Iso8601DateTime'], ParentType, ContextType>;
+  rangedWoundRoll?: Resolver<
+    Maybe<ResolversTypes['Int']>,
+    ParentType,
+    ContextType
+  >;
+  updatedAt?: Resolver<
+    ResolversTypes['Iso8601DateTime'],
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -719,4 +1074,3 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   RollResult?: RollResultResolvers<ContextType>;
   Unit?: UnitResolvers<ContextType>;
 }>;
-
