@@ -6,7 +6,7 @@
   "scripts": {
     "generate": "graphql-codegen --config codegen.yml",
     "build": "npm run generate && tsc --project tsconfig.json",
-    "dev": "npm run compile && npm run start",
+    "dev": "npm run build && npm run start",
     "start": "node --experimental-loader newrelic/esm-loader.mjs ./dist/app.js",
     "dump_db": "pg_dump -U postgres -h localhost -f ./src/db/migrations/structure.sql mina_arena_development --schema-only",
     "prepare": "husky install",

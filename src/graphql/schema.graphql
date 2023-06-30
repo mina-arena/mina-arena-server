@@ -9,7 +9,9 @@ type Mutation {
   createGame(input: CreateGameInput!): Game
   createGamePieces(input: CreateGamePiecesInput!): [GamePiece!]
   startGame(input: StartGameInput!): Game
-  createGamePieceActions(input: CreateGamePieceActionsInput!): [GamePieceAction!]
+  createGamePieceActions(
+    input: CreateGamePieceActionsInput!
+  ): [GamePieceAction!]
   submitGamePhase(input: SubmitGamePhaseInput!): Game
 }
 
@@ -35,7 +37,7 @@ enum GamePieceActionType {
 }
 
 type Player {
-  id: ID!
+  id: Int!
   name: String!
   minaPublicKey: String!
   playerUnits: [PlayerUnit!]!
@@ -44,7 +46,7 @@ type Player {
 }
 
 type Game {
-  id: ID!
+  id: Int!
   status: GameStatus!
   arena: GameArena
   turnNumber: Int
@@ -60,7 +62,7 @@ type Game {
 }
 
 type GamePlayer {
-  id: ID!
+  id: Int!
   game: Game!
   player: Player!
   playerNumber: Int!
@@ -71,7 +73,7 @@ type GamePlayer {
 }
 
 type GameArena {
-  id: ID!
+  id: Int!
   game: Game!
   width: Int!
   height: Int!
@@ -80,7 +82,7 @@ type GameArena {
 }
 
 type Unit {
-  id: ID!
+  id: Int!
   name: String!
   maxHealth: Int!
   movementSpeed: Int!
@@ -103,7 +105,7 @@ type Unit {
 }
 
 type PlayerUnit {
-  id: ID!
+  id: Int!
   player: Player!
   unit: Unit!
   name: String!
@@ -112,7 +114,7 @@ type PlayerUnit {
 }
 
 type GamePiece {
-  id: ID!
+  id: Int!
   game: Game!
   gamePlayer: GamePlayer!
   playerUnit: PlayerUnit!
@@ -129,7 +131,7 @@ type GamePieceCoordinates {
 }
 
 type GamePhase {
-  id: ID!
+  id: Int!
   game: Game!
   gamePlayer: GamePlayer!
   turnNumber: Int!
@@ -140,7 +142,7 @@ type GamePhase {
 }
 
 type GamePieceAction {
-  id: ID!
+  id: Int!
   gamePhase: GamePhase!
   gamePlayer: GamePlayer!
   gamePiece: GamePiece!
@@ -150,7 +152,10 @@ type GamePieceAction {
   updatedAt: Iso8601DateTime!
 }
 
-union GamePieceActionData = GamePieceMoveAction | GamePieceRangedAttackAction | GamePieceMeleeAttackAction
+union GamePieceActionData =
+    GamePieceMoveAction
+  | GamePieceRangedAttackAction
+  | GamePieceMeleeAttackAction
 
 type GamePieceMoveAction {
   moveFrom: GamePieceCoordinates!
