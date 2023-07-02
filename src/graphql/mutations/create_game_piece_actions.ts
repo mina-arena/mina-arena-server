@@ -7,6 +7,11 @@ import { Transaction } from 'sequelize';
 import { validateMoveAction } from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
 import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
+import { EncrytpedAttackRoll } from 'mina-arena-contracts';
+import { Group, Signature, Field, PublicKey } from 'snarkyjs';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export default async (
   parent,
@@ -18,62 +23,102 @@ export default async (
     // Validate that Player exists
     const player = await Models.Player.findOne({
       where: { minaPublicKey: args.input.minaPublicKey },
-      transaction: t
+      transaction: t,
     });
-    if (!player) throw new Error(`Player with minaPublicKey ${args.input.minaPublicKey} not found`);
+    if (!player)
+      throw new Error(
+        `Player with minaPublicKey ${args.input.minaPublicKey} not found`
+      );
 
     // Validate that Game exists and is in progress
-    const game = await Models.Game.findByPk(args.input.gameId, { transaction: t });
+    const game = await Models.Game.findByPk(args.input.gameId, {
+      transaction: t,
+    });
     if (!game) throw new Error(`Game with ID ${args.input.gameId} not found`);
-    if (game.status !== 'inProgress') throw new Error(`Game ${args.input.gameId} is not in progress`);
+    if (game.status !== 'inProgress')
+      throw new Error(`Game ${args.input.gameId} is not in progress`);
 
     // Validate that GamePlayer exists and it's their turn
     const gamePlayer = await Models.GamePlayer.findOne({
       where: { gameId: game.id, playerId: player.id },
-      transaction: t
+      transaction: t,
     });
-    if (!gamePlayer) throw new Error(`Player ${player.name} is not present in Game ${game.id}`);
-    if (game.turnGamePlayerId != gamePlayer.id) throw new Error(`It is not your turn!`);
+    if (!gamePlayer)
+      throw new Error(
+        `Player ${player.name} is not present in Game ${game.id}`
+      );
+    if (game.turnGamePlayerId != gamePlayer.id)
+      throw new Error(`It is not your turn!`);
 
     const gamePhase = await game.currentPhase();
 
     let createdGamePieceActions = [];
     for (const actionInput of args.input.actions) {
-      enforceOneOf(actionInput, ['moveInput', 'rangedAttackInput', 'meleeAttackInput']);
+      enforceOneOf(actionInput, [
+        'moveInput',
+        'rangedAttackInput',
+        'meleeAttackInput',
+      ]);
 
       // Validate that this action is allowed in this phase
       let rawActionType = actionInput.actionType;
       let actionType = snakeToCamel(rawActionType);
       if (!gamePhase.actionTypeAllowed(actionType)) {
-        throw new Error(`ActionType ${rawActionType} not allowed in phase ${gamePhase.phase}`);
+        throw new Error(
+          `ActionType ${rawActionType} not allowed in phase ${gamePhase.phase}`
+        );
       }
 
       // Validate GamePiece
-      let gamePiece = await Models.GamePiece.findByPk(actionInput.gamePieceId, { transaction: t });
-      if (!gamePiece) throw new Error(`GamePiece with ID ${actionInput.gamePieceId} not found`);
-      if (gamePiece.gamePlayerId != gamePlayer.id) throw new Error(`GamePiece ${gamePiece.id} does not belong to you`);
+      let gamePiece = await Models.GamePiece.findByPk(actionInput.gamePieceId, {
+        transaction: t,
+      });
+      if (!gamePiece)
+        throw new Error(
+          `GamePiece with ID ${actionInput.gamePieceId} not found`
+        );
+      if (gamePiece.gamePlayerId != gamePlayer.id)
+        throw new Error(`GamePiece ${gamePiece.id} does not belong to you`);
 
       switch (actionType) {
         case 'move':
           createdGamePieceActions.push(
-            await handleMoveAction(gamePlayer, gamePhase, gamePiece, actionInput.moveInput, t)
+            await handleMoveAction(
+              gamePlayer,
+              gamePhase,
+              gamePiece,
+              actionInput.moveInput,
+              t
+            )
           );
           break;
         case 'rangedAttack':
           createdGamePieceActions.push(
-            await handleRangedAttackAction(gamePlayer, gamePhase, gamePiece, actionInput.rangedAttackInput, t)
-          )
+            await handleRangedAttackAction(
+              gamePlayer,
+              gamePhase,
+              gamePiece,
+              actionInput.rangedAttackInput,
+              t
+            )
+          );
           break;
         case 'meleeAttack':
           createdGamePieceActions.push(
-            await handleMeleeAttackAction(gamePlayer, gamePhase, gamePiece, actionInput.meleeAttackInput, t)
-          )
+            await handleMeleeAttackAction(
+              gamePlayer,
+              gamePhase,
+              gamePiece,
+              actionInput.meleeAttackInput,
+              t
+            )
+          );
           break;
       }
     }
     return createdGamePieceActions;
   });
-}
+};
 
 async function handleMoveAction(
   gamePlayer: Models.GamePlayer,
@@ -100,8 +145,8 @@ async function handleMoveAction(
         actionType: 'move',
         resolved: false,
         moveFrom: gamePiece.coordinates(),
-        moveTo: moveInput.moveTo
-      }
+        moveTo: moveInput.moveTo,
+      },
     },
     { transaction }
   );
@@ -123,6 +168,14 @@ async function handleRangedAttackAction(
   );
 
   // Create GamePieceAction record in unresolved state
+  const encryptedAttackRolls = rangedAttackInput.diceRolls.map((roll) => {
+    return new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(roll.publicKey),
+      ciphertext: roll.cipherText.split(',').map((x) => Field(x)),
+      signature: Signature.fromJSON(roll.signature),
+      rngPublicKey: PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY),
+    });
+  });
   return await Models.GamePieceAction.create(
     {
       gamePhaseId: gamePhase.id,
@@ -133,8 +186,8 @@ async function handleRangedAttackAction(
         actionType: 'rangedAttack',
         resolved: false,
         targetGamePieceId: rangedAttackInput.targetGamePieceId,
-        encodedDiceRolls: rangedAttackInput.diceRoll
-      }
+        encryptedAttackRolls,
+      },
     },
     { transaction }
   );
@@ -147,7 +200,10 @@ async function handleMeleeAttackAction(
   meleeAttackInput: Types.GamePieceMeleeAttackActionInput,
   transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
-  const targetGamePiece = await Models.GamePiece.findByPk(meleeAttackInput.targetGamePieceId, { transaction });
+  const targetGamePiece = await Models.GamePiece.findByPk(
+    meleeAttackInput.targetGamePieceId,
+    { transaction }
+  );
 
   // Validate attack data, raises exception if not valid
   await validateMeleeAttackAction(
@@ -157,6 +213,14 @@ async function handleMeleeAttackAction(
     transaction
   );
 
+  const encryptedAttackRolls = meleeAttackInput.diceRolls.map((roll) => {
+    return new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(roll.publicKey),
+      ciphertext: roll.cipherText.split(',').map((x) => Field(x)),
+      signature: Signature.fromJSON(roll.signature),
+      rngPublicKey: PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY),
+    });
+  });
   return await Models.GamePieceAction.create(
     {
       gamePhaseId: gamePhase.id,
@@ -167,8 +231,8 @@ async function handleMeleeAttackAction(
         actionType: 'meleeAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
-        encodedDiceRolls: meleeAttackInput.diceRoll,
-      }
+        encryptedAttackRolls,
+      },
     },
     { transaction }
   );

@@ -197,7 +197,7 @@ export type GamePieceMeleeAttackAction = {
 };
 
 export type GamePieceMeleeAttackActionInput = {
-  diceRoll: DiceRollInput;
+  diceRolls: Array<DiceRollInput>;
   targetGamePieceId: Scalars['Int'];
 };
 
@@ -223,7 +223,7 @@ export type GamePieceRangedAttackAction = {
 };
 
 export type GamePieceRangedAttackActionInput = {
-  diceRoll: DiceRollInput;
+  diceRolls: Array<DiceRollInput>;
   targetGamePieceId: Scalars['Int'];
 };
 
