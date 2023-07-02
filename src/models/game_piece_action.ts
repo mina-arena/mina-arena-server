@@ -8,6 +8,8 @@ import {
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
+import { EncrytpedAttackRoll } from 'mina-arena-contracts';
+
 const ACTION_TYPES = ['move', 'rangedAttack', 'meleeAttack'];
 type GamePieceActionTypeTuple = typeof ACTION_TYPES;
 export type GamePieceActionType = GamePieceActionTypeTuple[number];
@@ -23,7 +25,7 @@ export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encodedDiceRolls: EncryptedDiceRolls;
+  encryptedAttackRolls: EncrytpedAttackRoll[];
   resolvedAttacks?: ResolvedAttack[];
   totalDamageDealt?: number;
   totalDamageAverage?: number;
@@ -32,7 +34,7 @@ export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encodedDiceRolls: EncryptedDiceRolls;
+  encryptedAttackRolls: EncrytpedAttackRoll[];
   resolvedAttacks?: ResolvedAttack[];
   totalDamageDealt?: number;
   totalDamageAverage?: number;
@@ -41,12 +43,6 @@ export type GamePieceActionData =
   | GamePieceMoveAction
   | GamePieceRangedAttackAction
   | GamePieceMeleeAttackAction;
-
-export type EncryptedDiceRolls = {
-  publicKey: { x: string; y: string };
-  cipherText: string;
-  signature: { r: string; s: string };
-};
 
 export type ResolvedAttack = {
   hitRoll: RollResult;

@@ -1,18 +1,11 @@
 import * as Models from '../../models/index.js';
-import { EncrytpedAttackRoll, MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
+import { MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
 import resolveAttacks from './attack_resolver.js';
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState, Position } from 'mina-arena-contracts';
-import {
-  Field,
-  PublicKey,
-  UInt32,
-  Signature,
-  Group,
-  PrivateKey,
-} from 'snarkyjs';
+import { Action, PhaseState } from 'mina-arena-contracts';
+import { Field, PublicKey, UInt32, Signature, PrivateKey } from 'snarkyjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -152,38 +145,38 @@ export default async function resolveMeleeAttackAction(
   // Warn on console for failure
   let snarkySuccess = false;
   let stateAfterAttack: PhaseState;
+  const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
+  const attackRolls = actionData.encryptedAttackRolls;
   try {
-    const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
-    const attackRoll = new EncrytpedAttackRoll({
-      publicKey: Group.fromJSON(actionData.encodedDiceRolls.publicKey),
-      ciphertext: actionData.encodedDiceRolls.cipherText
-        .split(',')
-        .map((c) => Field(c)),
-      signature: Signature.fromJSON(actionData.encodedDiceRolls.signature),
-      rngPublicKey,
-    });
     const serverPrivateKey = PrivateKey.fromBase58(
       process.env.SERVER_PRIVATE_KEY
     );
-    const piecesTreeAfterAttack = startingGamePiecesTree.clone();
-    piecesTreeAfterAttack.set(
-      snarkyTargetPiece.id.toBigInt(),
-      snarkyTargetPiece.hash()
-    );
 
-    stateAfterAttack = snarkyGameState.applyMeleeAttackAction(
-      snarkyAction,
-      Signature.fromJSON(action.signature),
-      snarkyAttackingPiece,
-      snarkyTargetPiece,
-      startingGamePiecesTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
-      startingGamePiecesTree.getWitness(snarkyTargetPiece.id.toBigInt()),
-      UInt32.from(
-        Math.floor(attackingGamePiece.distanceTo(targetGamePiece.coordinates()))
-      ),
-      attackRoll,
-      serverPrivateKey
-    );
+    // For each attack, attempt to apply the attack action
+    for (let i = 0; i < attackRolls.length; i++) {
+      const roll = attackRolls[i];
+      const piecesTreeAfterAttack = startingGamePiecesTree.clone();
+      piecesTreeAfterAttack.set(
+        snarkyTargetPiece.id.toBigInt(),
+        snarkyTargetPiece.hash()
+      );
+
+      stateAfterAttack = snarkyGameState.applyMeleeAttackAction(
+        snarkyAction,
+        Signature.fromJSON(action.signature),
+        snarkyAttackingPiece,
+        snarkyTargetPiece,
+        startingGamePiecesTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
+        startingGamePiecesTree.getWitness(snarkyTargetPiece.id.toBigInt()),
+        UInt32.from(
+          Math.floor(
+            attackingGamePiece.distanceTo(targetGamePiece.coordinates())
+          )
+        ),
+        roll,
+        serverPrivateKey
+      );
+    }
     snarkySuccess = true;
     console.log(
       `Successfully applied snarky melee attack action ${JSON.stringify(
@@ -202,8 +195,6 @@ export default async function resolveMeleeAttackAction(
     );
   }
 
-  // Resolve attack sequence
-  const encodedDiceRolls = actionData.encodedDiceRolls;
   const resolvedAttacks = resolveAttacks(
     attackingUnit.meleeNumAttacks,
     attackingUnit.meleeHitRoll,
@@ -211,7 +202,7 @@ export default async function resolveMeleeAttackAction(
     targetUnit.armorSaveRoll,
     attackingUnit.meleeArmorPiercing,
     attackingUnit.meleeDamage,
-    encodedDiceRolls
+    attackRolls
   );
   const totalDamageDealt = resolvedAttacks.reduce(
     (sum, attack) => sum + attack.damageDealt,
