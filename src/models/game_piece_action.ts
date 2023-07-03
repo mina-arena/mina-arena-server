@@ -8,8 +8,6 @@ import {
 import sequelizeConnection from '../db/config.js';
 import * as Models from './index.js';
 
-import { EncrytpedAttackRoll } from 'mina-arena-contracts';
-
 const ACTION_TYPES = ['move', 'rangedAttack', 'meleeAttack'];
 type GamePieceActionTypeTuple = typeof ACTION_TYPES;
 export type GamePieceActionType = GamePieceActionTypeTuple[number];
@@ -25,7 +23,7 @@ export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encryptedAttackRolls: EncrytpedAttackRoll[];
+  encryptedAttackRolls: EncrytpedAttackRollJSON[];
   resolvedAttacks?: ResolvedAttack[];
   totalDamageDealt?: number;
   totalDamageAverage?: number;
@@ -34,7 +32,7 @@ export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encryptedAttackRolls: EncrytpedAttackRoll[];
+  encryptedAttackRolls: EncrytpedAttackRollJSON[];
   resolvedAttacks?: ResolvedAttack[];
   totalDamageDealt?: number;
   totalDamageAverage?: number;
@@ -56,6 +54,19 @@ export type RollResult = {
   roll: number;
   rollNeeded: number;
   success: boolean;
+};
+
+export type EncrytpedAttackRollJSON = {
+  publicKey: {
+    x: string;
+    y: string;
+  };
+  ciphertext: string[];
+  signature: {
+    r: string;
+    s: string;
+  };
+  rngPublicKey: string;
 };
 
 class GamePieceAction extends Model<

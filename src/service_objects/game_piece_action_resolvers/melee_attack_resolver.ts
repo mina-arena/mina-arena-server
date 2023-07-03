@@ -1,11 +1,19 @@
 import * as Models from '../../models/index.js';
-import { MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
+import { EncrytpedAttackRoll, MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
 import resolveAttacks from './attack_resolver.js';
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState } from 'mina-arena-contracts';
-import { Field, PublicKey, UInt32, Signature, PrivateKey } from 'snarkyjs';
+import { Action, PhaseState, DecrytpedAttackRoll } from 'mina-arena-contracts';
+import {
+  Field,
+  PublicKey,
+  UInt32,
+  Signature,
+  PrivateKey,
+  Encryption,
+  Group,
+} from 'snarkyjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -44,6 +52,7 @@ export async function validateMeleeAttackAction(
   const distanceToTarget = attackingGamePiece.distanceTo(
     targetGamePiece.coordinates()
   );
+  console.log(distanceToTarget);
   if (distanceToTarget > MELEE_ATTACK_RANGE)
     throw new Error(
       `GamePiece ${attackingGamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than melee range of ${MELEE_ATTACK_RANGE}`
@@ -90,15 +99,15 @@ export default async function resolveMeleeAttackAction(
     attackingGamePiece.gameId
   );
 
-  const snarkyGameState = new PhaseState(
-    Field(0),
-    Field(0),
-    startingGamePiecesTree.tree.getRoot(),
-    startingGamePiecesTree.tree.getRoot(),
-    startingGameArenaTree.tree.getRoot(),
-    startingGameArenaTree.tree.getRoot(),
-    playerPublicKey
-  );
+  const snarkyGameState = new PhaseState({
+    nonce: Field(0),
+    actionsNonce: Field(0),
+    startingPiecesState: startingGamePiecesTree.tree.getRoot(),
+    currentPiecesState: startingGamePiecesTree.tree.getRoot(),
+    startingArenaState: startingGameArenaTree.tree.getRoot(),
+    currentArenaState: startingGameArenaTree.tree.getRoot(),
+    playerPublicKey,
+  });
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'meleeAttack')
@@ -154,7 +163,12 @@ export default async function resolveMeleeAttackAction(
 
     // For each attack, attempt to apply the attack action
     for (let i = 0; i < attackRolls.length; i++) {
-      const roll = attackRolls[i];
+      const roll = new EncrytpedAttackRoll({
+        publicKey: Group.fromJSON(attackRolls[i].publicKey),
+        ciphertext: attackRolls[i].ciphertext.map((c) => Field(c)),
+        signature: Signature.fromJSON(attackRolls[i].signature),
+        rngPublicKey: PublicKey.fromBase58(attackRolls[i].rngPublicKey),
+      });
       const piecesTreeAfterAttack = startingGamePiecesTree.clone();
       piecesTreeAfterAttack.set(
         snarkyTargetPiece.id.toBigInt(),
@@ -195,6 +209,22 @@ export default async function resolveMeleeAttackAction(
     );
   }
 
+  const roll = attackRolls[0];
+  const snarkyRoll = new EncrytpedAttackRoll({
+    publicKey: Group.fromJSON(roll.publicKey),
+    ciphertext: roll.ciphertext.map((c) => Field(c)),
+    signature: Signature.fromJSON(roll.signature),
+    rngPublicKey: PublicKey.fromBase58(roll.rngPublicKey),
+  });
+  const decryptedRoll = snarkyRoll.decryptRoll(
+    PrivateKey.fromBase58(process.env.SERVER_PRIVATE_KEY)
+  );
+  const decryptedRollJSON = {
+    hit: Number(decryptedRoll.hit.toString()),
+    wound: Number(decryptedRoll.wound.toString()),
+    save: Number(decryptedRoll.save.toString()),
+  };
+
   const resolvedAttacks = resolveAttacks(
     attackingUnit.meleeNumAttacks,
     attackingUnit.meleeHitRoll,
@@ -204,6 +234,7 @@ export default async function resolveMeleeAttackAction(
     attackingUnit.meleeDamage,
     attackRolls
   );
+
   const totalDamageDealt = resolvedAttacks.reduce(
     (sum, attack) => sum + attack.damageDealt,
     0

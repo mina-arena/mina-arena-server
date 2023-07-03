@@ -1,18 +1,24 @@
-import { jest } from '@jest/globals';
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
 import resolveMeleeAttackAction, {
   validateMeleeAttackAction,
 } from '../../../src/service_objects/game_piece_action_resolvers/melee_attack_resolver';
-import * as AttackResolver from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
-import { MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
+import { MELEE_ATTACK_RANGE, Action } from 'mina-arena-contracts';
+import { Field, PrivateKey } from 'snarkyjs';
+import { roll_6_6_1, roll_1_6_1, roll_6_1_1 } from '../../support/dice_rolls';
 
 describe('validateMeleeAttackAction', () => {
   let attackingGamePiece: Models.GamePiece;
   let targetGamePiece: Models.GamePiece;
 
+  let p1PrivateKey;
+  let p2PrivateKey;
+
   beforeEach(async () => {
     await Factories.cleanup();
+
+    p1PrivateKey = PrivateKey.random();
+    p2PrivateKey = PrivateKey.random();
 
     let game = await Factories.createGame();
 
@@ -30,8 +36,10 @@ describe('validateMeleeAttackAction', () => {
     });
 
     let targetUnit = await Factories.createUnit();
-    let attackingPlayer = await Factories.createPlayer();
-    let targetPlayer = await Factories.createPlayer();
+    let attackingPlayer = await Factories.createPlayer(
+      p1PrivateKey.toPublicKey()
+    );
+    let targetPlayer = await Factories.createPlayer(p2PrivateKey.toPublicKey());
     let attackingPlayerUnit = await Factories.createPlayerUnit(
       attackingPlayer,
       attackingUnit
@@ -104,8 +112,14 @@ describe('resolveMeleeAttackAction', () => {
   let targetUnit: Models.Unit;
   let attackingUnit: Models.Unit;
 
+  let p1PrivateKey;
+  let p2PrivateKey;
+
   beforeEach(async () => {
     await Factories.cleanup();
+
+    p1PrivateKey = PrivateKey.random();
+    p2PrivateKey = PrivateKey.random();
 
     let game = await Factories.createGame();
 
@@ -123,8 +137,10 @@ describe('resolveMeleeAttackAction', () => {
     });
 
     targetUnit = await Factories.createUnit();
-    let attackingPlayer = await Factories.createPlayer();
-    let targetPlayer = await Factories.createPlayer();
+    let attackingPlayer = await Factories.createPlayer(
+      p1PrivateKey.toPublicKey()
+    );
+    let targetPlayer = await Factories.createPlayer(p2PrivateKey.toPublicKey());
     let attackingPlayerUnit = await Factories.createPlayerUnit(
       attackingPlayer,
       attackingUnit
@@ -145,6 +161,7 @@ describe('resolveMeleeAttackAction', () => {
       10,
       10
     );
+
     let distance =
       attackingGamePiece.coordinates().y + (MELEE_ATTACK_RANGE - 1);
     targetGamePiece = await Factories.createGamePiece(
@@ -161,6 +178,17 @@ describe('resolveMeleeAttackAction', () => {
       phase: 'melee',
     });
 
+    const snarkyAttackingGamePiece = await attackingGamePiece.toSnarkyPiece();
+    const snarkyTargteGamePiece = await targetGamePiece.toSnarkyPiece();
+
+    const snarkyAction = new Action(
+      Field(1),
+      Field(2),
+      snarkyTargteGamePiece.hash(),
+      Field(snarkyAttackingGamePiece.id)
+    );
+    const signature = snarkyAction.sign(p1PrivateKey);
+
     action = await Models.GamePieceAction.create({
       gamePhaseId: gamePhase.id,
       gamePlayerId: attackingGamePlayer.id,
@@ -170,13 +198,9 @@ describe('resolveMeleeAttackAction', () => {
         actionType: 'meleeAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
-        encodedDiceRolls: {
-          publicKey: { x: 'xValue', y: 'yValue' },
-          cipherText: 'supersecret',
-          signature: { r: 'rValue', s: 'sValue' },
-        },
-        resolvedAttacks: undefined,
+        encryptedAttackRolls: [roll_6_6_1, roll_1_6_1, roll_6_1_1],
       },
+      signature: signature.toJSON(),
     });
   });
 
@@ -184,75 +208,7 @@ describe('resolveMeleeAttackAction', () => {
     await Factories.cleanup();
   });
 
-  describe.skip('with a valid action', () => {
-    beforeEach(async () => {
-      // Mock attack resolution
-      let mockResolvedAttackOne = {
-        hitRoll: {
-          roll: 6,
-          rollNeeded: attackingUnit.meleeHitRoll,
-          success: true
-        },
-        woundRoll: {
-          roll: 6,
-          rollNeeded: attackingUnit.meleeWoundRoll,
-          success: true
-        },
-        saveRoll: {
-          roll: 1,
-          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.meleeArmorPiercing,
-          success: false
-        },
-        damageDealt: 1,
-        averageDamage: 0.2,
-      };
-      let mockResolvedAttackTwo = {
-        hitRoll: {
-          roll: 1,
-          rollNeeded: attackingUnit.meleeHitRoll,
-          success: false
-        },
-        woundRoll: {
-          roll: 6,
-          rollNeeded: attackingUnit.meleeWoundRoll,
-          success: true
-        },
-        saveRoll: {
-          roll: 1,
-          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.meleeArmorPiercing,
-          success: false
-        },
-        damageDealt: 0,
-        averageDamage: 0.2,
-      };
-      let mockResolvedAttackThree = {
-        hitRoll: {
-          roll: 6,
-          rollNeeded: attackingUnit.meleeHitRoll,
-          success: true
-        },
-        woundRoll: {
-          roll: 1,
-          rollNeeded: attackingUnit.meleeWoundRoll,
-          success: false
-        },
-        saveRoll: {
-          roll: 1,
-          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.meleeArmorPiercing,
-          success: false
-        },
-        damageDealt: 0,
-        averageDamage: 0.2,
-      };
-      jest
-        .spyOn(AttackResolver, 'default')
-        .mockImplementation(() => [
-          mockResolvedAttackOne,
-          mockResolvedAttackTwo,
-          mockResolvedAttackThree,
-        ]);
-    });
-
+  describe('with a valid action', () => {
     it('resolves action and modifies state', async () => {
       await targetGamePiece.reload();
       expect(targetGamePiece.health).toBe(3);
@@ -296,7 +252,7 @@ describe('resolveMeleeAttackAction', () => {
 
   describe('with a unit out of range', () => {
     it('throws error', async () => {
-      await targetGamePiece.update({ positionX: 1000, positionY: 1000 });
+      await targetGamePiece.update({ positionX: 10, positionY: 100 });
       try {
         await resolveMeleeAttackAction(action);
         // Expect the above to throw error, should fail if not
