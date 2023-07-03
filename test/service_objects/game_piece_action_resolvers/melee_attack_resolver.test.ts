@@ -199,6 +199,7 @@ describe('resolveMeleeAttackAction', () => {
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
         encryptedAttackRolls: [roll_6_6_1, roll_1_6_1, roll_6_1_1],
+        resolvedAttacks: undefined,
       },
       signature: signature.toJSON(),
     });
