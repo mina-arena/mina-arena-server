@@ -65,15 +65,15 @@ export default async function resolveMoveAction(
   const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
   const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
 
-  const snarkyGameState = new PhaseState(
-    Field(0),
-    Field(0),
-    startingGamePiecesTree.tree.getRoot(),
-    startingGamePiecesTree.tree.getRoot(),
-    startingGameArenaTree.tree.getRoot(),
-    startingGameArenaTree.tree.getRoot(),
-    playerPublicKey
-  );
+  const snarkyGameState = new PhaseState({
+    nonce: Field(0),
+    actionsNonce: Field(0),
+    startingPiecesState: startingGamePiecesTree.tree.getRoot(),
+    currentPiecesState: startingGamePiecesTree.tree.getRoot(),
+    startingArenaState: startingGameArenaTree.tree.getRoot(),
+    currentArenaState: startingGameArenaTree.tree.getRoot(),
+    playerPublicKey,
+  });
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'move')
@@ -147,15 +147,15 @@ export default async function resolveMoveAction(
   if (snarkySuccess) {
     const endingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
     const endingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-    const snarkyGameStateAfter = new PhaseState(
-      Field(0),
-      Field(1),
-      startingGamePiecesTree.tree.getRoot(),
-      endingGamePiecesTree.tree.getRoot(),
-      startingGameArenaTree.tree.getRoot(),
-      endingGameArenaTree.tree.getRoot(),
-      playerPublicKey
-    )
+    const snarkyGameStateAfter = new PhaseState({
+      nonce: Field(0),
+      actionsNonce: Field(1),
+      startingPiecesState: startingGamePiecesTree.tree.getRoot(),
+      currentPiecesState: endingGamePiecesTree.tree.getRoot(),
+      startingArenaState: startingGameArenaTree.tree.getRoot(),
+      currentArenaState: endingGameArenaTree.tree.getRoot(),
+      playerPublicKey,
+    })
       .hash()
       .toString();
 

@@ -1,9 +1,13 @@
-import * as Models from '../../models/index.js';
-import { diceRoll } from '../../graphql/helpers.js';
 import {
-  EncryptedDiceRolls,
+  type EncrytpedAttackRollJSON,
   ResolvedAttack,
 } from '../../models/game_piece_action.js';
+
+import { PrivateKey, Group, Signature, Field, PublicKey } from 'snarkyjs';
+import { EncrytpedAttackRoll } from 'mina-arena-contracts';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export default function resolveAttacks(
   numAttacks: number,
@@ -12,19 +16,28 @@ export default function resolveAttacks(
   targetSaveRollStat: number,
   attackerArmorPiercingStat: number,
   attackerDamageStat: number,
-  encodedDiceRolls: EncryptedDiceRolls
+  attackRolls: EncrytpedAttackRollJSON[]
 ): ResolvedAttack[] {
-  // TODO: Decode dice roll results using private key
-  //  For now just simulate rolls here
-  const decodedDiceRolls = simulateDiceRolls(numAttacks);
+  const serverPrivateKey = PrivateKey.fromBase58(
+    process.env.SERVER_PRIVATE_KEY
+  );
+  const decryptedAttackRolls = attackRolls.map((roll) => {
+    const snarkyRoll = new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(roll.publicKey),
+      ciphertext: roll.ciphertext.map((c) => Field(c)),
+      signature: Signature.fromJSON(roll.signature),
+      rngPublicKey: PublicKey.fromBase58(roll.rngPublicKey),
+    });
+
+    return snarkyRoll.decryptRoll(serverPrivateKey);
+  });
 
   // Gather details of each attack and determine damage
   let attacks = [];
   for (let i = 0; i < numAttacks; i++) {
-    const rollsOffset = i * 3;
-    const hitRoll = decodedDiceRolls[rollsOffset];
-    const woundRoll = decodedDiceRolls[rollsOffset + 1];
-    const saveRoll = decodedDiceRolls[rollsOffset + 2];
+    const hitRoll = Number(decryptedAttackRolls[i].hit.toString());
+    const woundRoll = Number(decryptedAttackRolls[i].wound.toString());
+    const saveRoll = Number(decryptedAttackRolls[i].save.toString());
 
     const hitRollSuccess = hitRoll >= attackerHitRollStat;
     const woundRollSuccess = woundRoll >= attackerWoundRollStat;
@@ -69,15 +82,4 @@ export default function resolveAttacks(
     });
   }
   return attacks;
-}
-
-// Simulate the attack sequence
-function simulateDiceRolls(numAttacks: number): number[] {
-  let rolls = [];
-  for (let i = 0; i < numAttacks; i++) {
-    rolls.push(diceRoll()); // hit roll
-    rolls.push(diceRoll()); // wound roll
-    rolls.push(diceRoll()); // save roll
-  }
-  return rolls;
 }

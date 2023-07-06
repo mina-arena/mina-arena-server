@@ -1,8 +1,10 @@
-import { jest } from '@jest/globals'
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
-import resolveRangedAttackAction, { validateRangedAttackAction } from '../../../src/service_objects/game_piece_action_resolvers/ranged_attack_resolver';
+import resolveRangedAttackAction, {
+  validateRangedAttackAction,
+} from '../../../src/service_objects/game_piece_action_resolvers/ranged_attack_resolver';
 import * as AttackResolver from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
+import { roll_6_6_1 } from '../../support/dice_rolls';
 
 describe('validateRangedAttackAction', () => {
   let attackingGamePiece: Models.GamePiece;
@@ -30,19 +32,38 @@ describe('validateRangedAttackAction', () => {
       rangedWoundRoll: 4,
       rangedArmorPiercing: 1,
       rangedDamage: 1,
-      rangedAmmo: 5
+      rangedAmmo: 5,
     });
 
     let targetUnit = await Factories.createUnit();
     let attackingPlayer = await Factories.createPlayer();
     let targetPlayer = await Factories.createPlayer();
-    let attackingPlayerUnit = await Factories.createPlayerUnit(attackingPlayer, attackingUnit);
-    let targetPlayerUnit = await Factories.createPlayerUnit(targetPlayer, targetUnit);
-    let attackingGamePlayer = await Factories.createGamePlayer(game, attackingPlayer);
+    let attackingPlayerUnit = await Factories.createPlayerUnit(
+      attackingPlayer,
+      attackingUnit
+    );
+    let targetPlayerUnit = await Factories.createPlayerUnit(
+      targetPlayer,
+      targetUnit
+    );
+    let attackingGamePlayer = await Factories.createGamePlayer(
+      game,
+      attackingPlayer
+    );
     let targetGamePlayer = await Factories.createGamePlayer(game, targetPlayer);
 
-    attackingGamePiece = await Factories.createGamePiece(attackingGamePlayer, attackingPlayerUnit, 10, 10);
-    targetGamePiece = await Factories.createGamePiece(targetGamePlayer, targetPlayerUnit, 10, 15);
+    attackingGamePiece = await Factories.createGamePiece(
+      attackingGamePlayer,
+      attackingPlayerUnit,
+      10,
+      10
+    );
+    targetGamePiece = await Factories.createGamePiece(
+      targetGamePlayer,
+      targetPlayerUnit,
+      10,
+      15
+    );
   });
 
   afterAll(async () => {
@@ -72,8 +93,10 @@ describe('validateRangedAttackAction', () => {
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
       } catch (e) {
-        expect(e.message).toContain('cannot execute a ranged attack against target GamePiece');
-        expect(e.message).toContain('is greater than attacker\'s max range');
+        expect(e.message).toContain(
+          'cannot execute a ranged attack against target GamePiece'
+        );
+        expect(e.message).toContain("is greater than attacker's max range");
       }
     });
   });
@@ -107,25 +130,44 @@ describe('resolveRangedAttackAction', () => {
       rangedWoundRoll: 4,
       rangedArmorPiercing: 1,
       rangedDamage: 1,
-      rangedAmmo: 5
+      rangedAmmo: 5,
     });
 
     targetUnit = await Factories.createUnit();
     let attackingPlayer = await Factories.createPlayer();
     let targetPlayer = await Factories.createPlayer();
-    let attackingPlayerUnit = await Factories.createPlayerUnit(attackingPlayer, attackingUnit);
-    let targetPlayerUnit = await Factories.createPlayerUnit(targetPlayer, targetUnit);
-    let attackingGamePlayer = await Factories.createGamePlayer(game, attackingPlayer);
+    let attackingPlayerUnit = await Factories.createPlayerUnit(
+      attackingPlayer,
+      attackingUnit
+    );
+    let targetPlayerUnit = await Factories.createPlayerUnit(
+      targetPlayer,
+      targetUnit
+    );
+    let attackingGamePlayer = await Factories.createGamePlayer(
+      game,
+      attackingPlayer
+    );
     let targetGamePlayer = await Factories.createGamePlayer(game, targetPlayer);
 
-    let attackingGamePiece = await Factories.createGamePiece(attackingGamePlayer, attackingPlayerUnit, 10, 10);
-    targetGamePiece = await Factories.createGamePiece(targetGamePlayer, targetPlayerUnit, 10, 15);
+    let attackingGamePiece = await Factories.createGamePiece(
+      attackingGamePlayer,
+      attackingPlayerUnit,
+      10,
+      10
+    );
+    targetGamePiece = await Factories.createGamePiece(
+      targetGamePlayer,
+      targetPlayerUnit,
+      10,
+      15
+    );
 
     let gamePhase = await Models.GamePhase.create({
       gameId: game.id,
       gamePlayerId: attackingGamePlayer.id,
       turnNumber: 1,
-      phase: 'shooting'
+      phase: 'shooting',
     });
 
     action = await Models.GamePieceAction.create({
@@ -137,13 +179,9 @@ describe('resolveRangedAttackAction', () => {
         actionType: 'rangedAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
-        encodedDiceRolls: {
-          publicKey: { x: 'xValue', y: 'yValue' },
-          cipherText: 'supersecret',
-          signature: { r: 'rValue', s: 'sValue' }
-        },
-        resolvedAttacks: undefined
-      }
+        encryptedAttackRolls: [roll_6_6_1, roll_6_6_1, roll_6_6_1],
+        resolvedAttacks: undefined,
+      },
     });
   });
 
@@ -151,31 +189,7 @@ describe('resolveRangedAttackAction', () => {
     await Factories.cleanup();
   });
 
-  describe.skip('with a valid action', () => {
-    beforeEach(async () => {
-      // Mock attack resolution
-      let mockResolvedAttack = {
-        hitRoll: {
-          roll: 6,
-          rollNeeded: attackingUnit.rangedHitRoll,
-          success: true
-        },
-        woundRoll: {
-          roll: 6,
-          rollNeeded: attackingUnit.rangedWoundRoll,
-          success: true
-        },
-        saveRoll: {
-          roll: 1,
-          rollNeeded: targetUnit.armorSaveRoll - attackingUnit.rangedArmorPiercing,
-          success: false
-        },
-        damageDealt: 1,
-        averageDamage: 0.2,
-      };
-      jest.spyOn(AttackResolver, 'default').mockImplementation(() => [mockResolvedAttack]);
-    });
-
+  describe('with a valid action', () => {
     it('resolves action and modifies state', async () => {
       await targetGamePiece.reload();
       expect(targetGamePiece.health).toBe(3);
@@ -184,35 +198,37 @@ describe('resolveRangedAttackAction', () => {
 
       // Check action to now be resolved with saved results
       await action.reload();
-      expect(action.actionData['resolved']).toBe(true)
-      let savedResolvedAttacks = action.actionData['resolvedAttacks']
-      expect(savedResolvedAttacks.length).toBe(1)
-      expect(savedResolvedAttacks[0].hitRoll.roll).toBe(6)
-      expect(savedResolvedAttacks[0].hitRoll.success).toBe(true)
-      expect(savedResolvedAttacks[0].woundRoll.roll).toBe(6)
-      expect(savedResolvedAttacks[0].woundRoll.success).toBe(true)
-      expect(savedResolvedAttacks[0].saveRoll.roll).toBe(1)
-      expect(savedResolvedAttacks[0].saveRoll.success).toBe(false)
-      expect(savedResolvedAttacks[0].damageDealt).toBe(1)
+      expect(action.actionData['resolved']).toBe(true);
+      let savedResolvedAttacks = action.actionData['resolvedAttacks'];
+      expect(savedResolvedAttacks.length).toBe(3);
+      expect(savedResolvedAttacks[0].hitRoll.roll).toBe(6);
+      expect(savedResolvedAttacks[0].hitRoll.success).toBe(true);
+      expect(savedResolvedAttacks[0].woundRoll.roll).toBe(6);
+      expect(savedResolvedAttacks[0].woundRoll.success).toBe(true);
+      expect(savedResolvedAttacks[0].saveRoll.roll).toBe(1);
+      expect(savedResolvedAttacks[0].saveRoll.success).toBe(false);
+      expect(savedResolvedAttacks[0].damageDealt).toBe(1);
 
-      expect(action.actionData['totalDamageDealt']).toBe(1);
+      expect(action.actionData['totalDamageDealt']).toBe(3);
 
       // Check targetGamePiece new health
       await targetGamePiece.reload();
-      expect(targetGamePiece.health).toBe(2);
+      expect(targetGamePiece.health).toBe(0);
     });
   });
 
   describe('with a unit out of range', () => {
     it('throws error', async () => {
-      await targetGamePiece.update({ positionX: 1000, positionY: 1000 });
+      await targetGamePiece.update({ positionX: 10, positionY: 500 });
       try {
         await resolveRangedAttackAction(action);
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
       } catch (e) {
-        expect(e.message).toContain('cannot execute a ranged attack against target GamePiece');
-        expect(e.message).toContain('is greater than attacker\'s max range');
+        expect(e.message).toContain(
+          'cannot execute a ranged attack against target GamePiece'
+        );
+        expect(e.message).toContain("is greater than attacker's max range");
       }
     });
   });

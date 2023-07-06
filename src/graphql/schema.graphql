@@ -251,12 +251,12 @@ input GamePieceCoordinatesInput {
 
 input GamePieceRangedAttackActionInput {
   targetGamePieceId: Int!
-  diceRoll: DiceRollInput!
+  diceRolls: [DiceRollInput!]!
 }
 
 input GamePieceMeleeAttackActionInput {
   targetGamePieceId: Int!
-  diceRoll: DiceRollInput!
+  diceRolls: [DiceRollInput!]!
 }
 
 input DiceRollInput {

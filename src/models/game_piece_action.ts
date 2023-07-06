@@ -23,7 +23,7 @@ export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encodedDiceRolls: EncryptedDiceRolls;
+  encryptedAttackRolls: EncrytpedAttackRollJSON[];
   resolvedAttacks?: ResolvedAttack[];
   totalDamageDealt?: number;
   totalDamageAverage?: number;
@@ -32,7 +32,7 @@ export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encodedDiceRolls: EncryptedDiceRolls;
+  encryptedAttackRolls: EncrytpedAttackRollJSON[];
   resolvedAttacks?: ResolvedAttack[];
   totalDamageDealt?: number;
   totalDamageAverage?: number;
@@ -41,12 +41,6 @@ export type GamePieceActionData =
   | GamePieceMoveAction
   | GamePieceRangedAttackAction
   | GamePieceMeleeAttackAction;
-
-export type EncryptedDiceRolls = {
-  publicKey: { x: string; y: string };
-  cipherText: string;
-  signature: { r: string; s: string };
-};
 
 export type ResolvedAttack = {
   hitRoll: RollResult;
@@ -60,6 +54,19 @@ export type RollResult = {
   roll: number;
   rollNeeded: number;
   success: boolean;
+};
+
+export type EncrytpedAttackRollJSON = {
+  publicKey: {
+    x: string;
+    y: string;
+  };
+  ciphertext: string[];
+  signature: {
+    r: string;
+    s: string;
+  };
+  rngPublicKey: string;
 };
 
 class GamePieceAction extends Model<

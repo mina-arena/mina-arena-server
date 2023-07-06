@@ -1,5 +1,6 @@
 import resolveAttack from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
-import { EncryptedDiceRolls } from '../../../src/models/game_piece_action.js';
+import { EncrytpedAttackRollJSON } from '../../../src/models/game_piece_action';
+import { roll_6_6_1 } from '../../support/dice_rolls';
 
 describe('resolveAttack', () => {
   let numAttacks: number;
@@ -8,7 +9,7 @@ describe('resolveAttack', () => {
   let targetSaveRollStat: number;
   let attackerArmorPiercingStat: number;
   let attackerDamageStat: number;
-  let encodedDiceRolls: EncryptedDiceRolls;
+  let encryptedAttackRolls: EncrytpedAttackRollJSON[];
 
   beforeEach(async () => {
     numAttacks = 100;
@@ -18,11 +19,7 @@ describe('resolveAttack', () => {
     attackerArmorPiercingStat = 1;
     attackerDamageStat = 1;
 
-    encodedDiceRolls = {
-      publicKey: { x: 'xValue', y: 'yValue' },
-      cipherText: 'secret',
-      signature: { r: 'rValue', s: 'sValue' },
-    };
+    encryptedAttackRolls = new Array(numAttacks).fill(roll_6_6_1);
   });
 
   it('resolves attack sequences correctly', async () => {
@@ -33,7 +30,7 @@ describe('resolveAttack', () => {
       targetSaveRollStat,
       attackerArmorPiercingStat,
       attackerDamageStat,
-      encodedDiceRolls
+      encryptedAttackRolls
     );
     expect(resolvedAttacks.length).toBe(numAttacks);
     resolvedAttacks.forEach((resolvedAttack) => {
