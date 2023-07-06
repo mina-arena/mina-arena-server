@@ -181,12 +181,12 @@ describe('resolveMeleeAttackAction', () => {
     const snarkyAttackingGamePiece = await attackingGamePiece.toSnarkyPiece();
     const snarkyTargteGamePiece = await targetGamePiece.toSnarkyPiece();
 
-    const snarkyAction = new Action(
-      Field(1),
-      Field(2),
-      snarkyTargteGamePiece.hash(),
-      Field(snarkyAttackingGamePiece.id)
-    );
+    const snarkyAction = new Action({
+      nonce: Field(1),
+      actionType: Field(2),
+      actionParams: snarkyTargteGamePiece.hash(),
+      piece: Field(snarkyAttackingGamePiece.id),
+    });
     const signature = snarkyAction.sign(p1PrivateKey);
 
     action = await Models.GamePieceAction.create({

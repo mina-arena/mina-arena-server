@@ -139,12 +139,12 @@ export default async function resolveRangedAttackAction(
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
   const actionParam = Field(snarkyTargetPiece.id);
-  const snarkyAction = new Action(
-    Field(1),
-    Field(0),
-    actionParam,
-    snarkyAttackingPiece.id
-  );
+  const snarkyAction = new Action({
+    nonce: Field(1),
+    actionType: Field(0),
+    actionParams: actionParam,
+    piece: snarkyAttackingPiece.id,
+  });
 
   // Attempt to apply the move action to the game state
   // Warn on console for failure

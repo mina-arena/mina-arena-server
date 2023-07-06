@@ -80,12 +80,13 @@ class GamePiece extends Model<
     const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
     const gamePieceNumber = await this.gamePieceNumber();
 
-    const p = new Piece(
-      Field(gamePieceNumber),
-      minaPublicKey,
-      snarkyPosition,
-      snarkyUnit
-    );
+    const p = new Piece({
+      id: Field(gamePieceNumber),
+      playerPublicKey: minaPublicKey,
+      position: snarkyPosition,
+      baseUnit: snarkyUnit,
+      condition: snarkyUnit.stats,
+    });
 
     return p;
   }
