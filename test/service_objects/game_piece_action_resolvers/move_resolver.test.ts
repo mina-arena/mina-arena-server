@@ -202,7 +202,6 @@ describe('resolveMoveAction', () => {
       Field(await movingGamePiece.gamePieceNumber())
     );
     const signature = snarkyAction.sign(p1PrivateKey);
-    console.log(signature.toJSON());
 
     action = await Models.GamePieceAction.create({
       gamePhaseId: gamePhase.id,

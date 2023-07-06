@@ -169,12 +169,12 @@ async function handleRangedAttackAction(
 
   // Create GamePieceAction record in unresolved state
   const encryptedAttackRolls = rangedAttackInput.diceRolls.map((roll) => {
-    return new EncrytpedAttackRoll({
-      publicKey: Group.fromJSON(roll.publicKey),
-      ciphertext: roll.cipherText.split(',').map((x) => Field(x)),
-      signature: Signature.fromJSON(roll.signature),
-      rngPublicKey: PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY),
-    });
+    return {
+      publicKey: roll.publicKey,
+      ciphertext: roll.cipherText.split(','),
+      signature: roll.signature,
+      rngPublicKey: process.env.RNG_PUBLIC_KEY,
+    };
   });
   return await Models.GamePieceAction.create(
     {
@@ -214,12 +214,12 @@ async function handleMeleeAttackAction(
   );
 
   const encryptedAttackRolls = meleeAttackInput.diceRolls.map((roll) => {
-    return new EncrytpedAttackRoll({
-      publicKey: Group.fromJSON(roll.publicKey),
-      ciphertext: roll.cipherText.split(',').map((x) => Field(x)),
-      signature: Signature.fromJSON(roll.signature),
-      rngPublicKey: PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY),
-    });
+    return {
+      publicKey: roll.publicKey,
+      ciphertext: roll.cipherText.split(','),
+      signature: roll.signature,
+      rngPublicKey: process.env.RNG_PUBLIC_KEY,
+    };
   });
   return await Models.GamePieceAction.create(
     {

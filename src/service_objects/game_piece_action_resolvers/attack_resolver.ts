@@ -1,6 +1,9 @@
-import { ResolvedAttack } from '../../models/game_piece_action.js';
+import {
+  type EncrytpedAttackRollJSON,
+  ResolvedAttack,
+} from '../../models/game_piece_action.js';
 
-import { PrivateKey } from 'snarkyjs';
+import { PrivateKey, Group, Signature, Field, PublicKey } from 'snarkyjs';
 import { EncrytpedAttackRoll } from 'mina-arena-contracts';
 import dotenv from 'dotenv';
 
@@ -13,21 +16,28 @@ export default function resolveAttacks(
   targetSaveRollStat: number,
   attackerArmorPiercingStat: number,
   attackerDamageStat: number,
-  encodedDiceRolls: EncrytpedAttackRoll[]
+  attackRolls: EncrytpedAttackRollJSON[]
 ): ResolvedAttack[] {
   const serverPrivateKey = PrivateKey.fromBase58(
     process.env.SERVER_PRIVATE_KEY
   );
-  const decodedDiceRolls = encodedDiceRolls.map((roll) => {
-    return roll.decryptRoll(serverPrivateKey);
+  const decryptedAttackRolls = attackRolls.map((roll) => {
+    const snarkyRoll = new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(roll.publicKey),
+      ciphertext: roll.ciphertext.map((c) => Field(c)),
+      signature: Signature.fromJSON(roll.signature),
+      rngPublicKey: PublicKey.fromBase58(roll.rngPublicKey),
+    });
+
+    return snarkyRoll.decryptRoll(serverPrivateKey);
   });
 
   // Gather details of each attack and determine damage
   let attacks = [];
   for (let i = 0; i < numAttacks; i++) {
-    const hitRoll = Number(decodedDiceRolls[i].hit.toString());
-    const woundRoll = Number(decodedDiceRolls[i].wound.toString());
-    const saveRoll = Number(decodedDiceRolls[i].save.toString());
+    const hitRoll = Number(decryptedAttackRolls[i].hit.toString());
+    const woundRoll = Number(decryptedAttackRolls[i].wound.toString());
+    const saveRoll = Number(decryptedAttackRolls[i].save.toString());
 
     const hitRollSuccess = hitRoll >= attackerHitRollStat;
     const woundRollSuccess = woundRoll >= attackerWoundRollStat;

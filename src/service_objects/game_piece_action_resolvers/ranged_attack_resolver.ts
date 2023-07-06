@@ -3,8 +3,15 @@ import resolveAttacks from './attack_resolver.js';
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState } from 'mina-arena-contracts';
-import { Field, PublicKey, UInt32, Signature, PrivateKey } from 'snarkyjs';
+import { Action, PhaseState, EncrytpedAttackRoll } from 'mina-arena-contracts';
+import {
+  Field,
+  PublicKey,
+  UInt32,
+  Signature,
+  PrivateKey,
+  Group,
+} from 'snarkyjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -93,15 +100,15 @@ export default async function resolveRangedAttackAction(
     attackingGamePiece.gameId
   );
 
-  const snarkyGameState = new PhaseState(
-    Field(0),
-    Field(0),
-    startingGamePiecesTree.tree.getRoot(),
-    startingGamePiecesTree.tree.getRoot(),
-    startingGameArenaTree.tree.getRoot(),
-    startingGameArenaTree.tree.getRoot(),
-    playerPublicKey
-  );
+  const snarkyGameState = new PhaseState({
+    nonce: Field(0),
+    actionsNonce: Field(0),
+    startingPiecesState: startingGamePiecesTree.tree.getRoot(),
+    currentPiecesState: startingGamePiecesTree.tree.getRoot(),
+    startingArenaState: startingGameArenaTree.tree.getRoot(),
+    currentArenaState: startingGameArenaTree.tree.getRoot(),
+    playerPublicKey,
+  });
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'rangedAttack')
@@ -152,7 +159,12 @@ export default async function resolveRangedAttackAction(
 
     // For each attack, attempt to apply the attack action
     for (let i = 0; i < attackRolls.length; i++) {
-      const roll = attackRolls[i];
+      const roll = new EncrytpedAttackRoll({
+        publicKey: Group.fromJSON(attackRolls[i].publicKey),
+        ciphertext: attackRolls[i].ciphertext.map((c) => Field(c)),
+        signature: Signature.fromJSON(attackRolls[i].signature),
+        rngPublicKey: PublicKey.fromBase58(attackRolls[i].rngPublicKey),
+      });
       const piecesTreeAfterAttack = startingGamePiecesTree.clone();
       piecesTreeAfterAttack.set(
         snarkyTargetPiece.id.toBigInt(),

@@ -86,22 +86,8 @@ class GamePiece extends Model<
       snarkyPosition,
       snarkyUnit
     );
-    console.log('Creating snarky piece', {
-      gamePieceNumber,
-      minaPublicKey: minaPublicKey.toBase58(),
-      snarkyPositionX: snarkyPosition.x.toString(),
-      snarkyPositionY: snarkyPosition.y.toString(),
-      snarkyUnit: snarkyUnit.hash().toString(),
-      hash: p.hash().toString(),
-    });
 
     return p;
-    // return new Piece(
-    //   Field(gamePieceNumber),
-    //   minaPublicKey,
-    //   snarkyPosition,
-    //   snarkyUnit
-    // );
   }
 
   // Returns the number of this game piece in the game, starting from 1
