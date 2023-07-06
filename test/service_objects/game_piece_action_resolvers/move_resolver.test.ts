@@ -195,12 +195,12 @@ describe('resolveMoveAction', () => {
 
     let currentPos = movingGamePiece.coordinates();
 
-    const snarkyAction = new Action(
-      Field(1),
-      Field(0),
-      Position.fromXY(currentPos.x + 5, currentPos.y).hash(),
-      Field(await movingGamePiece.gamePieceNumber())
-    );
+    const snarkyAction = new Action({
+      nonce: Field(1),
+      actionType: Field(0),
+      actionParams: Position.fromXY(currentPos.x + 5, currentPos.y).hash(),
+      piece: Field(await movingGamePiece.gamePieceNumber()),
+    });
     const signature = snarkyAction.sign(p1PrivateKey);
 
     action = await Models.GamePieceAction.create({

@@ -76,12 +76,13 @@ describe('Pieces Tree Serlializer', () => {
       const player = await gamePlayer.player();
 
       const snarkyUnit = unit.toSnarkyUnit();
-      const snarkyPiece = new Piece(
-        Field(gamePieceNumber),
-        PublicKey.fromBase58(player.minaPublicKey),
-        Position.fromXY(gamePiece.positionX, gamePiece.positionY),
-        snarkyUnit
-      );
+      const snarkyPiece = new Piece({
+        id: Field(gamePieceNumber),
+        playerPublicKey: PublicKey.fromBase58(player.minaPublicKey),
+        position: Position.fromXY(gamePiece.positionX, gamePiece.positionY),
+        baseUnit: snarkyUnit,
+        condition: snarkyUnit.stats,
+      });
 
       expectedTree.set(BigInt(gamePieceNumber), snarkyPiece.hash());
     }

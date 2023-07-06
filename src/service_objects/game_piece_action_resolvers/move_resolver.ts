@@ -90,12 +90,12 @@ export default async function resolveMoveAction(
 
   const actionParam = Position.fromXY(actionData.moveTo.x, actionData.moveTo.y);
   const snarkyPiece = await gamePiece.toSnarkyPiece();
-  const snarkyAction = new Action(
-    Field(1),
-    Field(0),
-    actionParam.hash(),
-    snarkyPiece.id
-  );
+  const snarkyAction = new Action({
+    nonce: Field(1),
+    actionType: Field(0),
+    actionParams: actionParam.hash(),
+    piece: snarkyPiece.id,
+  });
 
   // Attempt to apply the move action to the game state
   // Warn on console for failure
