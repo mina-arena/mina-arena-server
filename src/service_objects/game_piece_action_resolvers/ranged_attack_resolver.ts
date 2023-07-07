@@ -205,27 +205,30 @@ export default async function resolveRangedAttackAction(
     );
   }
 
-  console.log(
-    '$$',
-    'Resolving Ranged Attack',
-    attackingUnit.rangedNumAttacks,
-    attackingUnit.rangedHitRoll,
-    attackingUnit.rangedWoundRoll,
-    targetUnit.armorSaveRoll,
-    attackingUnit.rangedArmorPiercing,
-    attackingUnit.rangedDamage,
-    attackRolls
-  );
+  console.log('$$', 'Resolving Ranged Attack', {
+    numAtks: attackingUnit.rangedNumAttacks,
+    hit: attackingUnit.rangedHitRoll,
+    wound: attackingUnit.rangedWoundRoll,
+    save: targetUnit.armorSaveRoll,
+    ap: attackingUnit.rangedArmorPiercing,
+    dmg: attackingUnit.rangedDamage,
+  });
   // Resolve attack sequence
-  const resolvedAttacks = resolveAttacks(
-    attackingUnit.rangedNumAttacks,
-    attackingUnit.rangedHitRoll,
-    attackingUnit.rangedWoundRoll,
-    targetUnit.armorSaveRoll,
-    attackingUnit.rangedArmorPiercing,
-    attackingUnit.rangedDamage,
-    attackRolls
-  );
+  let resolvedAttacks;
+  try {
+    resolvedAttacks = resolveAttacks(
+      attackingUnit.rangedNumAttacks,
+      attackingUnit.rangedHitRoll,
+      attackingUnit.rangedWoundRoll,
+      targetUnit.armorSaveRoll,
+      attackingUnit.rangedArmorPiercing,
+      attackingUnit.rangedDamage,
+      attackRolls
+    );
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
   console.log('$$', 'Resolved');
   const totalDamageDealt = resolvedAttacks.reduce(
     (sum, attack) => sum + attack.damageDealt,
