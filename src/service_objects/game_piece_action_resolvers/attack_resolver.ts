@@ -18,6 +18,7 @@ export default function resolveAttacks(
   attackerDamageStat: number,
   attackRolls: EncrytpedAttackRollJSON[]
 ): ResolvedAttack[] {
+  console.log('$$$', 'Resolving...');
   const serverPrivateKey = PrivateKey.fromBase58(
     process.env.SERVER_PRIVATE_KEY
   );
@@ -31,6 +32,8 @@ export default function resolveAttacks(
 
     return snarkyRoll.decryptRoll(serverPrivateKey);
   });
+
+  console.log('$$$', 'Decrypted rolls:', decryptedAttackRolls);
 
   // Gather details of each attack and determine damage
   let attacks = [];
@@ -79,6 +82,7 @@ export default function resolveAttacks(
       damageDealt: damageDealt,
       averageDamage: averageDamage,
     });
+    console.log('$$$', 'Attack:', attacks);
   }
   return attacks;
 }

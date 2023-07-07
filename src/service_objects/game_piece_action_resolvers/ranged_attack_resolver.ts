@@ -191,41 +191,42 @@ export default async function resolveRangedAttackAction(
     console.log(
       `Successfully applied snarky ranged attack action ${JSON.stringify(
         actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
+      )} to game ${attackingGamePiece.gameId} attacking piece ${attackingGamePiece.id
       }, target piece ${targetGamePiece.id}`
     );
   } catch (e) {
     console.warn(
       `Unable to apply snarky ranged attack action ${JSON.stringify(
         actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
+      )} to game ${attackingGamePiece.gameId} attacking piece ${attackingGamePiece.id
       }, target piece ${targetGamePiece.id} - ${e}`
     );
   }
 
-  console.log(
-    '$$',
-    'Resolving Ranged Attack',
-    attackingUnit.rangedNumAttacks,
-    attackingUnit.rangedHitRoll,
-    attackingUnit.rangedWoundRoll,
-    targetUnit.armorSaveRoll,
-    attackingUnit.rangedArmorPiercing,
-    attackingUnit.rangedDamage,
-    attackRolls
-  );
+  console.log('$$', 'Resolving Ranged Attack', {
+    numAtks: attackingUnit.rangedNumAttacks,
+    hit: attackingUnit.rangedHitRoll,
+    wound: attackingUnit.rangedWoundRoll,
+    save: targetUnit.armorSaveRoll,
+    ap: attackingUnit.rangedArmorPiercing,
+    dmg: attackingUnit.rangedDamage,
+  });
   // Resolve attack sequence
-  const resolvedAttacks = resolveAttacks(
-    attackingUnit.rangedNumAttacks,
-    attackingUnit.rangedHitRoll,
-    attackingUnit.rangedWoundRoll,
-    targetUnit.armorSaveRoll,
-    attackingUnit.rangedArmorPiercing,
-    attackingUnit.rangedDamage,
-    attackRolls
-  );
+  let resolvedAttacks;
+  try {
+    resolvedAttacks = resolveAttacks(
+      attackingUnit.rangedNumAttacks,
+      attackingUnit.rangedHitRoll,
+      attackingUnit.rangedWoundRoll,
+      targetUnit.armorSaveRoll,
+      attackingUnit.rangedArmorPiercing,
+      attackingUnit.rangedDamage,
+      attackRolls
+    );
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
   console.log('$$', 'Resolved');
   const totalDamageDealt = resolvedAttacks.reduce(
     (sum, attack) => sum + attack.damageDealt,
