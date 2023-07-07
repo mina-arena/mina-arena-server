@@ -205,6 +205,17 @@ export default async function resolveRangedAttackAction(
     );
   }
 
+  console.log(
+    '$$',
+    'Resolving Ranged Attack',
+    attackingUnit.rangedNumAttacks,
+    attackingUnit.rangedHitRoll,
+    attackingUnit.rangedWoundRoll,
+    targetUnit.armorSaveRoll,
+    attackingUnit.rangedArmorPiercing,
+    attackingUnit.rangedDamage,
+    attackRolls
+  );
   // Resolve attack sequence
   const resolvedAttacks = resolveAttacks(
     attackingUnit.rangedNumAttacks,
@@ -215,6 +226,7 @@ export default async function resolveRangedAttackAction(
     attackingUnit.rangedDamage,
     attackRolls
   );
+  console.log('$$', 'Resolved');
   const totalDamageDealt = resolvedAttacks.reduce(
     (sum, attack) => sum + attack.damageDealt,
     0
@@ -223,14 +235,18 @@ export default async function resolveRangedAttackAction(
     (sum, attack) => sum + attack.averageDamage,
     0
   );
+  console.log('$$', 'Damage', totalDamageDealt, totalDamageAverage);
 
   // Update target GamePiece with damage dealt
   if (totalDamageDealt > 0) {
     const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
     targetGamePiece.health = newHealth;
+    console.log('$$', 'Saving Damage');
     await targetGamePiece.save({ transaction });
+    console.log('$$', 'Saved Damage');
   }
 
+  console.log('$$', 'Updating Action to be Resolved');
   // Update action record as resolved
   let newActionData = JSON.parse(JSON.stringify(actionData));
   newActionData.resolved = true;
@@ -238,5 +254,7 @@ export default async function resolveRangedAttackAction(
   newActionData.totalDamageDealt = totalDamageDealt;
   newActionData.totalDamageAverage = totalDamageAverage;
   action.actionData = newActionData;
+  console.log('$$', 'action', action);
   await action.save({ transaction });
+  console.log('$$', 'resolved');
 }
