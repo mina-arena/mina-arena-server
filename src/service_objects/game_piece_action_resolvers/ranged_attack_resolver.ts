@@ -191,16 +191,14 @@ export default async function resolveRangedAttackAction(
     console.log(
       `Successfully applied snarky ranged attack action ${JSON.stringify(
         actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
+      )} to game ${attackingGamePiece.gameId} attacking piece ${attackingGamePiece.id
       }, target piece ${targetGamePiece.id}`
     );
   } catch (e) {
     console.warn(
       `Unable to apply snarky ranged attack action ${JSON.stringify(
         actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
+      )} to game ${attackingGamePiece.gameId} attacking piece ${attackingGamePiece.id
       }, target piece ${targetGamePiece.id} - ${e}`
     );
   }
