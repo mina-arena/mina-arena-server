@@ -23,6 +23,7 @@ export default function resolveAttacks(
     process.env.SERVER_PRIVATE_KEY
   );
   const decryptedAttackRolls = attackRolls.map((roll) => {
+    console.log('$$$', 'Roll:', roll);
     const snarkyRoll = new EncrytpedAttackRoll({
       publicKey: Group.fromJSON(roll.publicKey),
       ciphertext: roll.ciphertext.map((c) => Field(c)),
