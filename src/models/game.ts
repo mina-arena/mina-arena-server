@@ -1,4 +1,10 @@
-import { DataTypes, Model, InferAttributes, InferCreationAttributes, CreationOptional } from 'sequelize';
+import {
+  DataTypes,
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+} from 'sequelize';
 import sequelizeConnection from '../db/config.js';
 import { GamePhaseName } from './game_phase.js';
 import * as Models from './index.js';
@@ -28,14 +34,14 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   async gamePlayersInTurnOrder(): Promise<Models.GamePlayer[]> {
     if (this.turnPlayerOrder === undefined) return [];
 
-    var playerNums = this.turnPlayerOrderArray();
-    var gamePlayers = await Models.GamePlayer.findAll({
-      where: { gameId: this.id, playerNumber: playerNums }
+    let playerNums = this.turnPlayerOrderArray();
+    let gamePlayers = await Models.GamePlayer.findAll({
+      where: { gameId: this.id, playerNumber: playerNums },
     });
     // TODO: This is super inefficient, but fine for
     // now since we'll only have two players per game.
-    return playerNums.map(function(playerNum) {
-      return gamePlayers.find(function(gamePlayer) {
+    return playerNums.map(function (playerNum) {
+      return gamePlayers.find(function (gamePlayer) {
         return gamePlayer.playerNumber == +playerNum;
       });
     });
@@ -52,8 +58,15 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   async currentPhase(): Promise<Models.GamePhase> {
     return await Models.GamePhase.findOne({
       where: { gameId: this.id },
-      order: [['id', 'DESC']]
-    })
+      order: [['id', 'DESC']],
+    });
+  }
+
+  async previousPhase(): Promise<Models.GamePhase> {
+    return await Models.GamePhase.findAll({
+      where: { gameId: this.id },
+      order: [['id', 'DESC']],
+    })[1];
   }
 
   // Get the GamePlayer whose turn it is
@@ -69,8 +82,8 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     return await Models.GamePlayer.findOne({
       where: {
         gameId: this.id,
-        playerNumber: nextNumber
-      }
+        playerNumber: nextNumber,
+      },
     });
   }
 
@@ -81,13 +94,13 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   }
 
   async gameArena(): Promise<Models.GameArena> {
-    return await Models.GameArena.findOne({ where: { gameId: this.id }});
+    return await Models.GameArena.findOne({ where: { gameId: this.id } });
   }
 
   // Get an array of integers representing the order in which players take turns.
   // Each integer element is the playerNumber of the associated GamePlayer.
   turnPlayerOrderArray(): number[] {
-    return this.turnPlayerOrder.split(',').map(numStr => +numStr);
+    return this.turnPlayerOrder.split(',').map((numStr) => +numStr);
   }
 
   // Get the playerNumber of the GamePlayer whose turn it is
@@ -101,7 +114,7 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     const playerNumberOrder = this.turnPlayerOrderArray();
 
     const currentPlayerIndex = playerNumberOrder.indexOf(currentPlayerNumber);
-    if (currentPlayerIndex == (playerNumberOrder.length - 1)) {
+    if (currentPlayerIndex == playerNumberOrder.length - 1) {
       return playerNumberOrder[0];
     } else {
       return playerNumberOrder[currentPlayerIndex + 1];
@@ -109,41 +122,44 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   }
 }
 
-Game.init({
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
+Game.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    status: {
+      allowNull: false,
+      type: DataTypes.ENUM('pending', 'inProgress', 'completed', 'canceled'),
+    },
+    turnNumber: {
+      type: DataTypes.INTEGER,
+    },
+    phase: {
+      type: DataTypes.ENUM('movement', 'shooting', 'melee'),
+    },
+    turnPlayerOrder: {
+      type: DataTypes.STRING,
+    },
+    turnGamePlayerId: {
+      type: DataTypes.INTEGER,
+    },
+    winningGamePlayerId: {
+      type: DataTypes.INTEGER,
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE,
+    },
   },
-  status: {
-    allowNull: false,
-    type: DataTypes.ENUM('pending', 'inProgress', 'completed', 'canceled')
-  },
-  turnNumber: {
-    type: DataTypes.INTEGER
-  },
-  phase: {
-    type: DataTypes.ENUM('movement', 'shooting', 'melee')
-  },
-  turnPlayerOrder: {
-    type: DataTypes.STRING
-  },
-  turnGamePlayerId: {
-    type: DataTypes.INTEGER
-  },
-  winningGamePlayerId: {
-    type: DataTypes.INTEGER
-  },
-  createdAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-  },
-  updatedAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-  },
-}, {
-  sequelize: sequelizeConnection
-});
+  {
+    sequelize: sequelizeConnection,
+  }
+);
 
 export default Game;

@@ -14,23 +14,32 @@ export default async (
     // Validate that player exists
     const player = await Models.Player.findOne({
       where: { minaPublicKey: args.input.minaPublicKey },
-      transaction: t
+      transaction: t,
     });
-    if (!player) throw new Error(`Player with minaPublicKey ${args.input.minaPublicKey} not found`);
+    if (!player)
+      throw new Error(
+        `Player with minaPublicKey ${args.input.minaPublicKey} not found`
+      );
 
     // Validate that game exists
-    const game = await Models.Game.findByPk(args.input.gameId, { transaction: t });
+    const game = await Models.Game.findByPk(args.input.gameId, {
+      transaction: t,
+    });
     if (!game) throw new Error(`Game with ID ${args.input.gameId} not found`);
 
     // Validate that player is part of indicated game
     const gamePlayer = await Models.GamePlayer.findOne({
       where: { gameId: game.id, playerId: player.id },
-      transaction: t
+      transaction: t,
     });
-    if (!gamePlayer) throw new Error(`Player ${player.name} is not present in Game ${game.id}`);
+    if (!gamePlayer)
+      throw new Error(
+        `Player ${player.name} is not present in Game ${game.id}`
+      );
 
     // Validate that the game is in the correct state to be adding pieces
-    if (game.status != 'pending') throw new Error(`Game is no longer allowing new GamePieces to be added`);
+    if (game.status != 'pending')
+      throw new Error(`Game is no longer allowing new GamePieces to be added`);
 
     // Create GamePieces
     let createdGamePieces = [];
@@ -59,22 +68,27 @@ export default async (
           )
         );
       } else {
-        throw new Error(`Invalid entry in argument gamePieceInputs, exactly one of [playerUnitId, createPlayerUnit] must be provided.`);
+        throw new Error(
+          `Invalid entry in argument gamePieceInputs, exactly one of [playerUnitId, createPlayerUnit] must be provided.`
+        );
       }
     }
 
     return createdGamePieces;
   });
-}
+};
 
 async function createGamePieceForPlayerUnit(
   game: Models.Game,
   gamePlayer: Models.GamePlayer,
-  playerUnitId: string,
+  playerUnitId: number,
   transaction?: Transaction
 ): Promise<Models.GamePiece> {
-  let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, { transaction });
-  if (!playerUnit) throw new Error(`No PlayerUnit found with ID ${playerUnitId}`);
+  let playerUnit = await Models.PlayerUnit.findByPk(playerUnitId, {
+    transaction,
+  });
+  if (!playerUnit)
+    throw new Error(`No PlayerUnit found with ID ${playerUnitId}`);
 
   let unit = await Models.Unit.findByPk(playerUnit.unitId, { transaction });
   return await Models.GamePiece.create(
@@ -82,7 +96,7 @@ async function createGamePieceForPlayerUnit(
       gameId: game.id,
       gamePlayerId: gamePlayer.id,
       playerUnitId: playerUnit.id,
-      health: unit.maxHealth
+      health: unit.maxHealth,
     },
     { transaction }
   );
@@ -91,7 +105,7 @@ async function createGamePieceForPlayerUnit(
 async function createGamePieceForUnit(
   game: Models.Game,
   gamePlayer: Models.GamePlayer,
-  unitId: string | number,
+  unitId: number,
   playerUnitName: string,
   transaction?: Transaction
 ): Promise<Models.GamePiece> {
@@ -102,7 +116,7 @@ async function createGamePieceForUnit(
     {
       playerId: gamePlayer.playerId,
       unitId: unit.id,
-      name: playerUnitName
+      name: playerUnitName,
     },
     { transaction }
   );
@@ -112,7 +126,7 @@ async function createGamePieceForUnit(
       gameId: game.id,
       gamePlayerId: gamePlayer.id,
       playerUnitId: playerUnit.id,
-      health: unit.maxHealth
+      health: unit.maxHealth,
     },
     { transaction }
   );
