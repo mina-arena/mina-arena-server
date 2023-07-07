@@ -11,7 +11,7 @@ const resolvers: Resolvers = {
     },
     game: async (
       parent,
-      args: { id: string },
+      args: { id: number },
       contextValue,
       info
     ): Promise<Models.Game> => {

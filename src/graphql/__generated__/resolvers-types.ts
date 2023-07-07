@@ -55,7 +55,7 @@ export type CreateGameInput = {
 
 export type CreateGamePieceActionInput = {
   actionType: GamePieceActionType;
-  gamePieceId: Scalars['ID'];
+  gamePieceId: Scalars['Int'];
   meleeAttackInput?: InputMaybe<GamePieceMeleeAttackActionInput>;
   moveInput?: InputMaybe<GamePieceMoveActionInput>;
   rangedAttackInput?: InputMaybe<GamePieceRangedAttackActionInput>;
@@ -63,17 +63,17 @@ export type CreateGamePieceActionInput = {
 
 export type CreateGamePieceActionsInput = {
   actions: Array<CreateGamePieceActionInput>;
-  gameId: Scalars['ID'];
+  gameId: Scalars['Int'];
   minaPublicKey: Scalars['String'];
 };
 
 export type CreateGamePieceInput = {
   createPlayerUnit?: InputMaybe<CreatePlayerUnitInput>;
-  playerUnitId?: InputMaybe<Scalars['ID']>;
+  playerUnitId?: InputMaybe<Scalars['Int']>;
 };
 
 export type CreateGamePiecesInput = {
-  gameId: Scalars['ID'];
+  gameId: Scalars['Int'];
   gamePieces: Array<CreateGamePieceInput>;
   minaPublicKey: Scalars['String'];
 };
@@ -104,6 +104,7 @@ export type Game = {
   gamePieces: Array<GamePiece>;
   gamePlayers: Array<GamePlayer>;
   id: Scalars['Int'];
+  previousPhase?: Maybe<GamePhase>;
   status: GameStatus;
   turnGamePlayer?: Maybe<GamePlayer>;
   turnNumber?: Maybe<Scalars['Int']>;
@@ -309,7 +310,7 @@ export type Query = {
 };
 
 export type QueryGameArgs = {
-  id: Scalars['ID'];
+  id: Scalars['Int'];
 };
 
 export type QueryPlayerArgs = {
@@ -338,11 +339,11 @@ export type SignatureInput = {
 };
 
 export type StartGameInput = {
-  gameId: Scalars['ID'];
+  gameId: Scalars['Int'];
 };
 
 export type SubmitGamePhaseInput = {
-  gamePhaseId: Scalars['ID'];
+  gamePhaseId: Scalars['Int'];
   minaPublicKey: Scalars['String'];
 };
 
@@ -508,7 +509,6 @@ export type ResolversTypes = ResolversObject<{
   GamePieceRangedAttackActionInput: GamePieceRangedAttackActionInput;
   GamePlayer: ResolverTypeWrapper<GamePlayerModel>;
   GameStatus: GameStatus;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Iso8601DateTime: ResolverTypeWrapper<Scalars['Iso8601DateTime']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -552,7 +552,6 @@ export type ResolversParentTypes = ResolversObject<{
   GamePieceRangedAttackAction: GamePieceRangedAttackActionModel;
   GamePieceRangedAttackActionInput: GamePieceRangedAttackActionInput;
   GamePlayer: GamePlayerModel;
-  ID: Scalars['ID'];
   Int: Scalars['Int'];
   Iso8601DateTime: Scalars['Iso8601DateTime'];
   Mutation: {};
@@ -600,6 +599,11 @@ export type GameResolvers<
     ContextType
   >;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  previousPhase?: Resolver<
+    Maybe<ResolversTypes['GamePhase']>,
+    ParentType,
+    ContextType
+  >;
   status?: Resolver<ResolversTypes['GameStatus'], ParentType, ContextType>;
   turnGamePlayer?: Resolver<
     Maybe<ResolversTypes['GamePlayer']>,

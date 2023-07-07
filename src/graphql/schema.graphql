@@ -1,5 +1,5 @@
 type Query {
-  game(id: ID!): Game
+  game(id: Int!): Game
   games: [Game!]!
   units: [Unit!]!
   player(minaPublicKey: String!): Player
@@ -57,6 +57,7 @@ type Game {
   gamePieces: [GamePiece!]!
   gamePhases: [GamePhase!]!
   currentPhase: GamePhase
+  previousPhase: GamePhase
   createdAt: Iso8601DateTime!
   updatedAt: Iso8601DateTime!
 }
@@ -207,12 +208,12 @@ input CreateGamePlayerInput {
 
 input CreateGamePiecesInput {
   minaPublicKey: String!
-  gameId: ID!
+  gameId: Int!
   gamePieces: [CreateGamePieceInput!]!
 }
 
 input CreateGamePieceInput {
-  playerUnitId: ID
+  playerUnitId: Int
   createPlayerUnit: CreatePlayerUnitInput
 }
 
@@ -222,18 +223,18 @@ input CreatePlayerUnitInput {
 }
 
 input StartGameInput {
-  gameId: ID!
+  gameId: Int!
 }
 
 input CreateGamePieceActionsInput {
   minaPublicKey: String!
-  gameId: ID!
+  gameId: Int!
   actions: [CreateGamePieceActionInput!]!
 }
 
 input CreateGamePieceActionInput {
   actionType: GamePieceActionType!
-  gamePieceId: ID!
+  gamePieceId: Int!
   moveInput: GamePieceMoveActionInput
   rangedAttackInput: GamePieceRangedAttackActionInput
   meleeAttackInput: GamePieceMeleeAttackActionInput
@@ -277,5 +278,5 @@ input SignatureInput {
 
 input SubmitGamePhaseInput {
   minaPublicKey: String!
-  gamePhaseId: ID!
+  gamePhaseId: Int!
 }
