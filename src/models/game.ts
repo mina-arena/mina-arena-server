@@ -63,10 +63,11 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   }
 
   async previousPhase(): Promise<Models.GamePhase> {
-    return await Models.GamePhase.findAll({
+    const phases = await Models.GamePhase.findAll({
       where: { gameId: this.id },
       order: [['id', 'DESC']],
-    })[1];
+    });
+    return phases[1];
   }
 
   // Get the GamePlayer whose turn it is
