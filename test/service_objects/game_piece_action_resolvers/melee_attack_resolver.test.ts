@@ -198,8 +198,8 @@ describe('resolveMeleeAttackAction', () => {
         actionType: 'meleeAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
-        encryptedAttackRolls: [roll_6_6_1, roll_1_6_1, roll_6_1_1],
-        resolvedAttacks: undefined,
+        encryptedAttackRolls: roll_6_6_1,
+        resolvedAttack: undefined,
       },
       signature: signature.toJSON(),
     });
@@ -219,29 +219,14 @@ describe('resolveMeleeAttackAction', () => {
       // Check action to now be resolved with saved results
       await action.reload();
       expect(action.actionData['resolved']).toBe(true);
-      let savedResolvedAttacks = action.actionData['resolvedAttacks'];
-      expect(savedResolvedAttacks.length).toBe(3);
-      expect(savedResolvedAttacks[0].hitRoll.roll).toBe(6);
-      expect(savedResolvedAttacks[0].hitRoll.success).toBe(true);
-      expect(savedResolvedAttacks[0].woundRoll.roll).toBe(6);
-      expect(savedResolvedAttacks[0].woundRoll.success).toBe(true);
-      expect(savedResolvedAttacks[0].saveRoll.roll).toBe(1);
-      expect(savedResolvedAttacks[0].saveRoll.success).toBe(false);
-      expect(savedResolvedAttacks[0].damageDealt).toBe(1);
-      expect(savedResolvedAttacks[1].hitRoll.roll).toBe(1);
-      expect(savedResolvedAttacks[1].hitRoll.success).toBe(false);
-      expect(savedResolvedAttacks[1].woundRoll.roll).toBe(6);
-      expect(savedResolvedAttacks[1].woundRoll.success).toBe(true);
-      expect(savedResolvedAttacks[1].saveRoll.roll).toBe(1);
-      expect(savedResolvedAttacks[1].saveRoll.success).toBe(false);
-      expect(savedResolvedAttacks[1].damageDealt).toBe(0);
-      expect(savedResolvedAttacks[2].hitRoll.roll).toBe(6);
-      expect(savedResolvedAttacks[2].hitRoll.success).toBe(true);
-      expect(savedResolvedAttacks[2].woundRoll.roll).toBe(1);
-      expect(savedResolvedAttacks[2].woundRoll.success).toBe(false);
-      expect(savedResolvedAttacks[2].saveRoll.roll).toBe(1);
-      expect(savedResolvedAttacks[2].saveRoll.success).toBe(false);
-      expect(savedResolvedAttacks[2].damageDealt).toBe(0);
+      let savedResolvedAttack = action.actionData['resolvedAttack'];
+      expect(savedResolvedAttack.hitRoll.roll).toBe(6);
+      expect(savedResolvedAttack.hitRoll.success).toBe(true);
+      expect(savedResolvedAttack.woundRoll.roll).toBe(6);
+      expect(savedResolvedAttack.woundRoll.success).toBe(true);
+      expect(savedResolvedAttack.saveRoll.roll).toBe(1);
+      expect(savedResolvedAttack.saveRoll.success).toBe(false);
+      expect(savedResolvedAttack.damageDealt).toBe(1);
 
       expect(action.actionData['totalDamageDealt']).toBe(1);
 

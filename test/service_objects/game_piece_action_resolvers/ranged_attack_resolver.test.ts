@@ -179,8 +179,8 @@ describe('resolveRangedAttackAction', () => {
         actionType: 'rangedAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
-        encryptedAttackRolls: [roll_6_6_1, roll_6_6_1, roll_6_6_1],
-        resolvedAttacks: undefined,
+        encryptedAttackRolls: roll_6_6_1,
+        resolvedAttack: undefined,
       },
     });
   });
@@ -199,21 +199,20 @@ describe('resolveRangedAttackAction', () => {
       // Check action to now be resolved with saved results
       await action.reload();
       expect(action.actionData['resolved']).toBe(true);
-      let savedResolvedAttacks = action.actionData['resolvedAttacks'];
-      expect(savedResolvedAttacks.length).toBe(3);
-      expect(savedResolvedAttacks[0].hitRoll.roll).toBe(6);
-      expect(savedResolvedAttacks[0].hitRoll.success).toBe(true);
-      expect(savedResolvedAttacks[0].woundRoll.roll).toBe(6);
-      expect(savedResolvedAttacks[0].woundRoll.success).toBe(true);
-      expect(savedResolvedAttacks[0].saveRoll.roll).toBe(1);
-      expect(savedResolvedAttacks[0].saveRoll.success).toBe(false);
-      expect(savedResolvedAttacks[0].damageDealt).toBe(1);
+      let savedResolvedAttack = action.actionData['resolvedAttack'];
+      expect(savedResolvedAttack.hitRoll.roll).toBe(6);
+      expect(savedResolvedAttack.hitRoll.success).toBe(true);
+      expect(savedResolvedAttack.woundRoll.roll).toBe(6);
+      expect(savedResolvedAttack.woundRoll.success).toBe(true);
+      expect(savedResolvedAttack.saveRoll.roll).toBe(1);
+      expect(savedResolvedAttack.saveRoll.success).toBe(false);
+      expect(savedResolvedAttack.damageDealt).toBe(1);
 
-      expect(action.actionData['totalDamageDealt']).toBe(3);
+      expect(action.actionData['totalDamageDealt']).toBe(1);
 
       // Check targetGamePiece new health
       await targetGamePiece.reload();
-      expect(targetGamePiece.health).toBe(0);
+      expect(targetGamePiece.health).toBe(2);
     });
   });
 
