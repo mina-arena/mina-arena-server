@@ -191,7 +191,7 @@ export type GamePieceCoordinatesInput = {
 export type GamePieceMeleeAttackAction = {
   __typename?: 'GamePieceMeleeAttackAction';
   resolved: Scalars['Boolean'];
-  resolvedAttack: ResolvedAttack;
+  resolvedAttack?: Maybe<ResolvedAttack>;
   targetGamePiece: GamePiece;
   totalDamageAverage?: Maybe<Scalars['Float']>;
   totalDamageDealt?: Maybe<Scalars['Int']>;
@@ -217,7 +217,7 @@ export type GamePieceMoveActionInput = {
 export type GamePieceRangedAttackAction = {
   __typename?: 'GamePieceRangedAttackAction';
   resolved: Scalars['Boolean'];
-  resolvedAttack: ResolvedAttack;
+  resolvedAttack?: Maybe<ResolvedAttack>;
   targetGamePiece: GamePiece;
   totalDamageAverage?: Maybe<Scalars['Float']>;
   totalDamageDealt?: Maybe<Scalars['Int']>;
@@ -773,7 +773,7 @@ export type GamePieceMeleeAttackActionResolvers<
 > = ResolversObject<{
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resolvedAttack?: Resolver<
-    ResolversTypes['ResolvedAttack'],
+    Maybe<ResolversTypes['ResolvedAttack']>,
     ParentType,
     ContextType
   >;
@@ -819,7 +819,7 @@ export type GamePieceRangedAttackActionResolvers<
 > = ResolversObject<{
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resolvedAttack?: Resolver<
-    ResolversTypes['ResolvedAttack'],
+    Maybe<ResolversTypes['ResolvedAttack']>,
     ParentType,
     ContextType
   >;
