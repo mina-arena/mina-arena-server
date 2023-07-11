@@ -167,7 +167,7 @@ type GamePieceMoveAction {
 type GamePieceRangedAttackAction {
   targetGamePiece: GamePiece!
   resolved: Boolean!
-  resolvedAttacks: [ResolvedAttack!]
+  resolvedAttack: ResolvedAttack!
   totalDamageDealt: Int
   totalDamageAverage: Float
 }
@@ -175,7 +175,7 @@ type GamePieceRangedAttackAction {
 type GamePieceMeleeAttackAction {
   targetGamePiece: GamePiece!
   resolved: Boolean!
-  resolvedAttacks: [ResolvedAttack!]
+  resolvedAttack: ResolvedAttack!
   totalDamageDealt: Int
   totalDamageAverage: Float
 }
@@ -252,12 +252,12 @@ input GamePieceCoordinatesInput {
 
 input GamePieceRangedAttackActionInput {
   targetGamePieceId: Int!
-  diceRolls: [DiceRollInput!]!
+  diceRolls: DiceRollInput!
 }
 
 input GamePieceMeleeAttackActionInput {
   targetGamePieceId: Int!
-  diceRolls: [DiceRollInput!]!
+  diceRolls: DiceRollInput!
 }
 
 input DiceRollInput {

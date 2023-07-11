@@ -23,8 +23,8 @@ export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encryptedAttackRolls: EncrytpedAttackRollJSON[];
-  resolvedAttacks?: ResolvedAttack[];
+  encryptedAttackRolls: EncrytpedAttackRollJSON;
+  resolvedAttack?: ResolvedAttack;
   totalDamageDealt?: number;
   totalDamageAverage?: number;
 };
@@ -32,8 +32,8 @@ export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack';
   resolved: boolean;
   targetGamePieceId: number;
-  encryptedAttackRolls: EncrytpedAttackRollJSON[];
-  resolvedAttacks?: ResolvedAttack[];
+  encryptedAttackRolls: EncrytpedAttackRollJSON;
+  resolvedAttack?: ResolvedAttack;
   totalDamageDealt?: number;
   totalDamageAverage?: number;
 };
