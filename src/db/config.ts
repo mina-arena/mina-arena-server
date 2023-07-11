@@ -53,7 +53,7 @@ if (environment == 'production') {
   sequelizeConnection = new Sequelize(dbName, dbUser, dbPassword, {
     host: dbHost,
     dialect: dbDriver,
-    logging: false, // environment == 'development'
+    logging: environment == 'development',
   });
 }
 
