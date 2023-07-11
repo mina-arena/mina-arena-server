@@ -222,7 +222,7 @@ export default async function resolveRangedAttackAction(
       attackRolls
     );
   } catch (e) {
-    console.log(e);
+    console.log('$$$', e);
     throw e;
   }
   console.log('$$', 'Resolved');
