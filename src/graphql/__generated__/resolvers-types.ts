@@ -191,14 +191,14 @@ export type GamePieceCoordinatesInput = {
 export type GamePieceMeleeAttackAction = {
   __typename?: 'GamePieceMeleeAttackAction';
   resolved: Scalars['Boolean'];
-  resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
+  resolvedAttack?: Maybe<ResolvedAttack>;
   targetGamePiece: GamePiece;
   totalDamageAverage?: Maybe<Scalars['Float']>;
   totalDamageDealt?: Maybe<Scalars['Int']>;
 };
 
 export type GamePieceMeleeAttackActionInput = {
-  diceRolls: Array<DiceRollInput>;
+  diceRolls: DiceRollInput;
   targetGamePieceId: Scalars['Int'];
 };
 
@@ -217,14 +217,14 @@ export type GamePieceMoveActionInput = {
 export type GamePieceRangedAttackAction = {
   __typename?: 'GamePieceRangedAttackAction';
   resolved: Scalars['Boolean'];
-  resolvedAttacks?: Maybe<Array<ResolvedAttack>>;
+  resolvedAttack?: Maybe<ResolvedAttack>;
   targetGamePiece: GamePiece;
   totalDamageAverage?: Maybe<Scalars['Float']>;
   totalDamageDealt?: Maybe<Scalars['Int']>;
 };
 
 export type GamePieceRangedAttackActionInput = {
-  diceRolls: Array<DiceRollInput>;
+  diceRolls: DiceRollInput;
   targetGamePieceId: Scalars['Int'];
 };
 
@@ -772,8 +772,8 @@ export type GamePieceMeleeAttackActionResolvers<
   ParentType extends ResolversParentTypes['GamePieceMeleeAttackAction'] = ResolversParentTypes['GamePieceMeleeAttackAction']
 > = ResolversObject<{
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  resolvedAttacks?: Resolver<
-    Maybe<Array<ResolversTypes['ResolvedAttack']>>,
+  resolvedAttack?: Resolver<
+    Maybe<ResolversTypes['ResolvedAttack']>,
     ParentType,
     ContextType
   >;
@@ -818,8 +818,8 @@ export type GamePieceRangedAttackActionResolvers<
   ParentType extends ResolversParentTypes['GamePieceRangedAttackAction'] = ResolversParentTypes['GamePieceRangedAttackAction']
 > = ResolversObject<{
   resolved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  resolvedAttacks?: Resolver<
-    Maybe<Array<ResolversTypes['ResolvedAttack']>>,
+  resolvedAttack?: Resolver<
+    Maybe<ResolversTypes['ResolvedAttack']>,
     ParentType,
     ContextType
   >;

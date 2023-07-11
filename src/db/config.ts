@@ -13,25 +13,25 @@ if (environment == 'production') {
   // In production we will connect to Postgres using
   // the DATABASE_URL environment variable
   const dbUrl = process.env.DATABASE_URL;
-  if (!dbUrl) throw new Error(`DATABASE_URL environment variable is required to boot in production!`);
+  if (!dbUrl)
+    throw new Error(
+      `DATABASE_URL environment variable is required to boot in production!`
+    );
 
-  sequelizeConnection = new Sequelize(
-    process.env.DATABASE_URL,
-    {
-      dialect: "postgres",
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
+  sequelizeConnection = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
       },
-    }
-  );
+    },
+  });
 } else {
-  var dbHost: string;
-  var dbName: string;
-  var dbUser: string;
-  var dbPassword: string;
+  let dbHost: string;
+  let dbName: string;
+  let dbUser: string;
+  let dbPassword: string;
 
   if (environment == 'development') {
     dbHost = process.env.DEV_DB_HOST || 'localhost';
@@ -44,14 +44,16 @@ if (environment == 'production') {
     dbUser = process.env.TEST_DB_USERNAME || 'postgres';
     dbPassword = process.env.TEST_DB_PASSWORD;
   } else {
-    throw new Error(`Invalid NODE_ENV ${environment}, must be one of: [development, test, production]`);
+    throw new Error(
+      `Invalid NODE_ENV ${environment}, must be one of: [development, test, production]`
+    );
   }
 
   const dbDriver: Dialect = 'postgres';
   sequelizeConnection = new Sequelize(dbName, dbUser, dbPassword, {
     host: dbHost,
     dialect: dbDriver,
-    logging: environment == 'development'
+    logging: environment == 'development',
   });
 }
 

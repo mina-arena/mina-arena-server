@@ -1,5 +1,5 @@
 import * as Models from '../../models/index.js';
-import resolveAttacks from './attack_resolver.js';
+import resolveAttack from './attack_resolver.js';
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
@@ -13,6 +13,7 @@ import {
   Group,
 } from 'snarkyjs';
 import dotenv from 'dotenv';
+import { type GamePieceRangedAttackAction } from '../../models/game_piece_action.js';
 
 dotenv.config();
 
@@ -157,48 +158,45 @@ export default async function resolveRangedAttackAction(
       process.env.SERVER_PRIVATE_KEY
     );
 
-    // For each attack, attempt to apply the attack action
-    for (let i = 0; i < attackRolls.length; i++) {
-      const roll = new EncrytpedAttackRoll({
-        publicKey: Group.fromJSON(attackRolls[i].publicKey),
-        ciphertext: attackRolls[i].ciphertext.map((c) => Field(c)),
-        signature: Signature.fromJSON(attackRolls[i].signature),
-        rngPublicKey: PublicKey.fromBase58(attackRolls[i].rngPublicKey),
-      });
-      const piecesTreeAfterAttack = startingGamePiecesTree.clone();
-      piecesTreeAfterAttack.set(
-        snarkyTargetPiece.id.toBigInt(),
-        snarkyTargetPiece.hash()
-      );
+    const roll = new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(attackRolls.publicKey),
+      ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
+      signature: Signature.fromJSON(attackRolls.signature),
+      rngPublicKey: PublicKey.fromBase58(attackRolls.rngPublicKey),
+    });
+    const piecesTreeAfterAttack = startingGamePiecesTree.clone();
+    piecesTreeAfterAttack.set(
+      snarkyTargetPiece.id.toBigInt(),
+      snarkyTargetPiece.hash()
+    );
 
-      stateAfterAttack = snarkyGameState.applyRangedAttackAction(
-        snarkyAction,
-        Signature.fromJSON(action.signature),
-        snarkyAttackingPiece,
-        snarkyTargetPiece,
-        startingGamePiecesTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
-        startingGamePiecesTree.getWitness(snarkyTargetPiece.id.toBigInt()),
-        UInt32.from(
-          Math.floor(
-            attackingGamePiece.distanceTo(targetGamePiece.coordinates())
-          )
-        ),
-        roll,
-        serverPrivateKey
-      );
-    }
+    stateAfterAttack = snarkyGameState.applyRangedAttackAction(
+      snarkyAction,
+      Signature.fromJSON(action.signature),
+      snarkyAttackingPiece,
+      snarkyTargetPiece,
+      startingGamePiecesTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
+      startingGamePiecesTree.getWitness(snarkyTargetPiece.id.toBigInt()),
+      UInt32.from(
+        Math.floor(attackingGamePiece.distanceTo(targetGamePiece.coordinates()))
+      ),
+      roll,
+      serverPrivateKey
+    );
     snarkySuccess = true;
     console.log(
       `Successfully applied snarky ranged attack action ${JSON.stringify(
         actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${attackingGamePiece.id
+      )} to game ${attackingGamePiece.gameId} attacking piece ${
+        attackingGamePiece.id
       }, target piece ${targetGamePiece.id}`
     );
   } catch (e) {
     console.warn(
       `Unable to apply snarky ranged attack action ${JSON.stringify(
         actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${attackingGamePiece.id
+      )} to game ${attackingGamePiece.gameId} attacking piece ${
+        attackingGamePiece.id
       }, target piece ${targetGamePiece.id} - ${e}`
     );
   }
@@ -211,10 +209,10 @@ export default async function resolveRangedAttackAction(
     ap: attackingUnit.rangedArmorPiercing,
     dmg: attackingUnit.rangedDamage,
   });
-  // Resolve attack sequence
-  let resolvedAttacks;
+  // Resolve attack
+  let resolvedAttack;
   try {
-    resolvedAttacks = resolveAttacks(
+    resolvedAttack = resolveAttack(
       attackingUnit.rangedNumAttacks,
       attackingUnit.rangedHitRoll,
       attackingUnit.rangedWoundRoll,
@@ -224,18 +222,12 @@ export default async function resolveRangedAttackAction(
       attackRolls
     );
   } catch (e) {
-    console.log(e);
+    console.log('$$$', e);
     throw e;
   }
   console.log('$$', 'Resolved');
-  const totalDamageDealt = resolvedAttacks.reduce(
-    (sum, attack) => sum + attack.damageDealt,
-    0
-  );
-  const totalDamageAverage = resolvedAttacks.reduce(
-    (sum, attack) => sum + attack.averageDamage,
-    0
-  );
+  const totalDamageDealt = resolvedAttack.damageDealt;
+  const totalDamageAverage = resolvedAttack.averageDamage;
   console.log('$$', 'Damage', totalDamageDealt, totalDamageAverage);
 
   // Update target GamePiece with damage dealt
@@ -249,9 +241,11 @@ export default async function resolveRangedAttackAction(
 
   console.log('$$', 'Updating Action to be Resolved');
   // Update action record as resolved
-  let newActionData = JSON.parse(JSON.stringify(actionData));
+  let newActionData = JSON.parse(
+    JSON.stringify(actionData)
+  ) as GamePieceRangedAttackAction;
   newActionData.resolved = true;
-  newActionData.resolvedAttacks = resolvedAttacks;
+  newActionData.resolvedAttack = resolvedAttack;
   newActionData.totalDamageDealt = totalDamageDealt;
   newActionData.totalDamageAverage = totalDamageAverage;
   action.actionData = newActionData;
