@@ -143,12 +143,13 @@ export default async function resolveMeleeAttackAction(
 
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
-  const actionParam = Field(snarkyTargetPiece.id);
+  const actionParam = Field(actionData.targetGamePieceHash);
+  console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
-    nonce: Field(1),
-    actionType: Field(0),
+    nonce: Field(actionData.nonce),
+    actionType: Field(2),
     actionParams: actionParam,
-    piece: snarkyAttackingPiece.id,
+    piece: Field(actionData.gamePieceNumber),
   });
 
   // Attempt to apply the move action to the game state

@@ -18,11 +18,9 @@ export default function resolveAttack(
   attackerDamageStat: number,
   attackRolls: EncrytpedAttackRollJSON
 ): ResolvedAttack {
-  console.log('$$$', 'Resolving...');
   const serverPrivateKey = PrivateKey.fromBase58(
     process.env.SERVER_PRIVATE_KEY
   );
-  console.log('$$$', 'Roll:', attackRolls);
   const snarkyRoll = new EncrytpedAttackRoll({
     publicKey: Group.fromJSON(attackRolls.publicKey),
     ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
@@ -30,8 +28,6 @@ export default function resolveAttack(
     rngPublicKey: PublicKey.fromBase58(attackRolls.rngPublicKey),
   });
   const decryptedAttackRolls = snarkyRoll.decryptRoll(serverPrivateKey);
-
-  console.log('$$$', 'Decrypted rolls:', decryptedAttackRolls);
 
   // Gather details of each attack and determine damage
   const hitRoll = Number(decryptedAttackRolls.hit.toString());

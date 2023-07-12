@@ -139,12 +139,13 @@ export default async function resolveRangedAttackAction(
   });
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
-  const actionParam = Field(snarkyTargetPiece.id);
+  const actionParam = Field(actionData.targetGamePieceHash);
+  console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
-    nonce: Field(1),
-    actionType: Field(0),
+    nonce: Field(actionData.nonce),
+    actionType: Field(1),
     actionParams: actionParam,
-    piece: snarkyAttackingPiece.id,
+    piece: Field(actionData.gamePieceNumber),
   });
 
   // Attempt to apply the move action to the game state
@@ -201,14 +202,6 @@ export default async function resolveRangedAttackAction(
     );
   }
 
-  console.log('$$', 'Resolving Ranged Attack', {
-    numAtks: attackingUnit.rangedNumAttacks,
-    hit: attackingUnit.rangedHitRoll,
-    wound: attackingUnit.rangedWoundRoll,
-    save: targetUnit.armorSaveRoll,
-    ap: attackingUnit.rangedArmorPiercing,
-    dmg: attackingUnit.rangedDamage,
-  });
   // Resolve attack
   let resolvedAttack;
   try {
@@ -225,21 +218,16 @@ export default async function resolveRangedAttackAction(
     console.log('$$$', e);
     throw e;
   }
-  console.log('$$', 'Resolved');
   const totalDamageDealt = resolvedAttack.damageDealt;
   const totalDamageAverage = resolvedAttack.averageDamage;
-  console.log('$$', 'Damage', totalDamageDealt, totalDamageAverage);
 
   // Update target GamePiece with damage dealt
   if (totalDamageDealt > 0) {
     const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
     targetGamePiece.health = newHealth;
-    console.log('$$', 'Saving Damage');
     await targetGamePiece.save({ transaction });
-    console.log('$$', 'Saved Damage');
   }
 
-  console.log('$$', 'Updating Action to be Resolved');
   // Update action record as resolved
   let newActionData = JSON.parse(
     JSON.stringify(actionData)
@@ -249,7 +237,5 @@ export default async function resolveRangedAttackAction(
   newActionData.totalDamageDealt = totalDamageDealt;
   newActionData.totalDamageAverage = totalDamageAverage;
   action.actionData = newActionData;
-  console.log('$$', 'action', action);
   await action.save({ transaction });
-  console.log('$$', 'resolved');
 }
