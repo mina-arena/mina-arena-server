@@ -57,6 +57,11 @@ const resolvers: Resolvers = {
     gamePieceNumber: async function (gamePiece) {
       return await gamePiece.gamePieceNumber();
     },
+    hash: async function (gamePiece) {
+      const snarkyPiece = await gamePiece.toSnarkyPiece();
+      const hash = snarkyPiece.hash();
+      return hash.toString();
+    },
   },
   GamePieceAction: {
     actionType: (action) => camelToScreamingSnake(action.actionType),

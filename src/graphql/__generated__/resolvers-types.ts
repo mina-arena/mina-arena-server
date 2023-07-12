@@ -150,6 +150,7 @@ export type GamePiece = {
   gamePieceActions: Array<GamePieceAction>;
   gamePieceNumber: Scalars['Int'];
   gamePlayer: GamePlayer;
+  hash: Scalars['String'];
   health: Scalars['Int'];
   id: Scalars['Int'];
   playerUnit: PlayerUnit;
@@ -201,6 +202,9 @@ export type GamePieceMeleeAttackAction = {
 
 export type GamePieceMeleeAttackActionInput = {
   diceRolls: DiceRollInput;
+  gamePieceNumber: Scalars['Int'];
+  nonce: Scalars['Int'];
+  targetGamePieceHash: Scalars['String'];
   targetGamePieceId: Scalars['Int'];
 };
 
@@ -212,8 +216,10 @@ export type GamePieceMoveAction = {
 };
 
 export type GamePieceMoveActionInput = {
+  gamePieceNumber: Scalars['Int'];
   moveFrom: GamePieceCoordinatesInput;
   moveTo: GamePieceCoordinatesInput;
+  nonce: Scalars['Int'];
 };
 
 export type GamePieceRangedAttackAction = {
@@ -227,6 +233,9 @@ export type GamePieceRangedAttackAction = {
 
 export type GamePieceRangedAttackActionInput = {
   diceRolls: DiceRollInput;
+  gamePieceNumber: Scalars['Int'];
+  nonce: Scalars['Int'];
+  targetGamePieceHash: Scalars['String'];
   targetGamePieceId: Scalars['Int'];
 };
 
@@ -706,6 +715,7 @@ export type GamePieceResolvers<
   >;
   gamePieceNumber?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   gamePlayer?: Resolver<ResolversTypes['GamePlayer'], ParentType, ContextType>;
+  hash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   health?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   playerUnit?: Resolver<ResolversTypes['PlayerUnit'], ParentType, ContextType>;
