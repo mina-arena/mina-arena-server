@@ -54,6 +54,9 @@ const resolvers: Resolvers = {
 
       return { x: gamePiece.positionX, y: gamePiece.positionY };
     },
+    gamePieceNumber: async function (gamePiece) {
+      return await gamePiece.gamePieceNumber();
+    },
   },
   GamePieceAction: {
     actionType: (action) => camelToScreamingSnake(action.actionType),

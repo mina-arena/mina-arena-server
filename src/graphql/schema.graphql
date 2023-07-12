@@ -121,6 +121,7 @@ type GamePiece {
   playerUnit: PlayerUnit!
   coordinates: GamePieceCoordinates
   health: Int!
+  gamePieceNumber: Int!
   gamePieceActions: [GamePieceAction!]!
   createdAt: Iso8601DateTime!
   updatedAt: Iso8601DateTime!
@@ -238,6 +239,7 @@ input CreateGamePieceActionInput {
   moveInput: GamePieceMoveActionInput
   rangedAttackInput: GamePieceRangedAttackActionInput
   meleeAttackInput: GamePieceMeleeAttackActionInput
+  signature: SignatureInput!
 }
 
 input GamePieceMoveActionInput {

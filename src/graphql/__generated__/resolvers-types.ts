@@ -59,6 +59,7 @@ export type CreateGamePieceActionInput = {
   meleeAttackInput?: InputMaybe<GamePieceMeleeAttackActionInput>;
   moveInput?: InputMaybe<GamePieceMoveActionInput>;
   rangedAttackInput?: InputMaybe<GamePieceRangedAttackActionInput>;
+  signature: SignatureInput;
 };
 
 export type CreateGamePieceActionsInput = {
@@ -147,6 +148,7 @@ export type GamePiece = {
   createdAt: Scalars['Iso8601DateTime'];
   game: Game;
   gamePieceActions: Array<GamePieceAction>;
+  gamePieceNumber: Scalars['Int'];
   gamePlayer: GamePlayer;
   health: Scalars['Int'];
   id: Scalars['Int'];
@@ -702,6 +704,7 @@ export type GamePieceResolvers<
     ParentType,
     ContextType
   >;
+  gamePieceNumber?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   gamePlayer?: Resolver<ResolversTypes['GamePlayer'], ParentType, ContextType>;
   health?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

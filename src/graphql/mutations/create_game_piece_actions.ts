@@ -7,8 +7,6 @@ import { Transaction } from 'sequelize';
 import { validateMoveAction } from '../../service_objects/game_piece_action_resolvers/move_resolver.js';
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
 import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
-import { EncrytpedAttackRoll } from 'mina-arena-contracts';
-import { Group, Signature, Field, PublicKey } from 'snarkyjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -88,6 +86,7 @@ export default async (
               gamePhase,
               gamePiece,
               actionInput.moveInput,
+              actionInput.signature,
               t
             )
           );
@@ -99,6 +98,7 @@ export default async (
               gamePhase,
               gamePiece,
               actionInput.rangedAttackInput,
+              actionInput.signature,
               t
             )
           );
@@ -110,6 +110,7 @@ export default async (
               gamePhase,
               gamePiece,
               actionInput.meleeAttackInput,
+              actionInput.signature,
               t
             )
           );
@@ -125,6 +126,7 @@ async function handleMoveAction(
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
   moveInput: Types.GamePieceMoveActionInput,
+  signature: { r: string; s: string },
   transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
   // Validate move data, raises exception if not valid
@@ -147,6 +149,7 @@ async function handleMoveAction(
         moveFrom: gamePiece.coordinates(),
         moveTo: moveInput.moveTo,
       },
+      signature,
     },
     { transaction }
   );
@@ -157,6 +160,7 @@ async function handleRangedAttackAction(
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
   rangedAttackInput: Types.GamePieceRangedAttackActionInput,
+  signature: { r: string; s: string },
   transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
   // Validate attack data, raises exception if not valid
@@ -186,6 +190,7 @@ async function handleRangedAttackAction(
         targetGamePieceId: rangedAttackInput.targetGamePieceId,
         encryptedAttackRolls,
       },
+      signature,
     },
     { transaction }
   );
@@ -196,6 +201,7 @@ async function handleMeleeAttackAction(
   gamePhase: Models.GamePhase,
   gamePiece: Models.GamePiece,
   meleeAttackInput: Types.GamePieceMeleeAttackActionInput,
+  signature: { r: string; s: string },
   transaction?: Transaction
 ): Promise<Models.GamePieceAction> {
   const targetGamePiece = await Models.GamePiece.findByPk(
@@ -229,6 +235,7 @@ async function handleMeleeAttackAction(
         targetGamePieceId: targetGamePiece.id,
         encryptedAttackRolls,
       },
+      signature,
     },
     { transaction }
   );
