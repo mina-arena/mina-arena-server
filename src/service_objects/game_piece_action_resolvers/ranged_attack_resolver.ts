@@ -115,14 +115,6 @@ export default async function resolveRangedAttackAction(
   });
 
   console.log('Ranged Beginning state hash', snarkyGameState.hash().toString());
-  console.log(
-    'Ranged Beginning Piece state',
-    snarkyGameState.currentPiecesState.toString()
-  );
-  console.log(
-    'Ranged Beginning Arena state',
-    snarkyGameState.currentArenaState.toString()
-  );
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'rangedAttack')
@@ -152,7 +144,7 @@ export default async function resolveRangedAttackAction(
   });
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
-  const actionParam = Field(actionData.targetGamePieceHash);
+  const actionParam = Field(actionData.targetGamePieceNumber);
   console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
     nonce: Field(actionData.nonce),
@@ -210,21 +202,20 @@ export default async function resolveRangedAttackAction(
     );
 
     // update our passed-in merkle trees with the new state
-    const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
-    snarkyTargetPiece.condition.health = UInt32.from(newHealth);
-    currentPiecesMerkleTree.set(
-      snarkyTargetPiece.id.toBigInt(),
-      snarkyTargetPiece.hash()
-    );
+    if (totalDamageDealt > 0) {
+      const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
+      snarkyTargetPiece.condition.health = UInt32.from(newHealth);
+      currentPiecesMerkleTree.set(
+        snarkyTargetPiece.id.toBigInt(),
+        snarkyTargetPiece.hash()
+      );
+      console.log('Damage dealt!', totalDamageDealt, 'new health', newHealth);
+      console.log(
+        'Pieces Merkle Tree',
+        currentPiecesMerkleTree.tree.getRoot().toString()
+      );
+    }
 
-    console.log(
-      'Ranged Final Piece state',
-      stateAfterAttack.currentPiecesState.toString()
-    );
-    console.log(
-      'Ranged Final Arena state',
-      stateAfterAttack.currentArenaState.toString()
-    );
     console.log('Ranged Final state hash', stateAfterAttack.hash().toString());
   } catch (e) {
     throw new Error(

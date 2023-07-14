@@ -58,11 +58,13 @@ export async function validateMeleeAttackAction(
   const distanceToTarget = attackingGamePiece.distanceTo(
     targetGamePiece.coordinates()
   );
-  console.log(distanceToTarget);
   if (distanceToTarget > MELEE_ATTACK_RANGE)
     throw new Error(
       `GamePiece ${attackingGamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than melee range of ${MELEE_ATTACK_RANGE}`
     );
+
+  const targetId = await targetGamePiece.gamePieceNumber();
+  console.log('target before attack', 'id', targetId, targetGamePiece.health);
 
   if (!resolving) {
     // Any validation which should only be performed in dry runs
@@ -155,7 +157,7 @@ export default async function resolveMeleeAttackAction(
 
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
-  const actionParam = Field(actionData.targetGamePieceHash);
+  const actionParam = Field(actionData.targetGamePieceNumber);
   console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
     nonce: Field(actionData.nonce),
@@ -207,21 +209,20 @@ export default async function resolveMeleeAttackAction(
       serverPrivateKey
     );
     // update our passed-in merkle trees with the new state
-    const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
-    snarkyTargetPiece.condition.health = UInt32.from(newHealth);
-    currentPiecesMerkleTree.set(
-      snarkyTargetPiece.id.toBigInt(),
-      snarkyTargetPiece.hash()
-    );
+    if (totalDamageDealt > 0) {
+      const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
+      snarkyTargetPiece.condition.health = UInt32.from(newHealth);
+      currentPiecesMerkleTree.set(
+        snarkyTargetPiece.id.toBigInt(),
+        snarkyTargetPiece.hash()
+      );
+      console.log('Damage Dealt!', totalDamageDealt, 'New Health', newHealth);
+      console.log(
+        'Pieces Merkle Tree',
+        currentPiecesMerkleTree.tree.getRoot().toString()
+      );
+    }
 
-    console.log(
-      'Melee Final Piece state',
-      stateAfterAttack.currentPiecesState.toString()
-    );
-    console.log(
-      'Melee Final Arena state',
-      stateAfterAttack.currentArenaState.toString()
-    );
     console.log('Melee Final state hash', stateAfterAttack.hash().toString());
   } catch (e) {
     throw new Error(
