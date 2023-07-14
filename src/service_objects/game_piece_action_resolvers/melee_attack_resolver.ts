@@ -1,5 +1,10 @@
 import * as Models from '../../models/index.js';
-import { EncrytpedAttackRoll, MELEE_ATTACK_RANGE } from 'mina-arena-contracts';
+import {
+  ArenaMerkleTree,
+  EncrytpedAttackRoll,
+  MELEE_ATTACK_RANGE,
+  PiecesMerkleTree,
+} from 'mina-arena-contracts';
 import resolveAttack from './attack_resolver.js';
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
@@ -53,11 +58,13 @@ export async function validateMeleeAttackAction(
   const distanceToTarget = attackingGamePiece.distanceTo(
     targetGamePiece.coordinates()
   );
-  console.log(distanceToTarget);
   if (distanceToTarget > MELEE_ATTACK_RANGE)
     throw new Error(
       `GamePiece ${attackingGamePiece.id} cannot execute a melee attack against target GamePiece ${targetGamePiece.id} because distance ${distanceToTarget} is greater than melee range of ${MELEE_ATTACK_RANGE}`
     );
+
+  const targetId = await targetGamePiece.gamePieceNumber();
+  console.log('target before attack', 'id', targetId, targetGamePiece.health);
 
   if (!resolving) {
     // Any validation which should only be performed in dry runs
@@ -84,6 +91,10 @@ export async function validateMeleeAttackAction(
 
 export default async function resolveMeleeAttackAction(
   action: Models.GamePieceAction,
+  startingPiecesMerkleTree: PiecesMerkleTree,
+  startingArenaMerkleTree: ArenaMerkleTree,
+  currentPiecesMerkleTree: PiecesMerkleTree,
+  currentArenaMerkleTree: ArenaMerkleTree,
   transaction?: Transaction
 ): Promise<Models.GamePiece> {
   const attackingGamePiece = await action.gamePiece();
@@ -93,22 +104,25 @@ export default async function resolveMeleeAttackAction(
   ).minaPublicKey;
   const playerPublicKey = PublicKey.fromBase58(playerPublicKeyString);
 
-  const startingGamePiecesTree = await serializePiecesTree(
-    attackingGamePiece.gameId
-  );
-  const startingGameArenaTree = await serializeArenaTree(
-    attackingGamePiece.gameId
-  );
-
   const snarkyGameState = new PhaseState({
     nonce: Field(0),
-    actionsNonce: Field(0),
-    startingPiecesState: startingGamePiecesTree.tree.getRoot(),
-    currentPiecesState: startingGamePiecesTree.tree.getRoot(),
-    startingArenaState: startingGameArenaTree.tree.getRoot(),
-    currentArenaState: startingGameArenaTree.tree.getRoot(),
+    actionsNonce: Field(action.actionData.nonce - 1), // todo save last-known nonce, don't rely on -1
+    startingPiecesState: startingPiecesMerkleTree.tree.getRoot(),
+    currentPiecesState: currentPiecesMerkleTree.tree.getRoot(),
+    startingArenaState: startingArenaMerkleTree.tree.getRoot(),
+    currentArenaState: currentArenaMerkleTree.tree.getRoot(),
     playerPublicKey,
   });
+
+  console.log('Melee Beginning state hash', snarkyGameState.hash().toString());
+  console.log(
+    'Melee Beginning Piece state',
+    snarkyGameState.currentPiecesState.toString()
+  );
+  console.log(
+    'Melee Beginning Arena state',
+    snarkyGameState.currentArenaState.toString()
+  );
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'meleeAttack')
@@ -143,7 +157,7 @@ export default async function resolveMeleeAttackAction(
 
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
-  const actionParam = Field(actionData.targetGamePieceHash);
+  const actionParam = Field(actionData.targetGamePieceNumber);
   console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
     nonce: Field(actionData.nonce),
@@ -152,73 +166,7 @@ export default async function resolveMeleeAttackAction(
     piece: Field(actionData.gamePieceNumber),
   });
 
-  // Attempt to apply the move action to the game state
-  // Warn on console for failure
-  let snarkySuccess = false;
-  let stateAfterAttack: PhaseState;
-  const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
   const attackRolls = actionData.encryptedAttackRolls;
-  try {
-    const serverPrivateKey = PrivateKey.fromBase58(
-      process.env.SERVER_PRIVATE_KEY
-    );
-    const roll = new EncrytpedAttackRoll({
-      publicKey: Group.fromJSON(attackRolls.publicKey),
-      ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
-      signature: Signature.fromJSON(attackRolls.signature),
-      rngPublicKey: PublicKey.fromBase58(attackRolls.rngPublicKey),
-    });
-    const piecesTreeAfterAttack = startingGamePiecesTree.clone();
-    piecesTreeAfterAttack.set(
-      snarkyTargetPiece.id.toBigInt(),
-      snarkyTargetPiece.hash()
-    );
-
-    stateAfterAttack = snarkyGameState.applyMeleeAttackAction(
-      snarkyAction,
-      Signature.fromJSON(action.signature),
-      snarkyAttackingPiece,
-      snarkyTargetPiece,
-      startingGamePiecesTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
-      startingGamePiecesTree.getWitness(snarkyTargetPiece.id.toBigInt()),
-      UInt32.from(
-        Math.floor(attackingGamePiece.distanceTo(targetGamePiece.coordinates()))
-      ),
-      roll,
-      serverPrivateKey
-    );
-    snarkySuccess = true;
-    console.log(
-      `Successfully applied snarky melee attack action ${JSON.stringify(
-        actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
-      }, target piece ${targetGamePiece.id}`
-    );
-  } catch (e) {
-    console.warn(
-      `Unable to apply snarky melee attack action ${JSON.stringify(
-        actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
-      }, target piece ${targetGamePiece.id} - ${e}`
-    );
-  }
-
-  const snarkyRoll = new EncrytpedAttackRoll({
-    publicKey: Group.fromJSON(attackRolls.publicKey),
-    ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
-    signature: Signature.fromJSON(attackRolls.signature),
-    rngPublicKey: PublicKey.fromBase58(attackRolls.rngPublicKey),
-  });
-  const decryptedRoll = snarkyRoll.decryptRoll(
-    PrivateKey.fromBase58(process.env.SERVER_PRIVATE_KEY)
-  );
-  const decryptedRollJSON = {
-    hit: Number(decryptedRoll.hit.toString()),
-    wound: Number(decryptedRoll.wound.toString()),
-    save: Number(decryptedRoll.save.toString()),
-  };
 
   const resolvedAttack = resolveAttack(
     attackingUnit.meleeNumAttacks,
@@ -232,6 +180,59 @@ export default async function resolveMeleeAttackAction(
 
   const totalDamageDealt = resolvedAttack.damageDealt;
   const totalDamageAverage = resolvedAttack.averageDamage;
+
+  // Attempt to apply the move action to the game state
+  // Warn on console for failure
+  const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
+  try {
+    const serverPrivateKey = PrivateKey.fromBase58(
+      process.env.SERVER_PRIVATE_KEY
+    );
+    const roll = new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(attackRolls.publicKey),
+      ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
+      signature: Signature.fromJSON(attackRolls.signature),
+      rngPublicKey,
+    });
+
+    const stateAfterAttack = snarkyGameState.applyMeleeAttackAction(
+      snarkyAction,
+      Signature.fromJSON(action.signature),
+      snarkyAttackingPiece,
+      snarkyTargetPiece,
+      currentPiecesMerkleTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
+      currentPiecesMerkleTree.getWitness(snarkyTargetPiece.id.toBigInt()),
+      UInt32.from(
+        Math.floor(attackingGamePiece.distanceTo(targetGamePiece.coordinates()))
+      ),
+      roll,
+      serverPrivateKey
+    );
+    // update our passed-in merkle trees with the new state
+    if (totalDamageDealt > 0) {
+      const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
+      snarkyTargetPiece.condition.health = UInt32.from(newHealth);
+      currentPiecesMerkleTree.set(
+        snarkyTargetPiece.id.toBigInt(),
+        snarkyTargetPiece.hash()
+      );
+      console.log('Damage Dealt!', totalDamageDealt, 'New Health', newHealth);
+      console.log(
+        'Pieces Merkle Tree',
+        currentPiecesMerkleTree.tree.getRoot().toString()
+      );
+    }
+
+    console.log('Melee Final state hash', stateAfterAttack.hash().toString());
+  } catch (e) {
+    throw new Error(
+      `Unable to apply snarky melee attack action ${JSON.stringify(
+        actionData
+      )} to game ${attackingGamePiece.gameId} attacking piece ${
+        attackingGamePiece.id
+      }, target piece ${targetGamePiece.id} - ${e}`
+    );
+  }
 
   // Update target GamePiece with damage dealt
   if (totalDamageDealt > 0) {

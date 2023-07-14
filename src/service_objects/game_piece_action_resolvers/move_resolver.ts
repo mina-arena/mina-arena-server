@@ -3,7 +3,13 @@ import { GamePieceCoordinates } from '../../graphql/__generated__/resolvers-type
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState, Position } from 'mina-arena-contracts';
+import {
+  Action,
+  ArenaMerkleTree,
+  PhaseState,
+  PiecesMerkleTree,
+  Position,
+} from 'mina-arena-contracts';
 import { Field, PublicKey, UInt32, Signature } from 'snarkyjs';
 
 export type ValidateMoveActionResult = {
@@ -54,6 +60,10 @@ export async function validateMoveAction(
 
 export default async function resolveMoveAction(
   action: Models.GamePieceAction,
+  startingPiecesMerkleTree: PiecesMerkleTree,
+  startingArenaMerkleTree: ArenaMerkleTree,
+  currentPiecesMerkleTree: PiecesMerkleTree,
+  currentArenaMerkleTree: ArenaMerkleTree,
   transaction?: Transaction
 ): Promise<Models.GamePiece> {
   const gamePiece = await action.gamePiece();
@@ -62,18 +72,25 @@ export default async function resolveMoveAction(
     .minaPublicKey;
   const playerPublicKey = PublicKey.fromBase58(playerPublicKeyString);
 
-  const startingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
-  const startingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-
   const snarkyGameState = new PhaseState({
     nonce: Field(0),
-    actionsNonce: Field(0),
-    startingPiecesState: startingGamePiecesTree.tree.getRoot(),
-    currentPiecesState: startingGamePiecesTree.tree.getRoot(),
-    startingArenaState: startingGameArenaTree.tree.getRoot(),
-    currentArenaState: startingGameArenaTree.tree.getRoot(),
+    actionsNonce: Field(action.actionData.nonce - 1), // todo save last-known nonce, don't rely on -1
+    startingPiecesState: startingPiecesMerkleTree.tree.getRoot(),
+    currentPiecesState: currentPiecesMerkleTree.tree.getRoot(),
+    startingArenaState: startingArenaMerkleTree.tree.getRoot(),
+    currentArenaState: currentArenaMerkleTree.tree.getRoot(),
     playerPublicKey,
   });
+
+  console.log('Move Beginning state hash', snarkyGameState.hash().toString());
+  console.log(
+    'Move Beginning Piece state',
+    snarkyGameState.currentPiecesState.toString()
+  );
+  console.log(
+    'Move Beginning Arena state',
+    snarkyGameState.currentArenaState.toString()
+  );
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'move')
@@ -99,18 +116,17 @@ export default async function resolveMoveAction(
 
   // Attempt to apply the move action to the game state
   // Warn on console for failure
-  let snarkySuccess = false;
   let stateAfterMove: PhaseState;
   try {
-    const arenaTreeAfterMove = startingGameArenaTree.clone();
+    const arenaTreeAfterMove = currentArenaMerkleTree.clone();
     arenaTreeAfterMove.set(gamePiece.positionX, gamePiece.positionY, Field(0));
 
     stateAfterMove = snarkyGameState.applyMoveAction(
       snarkyAction,
       Signature.fromJSON(action.signature),
       snarkyPiece,
-      startingGamePiecesTree.getWitness(snarkyPiece.id.toBigInt()),
-      startingGameArenaTree.getWitness(
+      currentPiecesMerkleTree.getWitness(snarkyPiece.id.toBigInt()),
+      currentArenaMerkleTree.getWitness(
         gamePiece.positionX,
         gamePiece.positionY
       ),
@@ -118,14 +134,37 @@ export default async function resolveMoveAction(
       actionParam,
       UInt32.from(Math.floor(moveValidity.distance)) // we need the true distance here
     );
-    snarkySuccess = true;
     console.log(
       `Successfully applied snarky move action ${JSON.stringify(
         actionData
       )} to game ${gamePiece.gameId} piece ${gamePiece.id}`
     );
+
+    // update our passed-in merkle trees with the new state
+    snarkyPiece.position = actionParam;
+    currentPiecesMerkleTree.set(snarkyPiece.id.toBigInt(), snarkyPiece.hash());
+    currentArenaMerkleTree.set(
+      actionData.moveTo.x,
+      actionData.moveTo.y,
+      Field(1)
+    );
+    currentArenaMerkleTree.set(
+      gamePiece.positionX,
+      gamePiece.positionY,
+      Field(0)
+    );
+
+    console.log(
+      'Move Final Piece state',
+      stateAfterMove.currentPiecesState.toString()
+    );
+    console.log(
+      'Move Final Arena state',
+      stateAfterMove.currentArenaState.toString()
+    );
+    console.log('Move Final state hash', stateAfterMove.hash().toString());
   } catch (e) {
-    console.warn(
+    throw new Error(
       `Unable to apply snarky move action ${JSON.stringify(
         actionData
       )} to game ${gamePiece.gameId} piece ${gamePiece.id} - ${e}`
@@ -142,35 +181,6 @@ export default async function resolveMoveAction(
   newActionData.resolved = true;
   action.actionData = newActionData;
   await action.save({ transaction });
-
-  // Warn on console if the state does not match
-  if (snarkySuccess) {
-    const endingGamePiecesTree = await serializePiecesTree(gamePiece.gameId);
-    const endingGameArenaTree = await serializeArenaTree(gamePiece.gameId);
-    const snarkyGameStateAfter = new PhaseState({
-      nonce: Field(0),
-      actionsNonce: Field(1),
-      startingPiecesState: startingGamePiecesTree.tree.getRoot(),
-      currentPiecesState: endingGamePiecesTree.tree.getRoot(),
-      startingArenaState: startingGameArenaTree.tree.getRoot(),
-      currentArenaState: endingGameArenaTree.tree.getRoot(),
-      playerPublicKey,
-    })
-      .hash()
-      .toString();
-
-    if (snarkyGameStateAfter != stateAfterMove.hash().toString()) {
-      console.warn(
-        `Snarky game state after move action does not match expected state! (${snarkyGameStateAfter} != ${stateAfterMove
-          .hash()
-          .toString()})`
-      );
-    } else {
-      console.log(
-        `Snarky game state after move action matches expected state!`
-      );
-    }
-  }
 
   return gamePiece;
 }

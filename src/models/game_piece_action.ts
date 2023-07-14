@@ -30,7 +30,7 @@ export type GamePieceRangedAttackAction = {
   totalDamageDealt?: number;
   totalDamageAverage?: number;
   gamePieceNumber: number;
-  targetGamePieceHash: string;
+  targetGamePieceNumber: number;
   nonce: number;
 };
 export type GamePieceMeleeAttackAction = {
@@ -42,7 +42,7 @@ export type GamePieceMeleeAttackAction = {
   totalDamageDealt?: number;
   totalDamageAverage?: number;
   gamePieceNumber: number;
-  targetGamePieceHash: string;
+  targetGamePieceNumber: number;
   nonce: number;
 };
 export type GamePieceActionData =

@@ -259,7 +259,7 @@ input GamePieceRangedAttackActionInput {
   targetGamePieceId: Int!
   diceRolls: DiceRollInput!
   gamePieceNumber: Int!
-  targetGamePieceHash: String!
+  targetGamePieceNumber: Int!
   nonce: Int!
 }
 
@@ -267,7 +267,7 @@ input GamePieceMeleeAttackActionInput {
   targetGamePieceId: Int!
   diceRolls: DiceRollInput!
   gamePieceNumber: Int!
-  targetGamePieceHash: String!
+  targetGamePieceNumber: Int!
   nonce: Int!
 }
 

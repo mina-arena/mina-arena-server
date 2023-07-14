@@ -3,7 +3,13 @@ import resolveAttack from './attack_resolver.js';
 import { Transaction } from 'sequelize';
 import serializePiecesTree from '../mina/pieces_tree_serializer.js';
 import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState, EncrytpedAttackRoll } from 'mina-arena-contracts';
+import {
+  Action,
+  PhaseState,
+  EncrytpedAttackRoll,
+  PiecesMerkleTree,
+  ArenaMerkleTree,
+} from 'mina-arena-contracts';
 import {
   Field,
   PublicKey,
@@ -85,6 +91,10 @@ export async function validateRangedAttackAction(
 
 export default async function resolveRangedAttackAction(
   action: Models.GamePieceAction,
+  startingPiecesMerkleTree: PiecesMerkleTree,
+  startingArenaMerkleTree: ArenaMerkleTree,
+  currentPiecesMerkleTree: PiecesMerkleTree,
+  currentArenaMerkleTree: ArenaMerkleTree,
   transaction?: Transaction
 ) {
   const attackingGamePiece = await action.gamePiece();
@@ -94,22 +104,17 @@ export default async function resolveRangedAttackAction(
   ).minaPublicKey;
   const playerPublicKey = PublicKey.fromBase58(playerPublicKeyString);
 
-  const startingGamePiecesTree = await serializePiecesTree(
-    attackingGamePiece.gameId
-  );
-  const startingGameArenaTree = await serializeArenaTree(
-    attackingGamePiece.gameId
-  );
-
   const snarkyGameState = new PhaseState({
     nonce: Field(0),
-    actionsNonce: Field(0),
-    startingPiecesState: startingGamePiecesTree.tree.getRoot(),
-    currentPiecesState: startingGamePiecesTree.tree.getRoot(),
-    startingArenaState: startingGameArenaTree.tree.getRoot(),
-    currentArenaState: startingGameArenaTree.tree.getRoot(),
+    actionsNonce: Field(action.actionData.nonce - 1), // todo save last-known nonce, don't rely on -1
+    startingPiecesState: startingPiecesMerkleTree.tree.getRoot(),
+    currentPiecesState: currentPiecesMerkleTree.tree.getRoot(),
+    startingArenaState: startingArenaMerkleTree.tree.getRoot(),
+    currentArenaState: currentArenaMerkleTree.tree.getRoot(),
     playerPublicKey,
   });
+
+  console.log('Ranged Beginning state hash', snarkyGameState.hash().toString());
 
   const actionData = action.actionData;
   if (actionData.actionType !== 'rangedAttack')
@@ -139,7 +144,7 @@ export default async function resolveRangedAttackAction(
   });
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
-  const actionParam = Field(actionData.targetGamePieceHash);
+  const actionParam = Field(actionData.targetGamePieceNumber);
   console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
     nonce: Field(actionData.nonce),
@@ -148,60 +153,7 @@ export default async function resolveRangedAttackAction(
     piece: Field(actionData.gamePieceNumber),
   });
 
-  // Attempt to apply the move action to the game state
-  // Warn on console for failure
-  let snarkySuccess = false;
-  let stateAfterAttack: PhaseState;
-  const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
   const attackRolls = actionData.encryptedAttackRolls;
-  try {
-    const serverPrivateKey = PrivateKey.fromBase58(
-      process.env.SERVER_PRIVATE_KEY
-    );
-
-    const roll = new EncrytpedAttackRoll({
-      publicKey: Group.fromJSON(attackRolls.publicKey),
-      ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
-      signature: Signature.fromJSON(attackRolls.signature),
-      rngPublicKey: PublicKey.fromBase58(attackRolls.rngPublicKey),
-    });
-    const piecesTreeAfterAttack = startingGamePiecesTree.clone();
-    piecesTreeAfterAttack.set(
-      snarkyTargetPiece.id.toBigInt(),
-      snarkyTargetPiece.hash()
-    );
-
-    stateAfterAttack = snarkyGameState.applyRangedAttackAction(
-      snarkyAction,
-      Signature.fromJSON(action.signature),
-      snarkyAttackingPiece,
-      snarkyTargetPiece,
-      startingGamePiecesTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
-      startingGamePiecesTree.getWitness(snarkyTargetPiece.id.toBigInt()),
-      UInt32.from(
-        Math.floor(attackingGamePiece.distanceTo(targetGamePiece.coordinates()))
-      ),
-      roll,
-      serverPrivateKey
-    );
-    snarkySuccess = true;
-    console.log(
-      `Successfully applied snarky ranged attack action ${JSON.stringify(
-        actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
-      }, target piece ${targetGamePiece.id}`
-    );
-  } catch (e) {
-    console.warn(
-      `Unable to apply snarky ranged attack action ${JSON.stringify(
-        actionData
-      )} to game ${attackingGamePiece.gameId} attacking piece ${
-        attackingGamePiece.id
-      }, target piece ${targetGamePiece.id} - ${e}`
-    );
-  }
-
   // Resolve attack
   let resolvedAttack;
   try {
@@ -220,6 +172,60 @@ export default async function resolveRangedAttackAction(
   }
   const totalDamageDealt = resolvedAttack.damageDealt;
   const totalDamageAverage = resolvedAttack.averageDamage;
+
+  // Attempt to apply the move action to the game state
+  const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
+  try {
+    const serverPrivateKey = PrivateKey.fromBase58(
+      process.env.SERVER_PRIVATE_KEY
+    );
+
+    const roll = new EncrytpedAttackRoll({
+      publicKey: Group.fromJSON(attackRolls.publicKey),
+      ciphertext: attackRolls.ciphertext.map((c) => Field(c)),
+      signature: Signature.fromJSON(attackRolls.signature),
+      rngPublicKey,
+    });
+
+    const stateAfterAttack = snarkyGameState.applyRangedAttackAction(
+      snarkyAction,
+      Signature.fromJSON(action.signature),
+      snarkyAttackingPiece,
+      snarkyTargetPiece,
+      currentPiecesMerkleTree.getWitness(snarkyAttackingPiece.id.toBigInt()),
+      currentPiecesMerkleTree.getWitness(snarkyTargetPiece.id.toBigInt()),
+      UInt32.from(
+        Math.floor(attackingGamePiece.distanceTo(targetGamePiece.coordinates()))
+      ),
+      roll,
+      serverPrivateKey
+    );
+
+    // update our passed-in merkle trees with the new state
+    if (totalDamageDealt > 0) {
+      const newHealth = Math.max(targetGamePiece.health - totalDamageDealt, 0);
+      snarkyTargetPiece.condition.health = UInt32.from(newHealth);
+      currentPiecesMerkleTree.set(
+        snarkyTargetPiece.id.toBigInt(),
+        snarkyTargetPiece.hash()
+      );
+      console.log('Damage dealt!', totalDamageDealt, 'new health', newHealth);
+      console.log(
+        'Pieces Merkle Tree',
+        currentPiecesMerkleTree.tree.getRoot().toString()
+      );
+    }
+
+    console.log('Ranged Final state hash', stateAfterAttack.hash().toString());
+  } catch (e) {
+    throw new Error(
+      `Unable to apply snarky ranged attack action ${JSON.stringify(
+        actionData
+      )} to game ${attackingGamePiece.gameId} attacking piece ${
+        attackingGamePiece.id
+      }, target piece ${targetGamePiece.id} - ${e}`
+    );
+  }
 
   // Update target GamePiece with damage dealt
   if (totalDamageDealt > 0) {

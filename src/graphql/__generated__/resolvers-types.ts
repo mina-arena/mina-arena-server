@@ -204,8 +204,8 @@ export type GamePieceMeleeAttackActionInput = {
   diceRolls: DiceRollInput;
   gamePieceNumber: Scalars['Int'];
   nonce: Scalars['Int'];
-  targetGamePieceHash: Scalars['String'];
   targetGamePieceId: Scalars['Int'];
+  targetGamePieceNumber: Scalars['Int'];
 };
 
 export type GamePieceMoveAction = {
@@ -235,8 +235,8 @@ export type GamePieceRangedAttackActionInput = {
   diceRolls: DiceRollInput;
   gamePieceNumber: Scalars['Int'];
   nonce: Scalars['Int'];
-  targetGamePieceHash: Scalars['String'];
   targetGamePieceId: Scalars['Int'];
+  targetGamePieceNumber: Scalars['Int'];
 };
 
 export type GamePlayer = {

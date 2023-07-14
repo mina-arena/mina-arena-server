@@ -3,6 +3,8 @@ import sequelizeConnection from '../db/config.js';
 import resolveGamePieceAction from './game_piece_action_resolver.js';
 import { GamePhaseName, GAME_PHASE_ORDER } from '../models/game_phase.js';
 import { Transaction } from 'sequelize';
+import serializeArenaTree from './mina/arena_tree_serializer.js';
+import serializePiecesTree from './mina/pieces_tree_serializer.js';
 
 export default async (
   gamePhase: Models.GamePhase,
@@ -10,16 +12,36 @@ export default async (
 ): Promise<Models.Game> => {
   // Validate that Game is in progress
   const game = await Models.Game.findByPk(gamePhase.gameId, { transaction });
-  if (game.status != 'inProgress') throw new Error(`Game ${game.id} is not in progress, status: ${game.status}`);
+  if (game.status != 'inProgress')
+    throw new Error(
+      `Game ${game.id} is not in progress, status: ${game.status}`
+    );
 
   // Gather actions and resolve them in order
   const actions = await Models.GamePieceAction.findAll({
     where: { gamePhaseId: gamePhase.id },
     order: [['id', 'ASC']],
-    transaction
+    transaction,
   });
+  const startingPiecesMerleTree = await serializePiecesTree(
+    game.id,
+    transaction
+  );
+  const startingArenaMerkleTree = await serializeArenaTree(
+    game.id,
+    transaction
+  );
+  const currentPiecesMerkleTree = startingPiecesMerleTree.clone();
+  const currentArenaMerkleTree = startingArenaMerkleTree.clone();
   for (const action of actions) {
-    await resolveGamePieceAction(action, transaction);
+    await resolveGamePieceAction(
+      action,
+      startingPiecesMerleTree,
+      startingArenaMerkleTree,
+      currentPiecesMerkleTree,
+      currentArenaMerkleTree,
+      transaction
+    );
   }
 
   // Check if any player has won
@@ -41,11 +63,11 @@ export default async (
   }
 
   return game;
-}
+};
 
 type CheckForWinnerResult = {
-  isGameDone: boolean,
-  winningGamePlayer?: Models.GamePlayer
+  isGameDone: boolean;
+  winningGamePlayer?: Models.GamePlayer;
 };
 
 async function checkForWinner(
@@ -54,7 +76,7 @@ async function checkForWinner(
 ): Promise<CheckForWinnerResult> {
   const gamePlayers = await Models.GamePlayer.findAll({
     where: { gameId: game.id },
-    transaction
+    transaction,
   });
 
   let livingGamePlayers = [];
@@ -83,14 +105,17 @@ async function createNextGamePhase(
   let nextGamePlayerId: number;
 
   const currentPhaseIndex = GAME_PHASE_ORDER.indexOf(currentPhase.phase);
-  const endOfCurrentPlayerTurn = currentPhaseIndex == (GAME_PHASE_ORDER.length - 1);
+  const endOfCurrentPlayerTurn =
+    currentPhaseIndex == GAME_PHASE_ORDER.length - 1;
 
   if (endOfCurrentPlayerTurn) {
     // Only increment the turn number when the first player is going again
     const nextGamePlayerNumber = await game.nextGamePlayerNumber();
     const firstPlayerNumber = game.turnPlayerOrderArray()[0];
     const isNewRound = nextGamePlayerNumber == firstPlayerNumber;
-    nextTurnNumber = isNewRound ? currentPhase.turnNumber + 1 : currentPhase.turnNumber;
+    nextTurnNumber = isNewRound
+      ? currentPhase.turnNumber + 1
+      : currentPhase.turnNumber;
     nextPhase = GAME_PHASE_ORDER[0];
     nextGamePlayerId = (await game.nextGamePlayer()).id;
   } else {
@@ -99,10 +124,13 @@ async function createNextGamePhase(
     nextGamePlayerId = currentPhase.gamePlayerId;
   }
 
-  return await Models.GamePhase.create({
-    gameId: game.id,
-    gamePlayerId: nextGamePlayerId,
-    turnNumber: nextTurnNumber,
-    phase: nextPhase
-  }, { transaction });
+  return await Models.GamePhase.create(
+    {
+      gameId: game.id,
+      gamePlayerId: nextGamePlayerId,
+      turnNumber: nextTurnNumber,
+      phase: nextPhase,
+    },
+    { transaction }
+  );
 }
