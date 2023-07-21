@@ -18,6 +18,8 @@ export type GamePieceMoveAction = {
   resolved: boolean;
   moveFrom: GameArenaCoordinates;
   moveTo: GameArenaCoordinates;
+  gamePieceNumber: number;
+  nonce: number;
 };
 export type GamePieceRangedAttackAction = {
   actionType: 'rangedAttack';
@@ -27,6 +29,9 @@ export type GamePieceRangedAttackAction = {
   resolvedAttack?: ResolvedAttack;
   totalDamageDealt?: number;
   totalDamageAverage?: number;
+  gamePieceNumber: number;
+  targetGamePieceNumber: number;
+  nonce: number;
 };
 export type GamePieceMeleeAttackAction = {
   actionType: 'meleeAttack';
@@ -36,6 +41,9 @@ export type GamePieceMeleeAttackAction = {
   resolvedAttack?: ResolvedAttack;
   totalDamageDealt?: number;
   totalDamageAverage?: number;
+  gamePieceNumber: number;
+  targetGamePieceNumber: number;
+  nonce: number;
 };
 export type GamePieceActionData =
   | GamePieceMoveAction

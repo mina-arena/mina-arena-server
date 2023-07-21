@@ -15,6 +15,7 @@ import {
   Piece,
   Unit,
   UnitStats,
+  PieceCondition,
 } from 'mina-arena-contracts';
 import { UInt32, PublicKey, Field } from 'snarkyjs';
 
@@ -80,12 +81,16 @@ class GamePiece extends Model<
     const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
     const gamePieceNumber = await this.gamePieceNumber();
 
+    const pieceConditionJSON = { ...snarkyUnit.stats };
+    pieceConditionJSON.health = UInt32.from(this.health);
+
+    const pieceCondition = new PieceCondition({ ...pieceConditionJSON });
     const p = new Piece({
       id: Field(gamePieceNumber),
       playerPublicKey: minaPublicKey,
       position: snarkyPosition,
       baseUnit: snarkyUnit,
-      condition: snarkyUnit.stats,
+      condition: pieceCondition,
     });
 
     return p;

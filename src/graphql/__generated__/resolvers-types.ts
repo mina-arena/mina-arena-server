@@ -59,6 +59,7 @@ export type CreateGamePieceActionInput = {
   meleeAttackInput?: InputMaybe<GamePieceMeleeAttackActionInput>;
   moveInput?: InputMaybe<GamePieceMoveActionInput>;
   rangedAttackInput?: InputMaybe<GamePieceRangedAttackActionInput>;
+  signature: SignatureInput;
 };
 
 export type CreateGamePieceActionsInput = {
@@ -147,7 +148,9 @@ export type GamePiece = {
   createdAt: Scalars['Iso8601DateTime'];
   game: Game;
   gamePieceActions: Array<GamePieceAction>;
+  gamePieceNumber: Scalars['Int'];
   gamePlayer: GamePlayer;
+  hash: Scalars['String'];
   health: Scalars['Int'];
   id: Scalars['Int'];
   playerUnit: PlayerUnit;
@@ -199,7 +202,10 @@ export type GamePieceMeleeAttackAction = {
 
 export type GamePieceMeleeAttackActionInput = {
   diceRolls: DiceRollInput;
+  gamePieceNumber: Scalars['Int'];
+  nonce: Scalars['Int'];
   targetGamePieceId: Scalars['Int'];
+  targetGamePieceNumber: Scalars['Int'];
 };
 
 export type GamePieceMoveAction = {
@@ -210,8 +216,10 @@ export type GamePieceMoveAction = {
 };
 
 export type GamePieceMoveActionInput = {
+  gamePieceNumber: Scalars['Int'];
   moveFrom: GamePieceCoordinatesInput;
   moveTo: GamePieceCoordinatesInput;
+  nonce: Scalars['Int'];
 };
 
 export type GamePieceRangedAttackAction = {
@@ -225,7 +233,10 @@ export type GamePieceRangedAttackAction = {
 
 export type GamePieceRangedAttackActionInput = {
   diceRolls: DiceRollInput;
+  gamePieceNumber: Scalars['Int'];
+  nonce: Scalars['Int'];
   targetGamePieceId: Scalars['Int'];
+  targetGamePieceNumber: Scalars['Int'];
 };
 
 export type GamePlayer = {
@@ -702,7 +713,9 @@ export type GamePieceResolvers<
     ParentType,
     ContextType
   >;
+  gamePieceNumber?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   gamePlayer?: Resolver<ResolversTypes['GamePlayer'], ParentType, ContextType>;
+  hash?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   health?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   playerUnit?: Resolver<ResolversTypes['PlayerUnit'], ParentType, ContextType>;

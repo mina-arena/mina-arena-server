@@ -30,7 +30,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "http": "^0.0.1-security",
-    "mina-arena-contracts": "0.3.4",
+    "mina-arena-contracts": "^0.4.1",
     "newrelic": "^10.3.0",
     "pg": "^8.9.0",
     "sequelize": "^6.31.0"

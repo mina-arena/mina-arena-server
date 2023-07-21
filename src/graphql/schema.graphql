@@ -121,6 +121,8 @@ type GamePiece {
   playerUnit: PlayerUnit!
   coordinates: GamePieceCoordinates
   health: Int!
+  gamePieceNumber: Int!
+  hash: String!
   gamePieceActions: [GamePieceAction!]!
   createdAt: Iso8601DateTime!
   updatedAt: Iso8601DateTime!
@@ -238,11 +240,14 @@ input CreateGamePieceActionInput {
   moveInput: GamePieceMoveActionInput
   rangedAttackInput: GamePieceRangedAttackActionInput
   meleeAttackInput: GamePieceMeleeAttackActionInput
+  signature: SignatureInput!
 }
 
 input GamePieceMoveActionInput {
   moveFrom: GamePieceCoordinatesInput!
   moveTo: GamePieceCoordinatesInput!
+  gamePieceNumber: Int!
+  nonce: Int!
 }
 
 input GamePieceCoordinatesInput {
@@ -253,11 +258,17 @@ input GamePieceCoordinatesInput {
 input GamePieceRangedAttackActionInput {
   targetGamePieceId: Int!
   diceRolls: DiceRollInput!
+  gamePieceNumber: Int!
+  targetGamePieceNumber: Int!
+  nonce: Int!
 }
 
 input GamePieceMeleeAttackActionInput {
   targetGamePieceId: Int!
   diceRolls: DiceRollInput!
+  gamePieceNumber: Int!
+  targetGamePieceNumber: Int!
+  nonce: Int!
 }
 
 input DiceRollInput {
