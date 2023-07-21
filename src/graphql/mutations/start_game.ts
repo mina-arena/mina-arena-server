@@ -9,6 +9,8 @@ import {
   MAX_POINTS,
   MAX_PIECES,
 } from '../../models/game.js';
+import { type Transaction } from 'sequelize';
+import { GameProgram, GameProof } from 'mina-arena-contracts';
 
 export default async (
   parent,
@@ -115,7 +117,7 @@ async function validateGame(game: Models.Game, t): Promise<ValidateGameResult> {
 async function setupGame(
   game: Models.Game,
   gamePlayers: Models.GamePlayer[],
-  t
+  t: Transaction
 ): Promise<Models.Game> {
   // Identify the player with the first turn and create the first phase
   const turnPlayerNumber = game.turnPlayerOrderArray()[0];
@@ -184,6 +186,11 @@ async function setupGame(
   game.phase = 'movement';
   game.turnGamePlayerId = turnPlayer.id;
   game.status = 'inProgress';
+
+  const gameState = await game.toSnarkyGameState();
+  const gameProof = await GameProgram.init(gameState, gameState);
+  game.gameProof = JSON.parse(JSON.stringify(gameProof.toJSON()));
+
   await game.save({ transaction: t });
   return game;
 }

@@ -8,6 +8,11 @@ import {
 import sequelizeConnection from '../db/config.js';
 import { GamePhaseName } from './game_phase.js';
 import * as Models from './index.js';
+import { GameState } from 'mina-arena-contracts';
+import serializePiecesTree from '../service_objects/mina/pieces_tree_serializer.js';
+import serializeArenaTree from '../service_objects/mina/arena_tree_serializer.js';
+import { Field, PublicKey, UInt32 } from 'snarkyjs';
+// import { ARENA_HEIGHT_U32, ARENA_WIDTH_U32 } from 'mina-arena-contracts';
 
 type GameStatus = 'pending' | 'inProgress' | 'completed' | 'canceled';
 
@@ -24,6 +29,7 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   declare turnPlayerOrder: CreationOptional<string>;
   declare turnGamePlayerId: CreationOptional<number>;
   declare winningGamePlayerId: CreationOptional<number>;
+  declare gameProof: CreationOptional<JSON>;
   declare readonly createdAt: CreationOptional<Date>;
   declare readonly updatedAt: CreationOptional<Date>;
 
@@ -105,8 +111,13 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   }
 
   // Get the playerNumber of the GamePlayer whose turn it is
-  async turnGamePlayerNumber(): Promise<number> {
-    return (await this.turnGamePlayer()).playerNumber;
+  async turnGamePlayerNumber(): Promise<0 | 1> {
+    const _playerNumber = (await this.turnGamePlayer()).playerNumber;
+    if (_playerNumber === 1) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   // Get the playerNumber of the GamePlayer who will be taking the next turn
@@ -120,6 +131,30 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     } else {
       return playerNumberOrder[currentPlayerIndex + 1];
     }
+  }
+
+  async toSnarkyGameState(): Promise<GameState> {
+    const pieces = await serializePiecesTree(this.id);
+    const arena = await serializeArenaTree(this.id);
+    const p1_id = this.turnPlayerOrder[0];
+    const p2_id = this.turnPlayerOrder[1];
+    if (!p1_id || !p2_id) {
+      throw new Error('Both players must be in the game');
+    }
+    const p1 = await (await Models.GamePlayer.findByPk(p1_id)).player();
+    const p2 = await (await Models.GamePlayer.findByPk(p2_id)).player();
+    const turnsNonce = this.turnNumber || 0;
+    const currentPlayerTurn = await this.turnGamePlayerNumber();
+    return new GameState(
+      pieces.tree.getRoot(),
+      arena.tree.getRoot(),
+      Field(currentPlayerTurn),
+      PublicKey.fromBase58(p1.minaPublicKey),
+      PublicKey.fromBase58(p2.minaPublicKey),
+      UInt32.from(550),
+      UInt32.from(650),
+      Field(turnsNonce)
+    );
   }
 }
 
@@ -148,6 +183,9 @@ Game.init(
     },
     winningGamePlayerId: {
       type: DataTypes.INTEGER,
+    },
+    gameProof: {
+      type: DataTypes.JSONB,
     },
     createdAt: {
       allowNull: false,
