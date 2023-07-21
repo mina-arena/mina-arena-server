@@ -4,12 +4,11 @@ import {
   EncrytpedAttackRoll,
   MELEE_ATTACK_RANGE,
   PiecesMerkleTree,
+  Action,
+  PhaseState,
 } from 'mina-arena-contracts';
 import resolveAttack from './attack_resolver.js';
 import { Transaction } from 'sequelize';
-import serializePiecesTree from '../mina/pieces_tree_serializer.js';
-import serializeArenaTree from '../mina/arena_tree_serializer.js';
-import { Action, PhaseState, DecrytpedAttackRoll } from 'mina-arena-contracts';
 import {
   Field,
   PublicKey,

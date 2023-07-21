@@ -1,8 +1,6 @@
 import * as Models from '../../models/index.js';
 import { GamePieceCoordinates } from '../../graphql/__generated__/resolvers-types.js';
 import { Transaction } from 'sequelize';
-import serializePiecesTree from '../mina/pieces_tree_serializer.js';
-import serializeArenaTree from '../mina/arena_tree_serializer.js';
 import {
   Action,
   ArenaMerkleTree,

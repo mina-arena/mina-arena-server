@@ -9,8 +9,11 @@ import {
   MAX_POINTS,
   MAX_PIECES,
 } from '../../models/game.js';
-import { type Transaction } from 'sequelize';
+import { Transaction } from 'sequelize';
 import { GameProgram, GameProof } from 'mina-arena-contracts';
+import Dotenv from 'dotenv';
+
+Dotenv.config();
 
 export default async (
   parent,
@@ -18,19 +21,32 @@ export default async (
   contextValue,
   info
 ): Promise<Models.Game> => {
-  return await sequelizeConnection.transaction(async (t) => {
-    // Validate that game exists
-    let game = await Models.Game.findByPk(args.input.gameId, {
+  let game: Models.Game;
+  await sequelizeConnection.transaction(async (t: Transaction) => {
+    game = await Models.Game.findByPk(args.input.gameId, {
       transaction: t,
     });
-    if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
-
+  });
+  if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
+  await sequelizeConnection.transaction(async (t: Transaction) => {
     // Validate game state, raises exception if invalid
     const validationResult = await validateGame(game, t);
 
     // Game is valid, perform setup
-    return setupGame(game, validationResult.gamePlayers, t);
+    game = await setupGame(game, validationResult.gamePlayers, t);
   });
+  if (process.env.COMPILE_PROOFS) {
+    await sequelizeConnection.transaction(async (t: Transaction) => {
+      // Validate that game exists
+      let game = await Models.Game.findByPk(args.input.gameId, {
+        transaction: t,
+      });
+      if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
+
+      game = await proveGame(game, t);
+    });
+  }
+  return game;
 };
 
 type ValidateGameResult = {
@@ -187,10 +203,18 @@ async function setupGame(
   game.turnGamePlayerId = turnPlayer.id;
   game.status = 'inProgress';
 
-  const gameState = await game.toSnarkyGameState();
-  const gameProof = await GameProgram.init(gameState, gameState);
-  game.gameProof = JSON.parse(JSON.stringify(gameProof.toJSON()));
-
   await game.save({ transaction: t });
+  return game;
+}
+
+async function proveGame(
+  game: Models.Game,
+  t: Transaction
+): Promise<Models.Game> {
+  const snaryGameState = await game.toSnarkyGameState();
+
+  const gameProof = await GameProgram.init(snaryGameState, snaryGameState);
+  game.gameProof = JSON.parse(JSON.stringify(gameProof.toJSON()));
+  game.save({ transaction: t });
   return game;
 }

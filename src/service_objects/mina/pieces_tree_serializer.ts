@@ -14,7 +14,7 @@ import { Transaction } from 'sequelize';
  * Given a Game ID, find all of the Game Pieces and serialize them into a PiecesMerkleTree
  */
 
-export default async function serializePiecesTree(
+export async function serializePiecesTreeFromGameId(
   gameId: string | number,
   transaction?: Transaction
 ): Promise<PiecesMerkleTree> {

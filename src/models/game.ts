@@ -9,8 +9,8 @@ import sequelizeConnection from '../db/config.js';
 import { GamePhaseName } from './game_phase.js';
 import * as Models from './index.js';
 import { GameState } from 'mina-arena-contracts';
-import serializePiecesTree from '../service_objects/mina/pieces_tree_serializer.js';
-import serializeArenaTree from '../service_objects/mina/arena_tree_serializer.js';
+import { serializePiecesTreeFromGameId } from '../service_objects/mina/pieces_tree_serializer.js';
+import { serializeArenaTreeFromGameId } from '../service_objects/mina/arena_tree_serializer.js';
 import { Field, PublicKey, UInt32 } from 'snarkyjs';
 // import { ARENA_HEIGHT_U32, ARENA_WIDTH_U32 } from 'mina-arena-contracts';
 
@@ -134,8 +134,8 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   }
 
   async toSnarkyGameState(): Promise<GameState> {
-    const pieces = await serializePiecesTree(this.id);
-    const arena = await serializeArenaTree(this.id);
+    const pieces = await serializePiecesTreeFromGameId(this.id);
+    const arena = await serializeArenaTreeFromGameId(this.id);
     const p1_id = this.turnPlayerOrder[0];
     const p2_id = this.turnPlayerOrder[1];
     if (!p1_id || !p2_id) {

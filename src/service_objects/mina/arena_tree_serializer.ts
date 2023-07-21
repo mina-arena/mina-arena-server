@@ -8,7 +8,7 @@ import { Transaction } from 'sequelize';
  * Given a Game ID, find all the GamePieces that are in the game and serialize them into an ArenaMerkleTree
  */
 
-export default async function serializeArenaTree(
+export async function serializeArenaTreeFromGameId(
   gameId: string | number,
   transaction?: Transaction
 ): Promise<ArenaMerkleTree> {
