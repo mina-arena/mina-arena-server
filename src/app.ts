@@ -19,9 +19,9 @@ dotenv.config();
 
 if (process.env.COMPILE_PROOFS === 'true') {
   console.time('compiling proofs');
-  PhaseProgram.compile();
-  TurnProgram.compile();
-  GameProgram.compile();
+  await PhaseProgram.compile();
+  await TurnProgram.compile();
+  await GameProgram.compile();
   console.timeEnd('compiling proofs');
 }
 

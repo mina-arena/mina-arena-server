@@ -136,13 +136,9 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
   async toSnarkyGameState(): Promise<GameState> {
     const pieces = await serializePiecesTreeFromGameId(this.id);
     const arena = await serializeArenaTreeFromGameId(this.id);
-    const p1_id = this.turnPlayerOrder[0];
-    const p2_id = this.turnPlayerOrder[1];
-    if (!p1_id || !p2_id) {
-      throw new Error('Both players must be in the game');
-    }
-    const p1 = await (await Models.GamePlayer.findByPk(p1_id)).player();
-    const p2 = await (await Models.GamePlayer.findByPk(p2_id)).player();
+    const players = await this.gamePlayersInTurnOrder();
+    const p1 = await players[0].player();
+    const p2 = await players[1].player();
     const turnsNonce = this.turnNumber || 0;
     const currentPlayerTurn = await this.turnGamePlayerNumber();
     return new GameState(
