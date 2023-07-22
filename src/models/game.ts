@@ -140,7 +140,12 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     const p1 = await players[0].player();
     const p2 = await players[1].player();
     const turnsNonce = this.turnNumber || 0;
-    const currentPlayerTurn = await this.turnGamePlayerNumber();
+    const currentPlayerTurn = (await this.turnGamePlayerNumber()) + 1;
+    console.log('pieces', pieces.tree.getRoot().toString());
+    console.log('arena', arena.tree.getRoot().toString());
+    console.log('p1', p1.minaPublicKey);
+    console.log('p2', p2.minaPublicKey);
+    console.log('turnsNonce', turnsNonce);
     return new GameState(
       pieces.tree.getRoot(),
       arena.tree.getRoot(),

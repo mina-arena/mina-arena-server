@@ -22,30 +22,33 @@ export default async (
   info
 ): Promise<Models.Game> => {
   let game: Models.Game;
-  await sequelizeConnection.transaction(async (t: Transaction) => {
-    game = await Models.Game.findByPk(args.input.gameId, {
-      transaction: t,
-    });
+  const t0 = sequelizeConnection.transaction();
+  console.log(t0);
+  console.log(args);
+  game = await Models.Game.findByPk(args.input.gameId, {
+    transaction: t0,
+  });
+  await t0.commit();
+  if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
+
+  const t1 = sequelizeConnection.transaction();
+  // Validate game state, raises exception if invalid
+  const validationResult = await validateGame(game, t1);
+
+  // Game is valid, perform setup
+  game = await setupGame(game, validationResult.gamePlayers, t1);
+  await t1.commit();
+
+  const t2 = sequelizeConnection.transaction();
+  // Validate that game exists
+  game = await Models.Game.findByPk(args.input.gameId, {
+    transaction: t2,
   });
   if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
-  await sequelizeConnection.transaction(async (t: Transaction) => {
-    // Validate game state, raises exception if invalid
-    const validationResult = await validateGame(game, t);
 
-    // Game is valid, perform setup
-    game = await setupGame(game, validationResult.gamePlayers, t);
-  });
-  if (process.env.COMPILE_PROOFS) {
-    await sequelizeConnection.transaction(async (t: Transaction) => {
-      // Validate that game exists
-      let game = await Models.Game.findByPk(args.input.gameId, {
-        transaction: t,
-      });
-      if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
+  game = await proveGame(game, t2);
+  await t2.commit();
 
-      game = await proveGame(game, t);
-    });
-  }
   return game;
 };
 
@@ -213,8 +216,13 @@ async function proveGame(
 ): Promise<Models.Game> {
   const snaryGameState = await game.toSnarkyGameState();
 
-  const gameProof = await GameProgram.init(snaryGameState, snaryGameState);
-  game.gameProof = JSON.parse(JSON.stringify(gameProof.toJSON()));
+  if (process.env.COMPILE_PROOFS === 'true') {
+    const gameProof = await GameProgram.init(snaryGameState, snaryGameState);
+    game.gameProof = JSON.parse(JSON.stringify(gameProof.toJSON()));
+  } else {
+    game.gameProof = JSON.parse(JSON.stringify({}));
+  }
+
   game.save({ transaction: t });
   return game;
 }
