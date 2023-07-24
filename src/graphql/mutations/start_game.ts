@@ -2,7 +2,6 @@ import * as Types from '../__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { shuffle, unique } from '../helpers.js';
-import https from 'http';
 import axios from 'axios';
 
 import {

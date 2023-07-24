@@ -12,11 +12,6 @@ import resolvers from './graphql/resolvers.js';
 
 import dbInit from './db/init.js';
 
-import dotenv from 'dotenv';
-import { GameProgram, PhaseProgram, TurnProgram } from 'mina-arena-contracts';
-
-dotenv.config();
-
 dbInit();
 
 const app = express();
