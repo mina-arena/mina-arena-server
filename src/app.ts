@@ -17,14 +17,6 @@ import { GameProgram, PhaseProgram, TurnProgram } from 'mina-arena-contracts';
 
 dotenv.config();
 
-if (process.env.COMPILE_PROOFS === 'true') {
-  console.time('compiling proofs');
-  await PhaseProgram.compile();
-  await TurnProgram.compile();
-  await GameProgram.compile();
-  console.timeEnd('compiling proofs');
-}
-
 dbInit();
 
 const app = express();

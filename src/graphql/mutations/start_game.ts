@@ -2,6 +2,8 @@ import * as Types from '../__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { shuffle, unique } from '../helpers.js';
+import https from 'http';
+import axios from 'axios';
 
 import {
   MIN_PLAYERS,
@@ -22,34 +24,29 @@ export default async (
   info
 ): Promise<Models.Game> => {
   let game: Models.Game;
-  const t0 = sequelizeConnection.transaction();
-  console.log(t0);
-  console.log(args);
-  game = await Models.Game.findByPk(args.input.gameId, {
-    transaction: t0,
+  await sequelizeConnection.transaction(async (t) => {
+    game = await Models.Game.findByPk(args.input.gameId, {
+      transaction: t,
+    });
+    if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
+
+    // Validate game state, raises exception if invalid
+    const validationResult = await validateGame(game, t);
+
+    // Game is valid, perform setup
+    game = await setupGame(game, validationResult.gamePlayers, t);
   });
-  await t0.commit();
-  if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
+  return await sequelizeConnection.transaction(async (t2) => {
+    // Validate that game exists
+    game = await Models.Game.findByPk(args.input.gameId, {
+      transaction: t2,
+    });
+    if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
 
-  const t1 = sequelizeConnection.transaction();
-  // Validate game state, raises exception if invalid
-  const validationResult = await validateGame(game, t1);
+    await proveGame(game, t2);
 
-  // Game is valid, perform setup
-  game = await setupGame(game, validationResult.gamePlayers, t1);
-  await t1.commit();
-
-  const t2 = sequelizeConnection.transaction();
-  // Validate that game exists
-  game = await Models.Game.findByPk(args.input.gameId, {
-    transaction: t2,
+    return game;
   });
-  if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
-
-  game = await proveGame(game, t2);
-  await t2.commit();
-
-  return game;
 };
 
 type ValidateGameResult = {
@@ -210,19 +207,25 @@ async function setupGame(
   return game;
 }
 
-async function proveGame(
-  game: Models.Game,
-  t: Transaction
-): Promise<Models.Game> {
+async function proveGame(game: Models.Game, t: Transaction) {
   const snaryGameState = await game.toSnarkyGameState();
 
   if (process.env.COMPILE_PROOFS === 'true') {
-    const gameProof = await GameProgram.init(snaryGameState, snaryGameState);
-    game.gameProof = JSON.parse(JSON.stringify(gameProof.toJSON()));
+    const postData = JSON.parse(JSON.stringify(snaryGameState.toJSON()));
+    const url = `${process.env.PROOF_WORKER_HOST}/initializeGame`;
+
+    try {
+      const response = await axios.post(url, postData);
+      console.log('data', response.data);
+    } catch (e) {
+      console.log(e);
+    }
+    // GameProgram.init(snaryGameState, snaryGameState);
+    // console.log(gameProof);
   } else {
     game.gameProof = JSON.parse(JSON.stringify({}));
   }
 
-  game.save({ transaction: t });
-  return game;
+  // game.save({ transaction: t });
+  // return game;
 }

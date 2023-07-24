@@ -141,21 +141,16 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     const p2 = await players[1].player();
     const turnsNonce = this.turnNumber || 0;
     const currentPlayerTurn = (await this.turnGamePlayerNumber()) + 1;
-    console.log('pieces', pieces.tree.getRoot().toString());
-    console.log('arena', arena.tree.getRoot().toString());
-    console.log('p1', p1.minaPublicKey);
-    console.log('p2', p2.minaPublicKey);
-    console.log('turnsNonce', turnsNonce);
-    return new GameState(
-      pieces.tree.getRoot(),
-      arena.tree.getRoot(),
-      Field(currentPlayerTurn),
-      PublicKey.fromBase58(p1.minaPublicKey),
-      PublicKey.fromBase58(p2.minaPublicKey),
-      UInt32.from(550),
-      UInt32.from(650),
-      Field(turnsNonce)
-    );
+    return new GameState({
+      piecesRoot: pieces.tree.getRoot(),
+      arenaRoot: arena.tree.getRoot(),
+      playerTurn: Field(currentPlayerTurn),
+      player1PublicKey: PublicKey.fromBase58(p1.minaPublicKey),
+      player2PublicKey: PublicKey.fromBase58(p2.minaPublicKey),
+      arenaLength: UInt32.from(550),
+      arenaWidth: UInt32.from(650),
+      turnsNonce: Field(turnsNonce),
+    });
   }
 }
 
