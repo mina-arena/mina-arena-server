@@ -1,7 +1,7 @@
 import * as Types from '../__generated__/resolvers-types';
 import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
-import { shuffle, unique } from '../helpers.js';
+import { unique } from '../helpers.js';
 import axios from 'axios';
 
 import {
@@ -11,8 +11,11 @@ import {
   MAX_PIECES,
 } from '../../models/game.js';
 import { Transaction } from 'sequelize';
-import { GameProgram, GameProof } from 'mina-arena-contracts';
+import { Field, UInt32, PublicKey } from 'snarkyjs';
+import { GameState } from 'mina-arena-contracts';
 import Dotenv from 'dotenv';
+import { serializePiecesTreeFromPieces } from '../../service_objects/mina/pieces_tree_serializer';
+import { serializeArenaTreeFromPieces } from '../../service_objects/mina/arena_tree_serializer';
 
 Dotenv.config();
 
@@ -23,7 +26,7 @@ export default async (
   info
 ): Promise<Models.Game> => {
   let game: Models.Game;
-  await sequelizeConnection.transaction(async (t) => {
+  return await sequelizeConnection.transaction(async (t) => {
     game = await Models.Game.findByPk(args.input.gameId, {
       transaction: t,
     });
@@ -34,16 +37,6 @@ export default async (
 
     // Game is valid, perform setup
     game = await setupGame(game, validationResult.gamePlayers, t);
-  });
-  return await sequelizeConnection.transaction(async (t2) => {
-    // Validate that game exists
-    game = await Models.Game.findByPk(args.input.gameId, {
-      transaction: t2,
-    });
-    if (!game) throw new Error(`No Game found with ID ${args.input.gameId}`);
-
-    await proveGame(game, t2);
-
     return game;
   });
 };
@@ -139,6 +132,9 @@ async function setupGame(
   const turnPlayer = gamePlayers.find(function (gamePlayer) {
     return gamePlayer.playerNumber == turnPlayerNumber;
   });
+  const otherPlayer = gamePlayers.find(function (gamePlayer) {
+    return gamePlayer.playerNumber != turnPlayerNumber;
+  });
   await Models.GamePhase.create(
     {
       gameId: game.id,
@@ -202,29 +198,60 @@ async function setupGame(
   game.turnGamePlayerId = turnPlayer.id;
   game.status = 'inProgress';
 
+  // Prove gave via the proving service
+  try {
+    await proveInitGame(
+      game,
+      playerOnePieces,
+      playerTwoPieces,
+      turnPlayer,
+      otherPlayer,
+      turnPlayerNumber
+    );
+  } catch (e) {
+    // log and move on with saving state
+    console.log('$$$ Prover Error $$$ ', e);
+  }
+
   await game.save({ transaction: t });
   return game;
 }
 
-async function proveGame(game: Models.Game, t: Transaction) {
-  const snaryGameState = await game.toSnarkyGameState();
+async function proveInitGame(
+  game: Models.Game,
+  player1Pieces: Array<Models.GamePiece>,
+  player2Pieces: Array<Models.GamePiece>,
+  player1: Models.GamePlayer,
+  player2: Models.GamePlayer,
+  turnPlayerNumber: number
+) {
+  const piecesInput = [...player1Pieces].concat([...player2Pieces]);
+  const pieces = await serializePiecesTreeFromPieces(piecesInput);
+  const arena = await serializeArenaTreeFromPieces(piecesInput);
+  const p1 = await player1.player();
+  const p2 = await player2.player();
+  const turnsNonce = this.turnNumber || 0;
+  const currentPlayerTurn = turnPlayerNumber + 1;
+
+  const gameState = new GameState({
+    piecesRoot: pieces.tree.getRoot(),
+    arenaRoot: arena.tree.getRoot(),
+    playerTurn: Field(currentPlayerTurn),
+    player1PublicKey: PublicKey.fromBase58(p1.minaPublicKey),
+    player2PublicKey: PublicKey.fromBase58(p2.minaPublicKey),
+    arenaLength: UInt32.from(550),
+    arenaWidth: UInt32.from(650),
+    turnsNonce: Field(turnsNonce),
+  });
 
   if (process.env.COMPILE_PROOFS === 'true') {
-    const postData = JSON.parse(JSON.stringify(snaryGameState.toJSON()));
+    const postData = JSON.parse(JSON.stringify(gameState.toJSON()));
     const url = `${process.env.PROOF_WORKER_HOST}/initializeGame`;
 
-    try {
-      const response = await axios.post(url, postData);
-      console.log('data', response.data);
-    } catch (e) {
-      console.log(e);
-    }
-    // GameProgram.init(snaryGameState, snaryGameState);
-    // console.log(gameProof);
+    const response = await axios.post(url, postData);
+    console.log('data', response.data);
+    game.gameProof = JSON.parse(response.data);
   } else {
-    game.gameProof = JSON.parse(JSON.stringify({}));
+    game.gameProof = JSON.parse(JSON.stringify(gameState.toJSON()));
   }
-
-  // game.save({ transaction: t });
-  // return game;
 }

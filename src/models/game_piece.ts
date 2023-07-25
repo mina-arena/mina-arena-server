@@ -70,7 +70,7 @@ class GamePiece extends Model<
     return await (await this.playerUnit()).unit();
   }
 
-  async toSnarkyPiece(): Promise<Piece> {
+  async toSnarkyPiece(gamePieceNumber?: number): Promise<Piece> {
     const playerUnit = await this.playerUnit();
     const unit = await playerUnit.unit();
     const gamePlayer = await this.gamePlayer();
@@ -79,7 +79,10 @@ class GamePiece extends Model<
     const minaPublicKey = PublicKey.fromBase58(player.minaPublicKey);
 
     const snarkyPosition = Position.fromXY(this.positionX, this.positionY);
-    const gamePieceNumber = await this.gamePieceNumber();
+
+    if (!gamePieceNumber) {
+      gamePieceNumber = await this.gamePieceNumber();
+    }
 
     const pieceConditionJSON = { ...snarkyUnit.stats };
     pieceConditionJSON.health = UInt32.from(this.health);

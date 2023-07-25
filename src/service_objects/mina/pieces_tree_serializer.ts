@@ -36,3 +36,22 @@ export async function serializePiecesTreeFromGameId(
 
   return piecesTree;
 }
+
+export async function serializePiecesTreeFromPieces(
+  pieces: Array<Models.GamePiece>
+): Promise<PiecesMerkleTree> {
+  pieces = pieces.sort((a, b) => {
+    if (a.id > b.id) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+  console.log(pieces);
+  const piecesTree = new PiecesMerkleTree();
+  for (let i = 0; i < pieces.length; i++) {
+    const snarkyPiece = await pieces[i].toSnarkyPiece(i + 1);
+    piecesTree.set(snarkyPiece.id.toBigInt(), snarkyPiece.hash());
+  }
+  return piecesTree;
+}

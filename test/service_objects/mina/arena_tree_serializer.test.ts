@@ -1,7 +1,7 @@
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
-import serializeArenaTree from '../../../src/service_objects/mina/arena_tree_serializer';
-import { ArenaMerkleTree, Position } from 'mina-arena-contracts';
+import { serializeArenaTreeFromGameId } from '../../../src/service_objects/mina/arena_tree_serializer';
+import { ArenaMerkleTree } from 'mina-arena-contracts';
 import { Field } from 'snarkyjs';
 
 describe('Arena Tree Serlializer', () => {
@@ -66,7 +66,7 @@ describe('Arena Tree Serlializer', () => {
       expectedTree.set(position[0], position[1], Field(1));
     });
 
-    const serializedTree = await serializeArenaTree(game.id);
+    const serializedTree = await serializeArenaTreeFromGameId(game.id);
 
     expect(serializedTree.tree.getRoot().toString()).toEqual(
       expectedTree.tree.getRoot().toString()

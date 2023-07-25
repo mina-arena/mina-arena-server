@@ -1,14 +1,8 @@
 import * as Models from '../../../src/models';
 import * as Factories from '../../factories';
-import serializePiecesTree from '../../../src/service_objects/mina/pieces_tree_serializer';
-import {
-  PiecesMerkleTree,
-  Piece,
-  Position,
-  Unit,
-  UnitStats,
-} from 'mina-arena-contracts';
-import { Field, PublicKey, UInt32 } from 'snarkyjs';
+import { serializePiecesTreeFromGameId } from '../../../src/service_objects/mina/pieces_tree_serializer';
+import { PiecesMerkleTree, Piece, Position } from 'mina-arena-contracts';
+import { Field, PublicKey } from 'snarkyjs';
 
 describe('Pieces Tree Serlializer', () => {
   let game: Models.Game;
@@ -87,7 +81,7 @@ describe('Pieces Tree Serlializer', () => {
       expectedTree.set(BigInt(gamePieceNumber), snarkyPiece.hash());
     }
 
-    const serializedTree = await serializePiecesTree(game.id);
+    const serializedTree = await serializePiecesTreeFromGameId(game.id);
 
     expect(serializedTree.tree.getRoot().toString()).toEqual(
       expectedTree.tree.getRoot().toString()

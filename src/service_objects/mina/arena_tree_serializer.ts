@@ -31,3 +31,16 @@ export async function serializeArenaTreeFromGameId(
 
   return arenaTree;
 }
+
+export async function serializeArenaTreeFromPieces(
+  pieces: Array<Models.GamePiece>
+): Promise<ArenaMerkleTree> {
+  const arenaTree = new ArenaMerkleTree();
+  for (const gamePiece of pieces) {
+    const x = gamePiece.positionX;
+    const y = gamePiece.positionY;
+    arenaTree.set(x, y, Field(1));
+  }
+
+  return arenaTree;
+}
