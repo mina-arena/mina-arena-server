@@ -213,6 +213,8 @@ describe('resolveMoveAction', () => {
         resolved: false,
         moveFrom: { x: currentPos.x, y: currentPos.y },
         moveTo: { x: currentPos.x + 5, y: currentPos.y },
+        gamePieceNumber: await movingGamePiece.gamePieceNumber(),
+        nonce: 1,
       },
       signature: signature.toJSON(),
     });
