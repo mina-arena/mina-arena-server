@@ -230,7 +230,7 @@ async function proveInitGame(
   const arena = await serializeArenaTreeFromPieces(piecesInput);
   const p1 = await player1.player();
   const p2 = await player2.player();
-  const turnsNonce = this.turnNumber || 0;
+  const turnsNonce = 0;
   const currentPlayerTurn = turnPlayerNumber + 1;
 
   const gameState = new GameState({
