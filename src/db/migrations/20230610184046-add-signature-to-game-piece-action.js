@@ -25,7 +25,7 @@ module.exports = {
         transaction,
       });
     } catch (err) {
-      // await transaction.rollback();
+      await transaction.rollback();
       console.error(err);
     }
   },

@@ -14,8 +14,8 @@ import { Transaction } from 'sequelize';
 import { Field, UInt32, PublicKey } from 'snarkyjs';
 import { GameState } from 'mina-arena-contracts';
 import Dotenv from 'dotenv';
-import { serializePiecesTreeFromPieces } from '../../service_objects/mina/pieces_tree_serializer';
-import { serializeArenaTreeFromPieces } from '../../service_objects/mina/arena_tree_serializer';
+import { serializePiecesTreeFromPieces } from '../../service_objects/mina/pieces_tree_serializer.js';
+import { serializeArenaTreeFromPieces } from '../../service_objects/mina/arena_tree_serializer.js';
 
 Dotenv.config();
 
@@ -250,7 +250,7 @@ async function proveInitGame(
 
     const response = await axios.post(url, postData);
     console.log('data', response.data);
-    game.gameProof = JSON.parse(response.data);
+    game.gameProof = response.data;
   } else {
     game.gameProof = JSON.parse(JSON.stringify(gameState.toJSON()));
   }
