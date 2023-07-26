@@ -3,8 +3,8 @@ import sequelizeConnection from '../db/config.js';
 import resolveGamePieceAction from './game_piece_action_resolver.js';
 import { GamePhaseName, GAME_PHASE_ORDER } from '../models/game_phase.js';
 import { Transaction } from 'sequelize';
-import serializeArenaTree from './mina/arena_tree_serializer.js';
-import serializePiecesTree from './mina/pieces_tree_serializer.js';
+import { serializeArenaTreeFromGameId } from './mina/arena_tree_serializer.js';
+import { serializePiecesTreeFromGameId } from './mina/pieces_tree_serializer.js';
 
 export default async (
   gamePhase: Models.GamePhase,
@@ -23,11 +23,11 @@ export default async (
     order: [['id', 'ASC']],
     transaction,
   });
-  const startingPiecesMerleTree = await serializePiecesTree(
+  const startingPiecesMerleTree = await serializePiecesTreeFromGameId(
     game.id,
     transaction
   );
-  const startingArenaMerkleTree = await serializeArenaTree(
+  const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
     game.id,
     transaction
   );

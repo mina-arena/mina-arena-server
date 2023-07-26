@@ -1,8 +1,6 @@
 import * as Models from '../../models/index.js';
 import resolveAttack from './attack_resolver.js';
 import { Transaction } from 'sequelize';
-import serializePiecesTree from '../mina/pieces_tree_serializer.js';
-import serializeArenaTree from '../mina/arena_tree_serializer.js';
 import {
   Action,
   PhaseState,
