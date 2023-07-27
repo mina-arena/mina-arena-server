@@ -80,16 +80,6 @@ export default async function resolveMoveAction(
     playerPublicKey,
   });
 
-  console.log('Move Beginning state hash', snarkyGameState.hash().toString());
-  console.log(
-    'Move Beginning Piece state',
-    snarkyGameState.currentPiecesState.toString()
-  );
-  console.log(
-    'Move Beginning Arena state',
-    snarkyGameState.currentArenaState.toString()
-  );
-
   const actionData = action.actionData;
   if (actionData.actionType !== 'move')
     throw new Error(
@@ -132,12 +122,6 @@ export default async function resolveMoveAction(
       actionParam,
       UInt32.from(Math.floor(moveValidity.distance)) // we need the true distance here
     );
-    console.log(
-      `Successfully applied snarky move action ${JSON.stringify(
-        actionData
-      )} to game ${gamePiece.gameId} piece ${gamePiece.id}`
-    );
-
     // update our passed-in merkle trees with the new state
     snarkyPiece.position = actionParam;
     currentPiecesMerkleTree.set(snarkyPiece.id.toBigInt(), snarkyPiece.hash());
@@ -151,16 +135,6 @@ export default async function resolveMoveAction(
       gamePiece.positionY,
       Field(0)
     );
-
-    console.log(
-      'Move Final Piece state',
-      stateAfterMove.currentPiecesState.toString()
-    );
-    console.log(
-      'Move Final Arena state',
-      stateAfterMove.currentArenaState.toString()
-    );
-    console.log('Move Final state hash', stateAfterMove.hash().toString());
   } catch (e) {
     throw new Error(
       `Unable to apply snarky move action ${JSON.stringify(

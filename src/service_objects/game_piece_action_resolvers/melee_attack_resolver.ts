@@ -63,7 +63,6 @@ export async function validateMeleeAttackAction(
     );
 
   const targetId = await targetGamePiece.gamePieceNumber();
-  console.log('target before attack', 'id', targetId, targetGamePiece.health);
 
   if (!resolving) {
     // Any validation which should only be performed in dry runs
@@ -113,16 +112,6 @@ export default async function resolveMeleeAttackAction(
     playerPublicKey,
   });
 
-  console.log('Melee Beginning state hash', snarkyGameState.hash().toString());
-  console.log(
-    'Melee Beginning Piece state',
-    snarkyGameState.currentPiecesState.toString()
-  );
-  console.log(
-    'Melee Beginning Arena state',
-    snarkyGameState.currentArenaState.toString()
-  );
-
   const actionData = action.actionData;
   if (actionData.actionType !== 'meleeAttack')
     throw new Error(
@@ -157,7 +146,6 @@ export default async function resolveMeleeAttackAction(
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
   const actionParam = Field(actionData.targetGamePieceNumber);
-  console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
     nonce: Field(actionData.nonce),
     actionType: Field(2),
@@ -215,14 +203,7 @@ export default async function resolveMeleeAttackAction(
         snarkyTargetPiece.id.toBigInt(),
         snarkyTargetPiece.hash()
       );
-      console.log('Damage Dealt!', totalDamageDealt, 'New Health', newHealth);
-      console.log(
-        'Pieces Merkle Tree',
-        currentPiecesMerkleTree.tree.getRoot().toString()
-      );
     }
-
-    console.log('Melee Final state hash', stateAfterAttack.hash().toString());
   } catch (e) {
     throw new Error(
       `Unable to apply snarky melee attack action ${JSON.stringify(
