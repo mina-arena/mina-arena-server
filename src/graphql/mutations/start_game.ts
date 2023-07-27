@@ -198,60 +198,6 @@ async function setupGame(
   game.turnGamePlayerId = turnPlayer.id;
   game.status = 'inProgress';
 
-  // Prove gave via the proving service
-  try {
-    await proveInitGame(
-      game,
-      playerOnePieces,
-      playerTwoPieces,
-      turnPlayer,
-      otherPlayer,
-      turnPlayerNumber
-    );
-  } catch (e) {
-    // log and move on with saving state
-    console.log('$$$ Prover Error $$$ ', e);
-  }
-
   await game.save({ transaction: t });
   return game;
-}
-
-async function proveInitGame(
-  game: Models.Game,
-  player1Pieces: Array<Models.GamePiece>,
-  player2Pieces: Array<Models.GamePiece>,
-  player1: Models.GamePlayer,
-  player2: Models.GamePlayer,
-  turnPlayerNumber: number
-) {
-  const piecesInput = [...player1Pieces].concat([...player2Pieces]);
-  const pieces = await serializePiecesTreeFromPieces(piecesInput);
-  const arena = await serializeArenaTreeFromPieces(piecesInput);
-  const p1 = await player1.player();
-  const p2 = await player2.player();
-  const turnsNonce = this.turnNumber || 0;
-  const currentPlayerTurn = turnPlayerNumber + 1;
-
-  const gameState = new GameState({
-    piecesRoot: pieces.tree.getRoot(),
-    arenaRoot: arena.tree.getRoot(),
-    playerTurn: Field(currentPlayerTurn),
-    player1PublicKey: PublicKey.fromBase58(p1.minaPublicKey),
-    player2PublicKey: PublicKey.fromBase58(p2.minaPublicKey),
-    arenaLength: UInt32.from(550),
-    arenaWidth: UInt32.from(650),
-    turnsNonce: Field(turnsNonce),
-  });
-
-  if (process.env.COMPILE_PROOFS === 'true') {
-    const postData = JSON.parse(JSON.stringify(gameState.toJSON()));
-    const url = `${process.env.PROOF_WORKER_HOST}/initializeGame`;
-
-    const response = await axios.post(url, postData);
-    console.log('data', response.data);
-    game.gameProof = JSON.parse(response.data);
-  } else {
-    game.gameProof = JSON.parse(JSON.stringify(gameState.toJSON()));
-  }
 }

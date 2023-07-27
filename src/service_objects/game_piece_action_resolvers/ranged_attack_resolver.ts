@@ -112,8 +112,6 @@ export default async function resolveRangedAttackAction(
     playerPublicKey,
   });
 
-  console.log('Ranged Beginning state hash', snarkyGameState.hash().toString());
-
   const actionData = action.actionData;
   if (actionData.actionType !== 'rangedAttack')
     throw new Error(
@@ -143,7 +141,6 @@ export default async function resolveRangedAttackAction(
   const snarkyAttackingPiece = await attackingGamePiece.toSnarkyPiece();
   const snarkyTargetPiece = await targetGamePiece.toSnarkyPiece();
   const actionParam = Field(actionData.targetGamePieceNumber);
-  console.log('applying action', JSON.stringify(actionData));
   const snarkyAction = new Action({
     nonce: Field(actionData.nonce),
     actionType: Field(1),
@@ -154,20 +151,15 @@ export default async function resolveRangedAttackAction(
   const attackRolls = actionData.encryptedAttackRolls;
   // Resolve attack
   let resolvedAttack;
-  try {
-    resolvedAttack = resolveAttack(
-      attackingUnit.rangedNumAttacks,
-      attackingUnit.rangedHitRoll,
-      attackingUnit.rangedWoundRoll,
-      targetUnit.armorSaveRoll,
-      attackingUnit.rangedArmorPiercing,
-      attackingUnit.rangedDamage,
-      attackRolls
-    );
-  } catch (e) {
-    console.log('$$$', e);
-    throw e;
-  }
+  resolvedAttack = resolveAttack(
+    attackingUnit.rangedNumAttacks,
+    attackingUnit.rangedHitRoll,
+    attackingUnit.rangedWoundRoll,
+    targetUnit.armorSaveRoll,
+    attackingUnit.rangedArmorPiercing,
+    attackingUnit.rangedDamage,
+    attackRolls
+  );
   const totalDamageDealt = resolvedAttack.damageDealt;
   const totalDamageAverage = resolvedAttack.averageDamage;
 
@@ -207,14 +199,7 @@ export default async function resolveRangedAttackAction(
         snarkyTargetPiece.id.toBigInt(),
         snarkyTargetPiece.hash()
       );
-      console.log('Damage dealt!', totalDamageDealt, 'new health', newHealth);
-      console.log(
-        'Pieces Merkle Tree',
-        currentPiecesMerkleTree.tree.getRoot().toString()
-      );
     }
-
-    console.log('Ranged Final state hash', stateAfterAttack.hash().toString());
   } catch (e) {
     throw new Error(
       `Unable to apply snarky ranged attack action ${JSON.stringify(

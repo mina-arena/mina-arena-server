@@ -140,6 +140,8 @@ type GamePhase {
   turnNumber: Int!
   name: GamePhaseName!
   gamePieceActions: [GamePieceAction!]!
+  initialPhaseState: String
+  finalPhaseState: String
   createdAt: Iso8601DateTime!
   updatedAt: Iso8601DateTime!
 }
@@ -172,6 +174,7 @@ type GamePieceRangedAttackAction {
   resolvedAttack: ResolvedAttack
   totalDamageDealt: Int
   totalDamageAverage: Float
+  rollInput: String
 }
 
 type GamePieceMeleeAttackAction {
@@ -180,6 +183,7 @@ type GamePieceMeleeAttackAction {
   resolvedAttack: ResolvedAttack
   totalDamageDealt: Int
   totalDamageAverage: Float
+  rollInput: String
 }
 
 type ResolvedAttack {
@@ -290,4 +294,20 @@ input SignatureInput {
 input SubmitGamePhaseInput {
   minaPublicKey: String!
   gamePhaseId: Int!
+}
+
+type DiceRoll {
+  publicKey: PublicKeyGroup
+  cipherText: String!
+  signature: Signature
+}
+
+type PublicKeyGroup {
+  x: String!
+  y: String!
+}
+
+type Signature {
+  r: String!
+  s: String!
 }

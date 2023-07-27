@@ -1,8 +1,12 @@
-import { Resolvers } from './__generated__/resolvers-types';
+import { DiceRollInput, Resolvers } from './__generated__/resolvers-types';
 import * as Models from '../models/index.js';
 import * as Mutations from './mutations/index.js';
 
 import { camelToScreamingSnake } from './helpers.js';
+import {
+  GamePieceRangedAttackAction,
+  GamePieceMeleeAttackAction,
+} from '../models/game_piece_action';
 
 const resolvers: Resolvers = {
   Query: {
@@ -85,10 +89,26 @@ const resolvers: Resolvers = {
     targetGamePiece: async (action) => {
       return await Models.GamePiece.findByPk(action.targetGamePieceId);
     },
+    rollInput: (action: GamePieceRangedAttackAction) => {
+      const diceRolls = {
+        publicKey: action.encryptedAttackRolls.publicKey,
+        cipherText: action.encryptedAttackRolls.ciphertext.join(''),
+        signature: action.encryptedAttackRolls.signature,
+      };
+      return JSON.stringify(diceRolls);
+    },
   },
   GamePieceMeleeAttackAction: {
     targetGamePiece: async (action) => {
       return await Models.GamePiece.findByPk(action.targetGamePieceId);
+    },
+    rollInput: (action: GamePieceMeleeAttackAction) => {
+      const diceRolls = {
+        publicKey: action.encryptedAttackRolls.publicKey,
+        cipherText: action.encryptedAttackRolls.ciphertext.join(''),
+        signature: action.encryptedAttackRolls.signature,
+      };
+      return JSON.stringify(diceRolls);
     },
   },
 };

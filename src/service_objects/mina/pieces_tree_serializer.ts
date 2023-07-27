@@ -47,7 +47,6 @@ export async function serializePiecesTreeFromPieces(
       return 1;
     }
   });
-  console.log(pieces);
   const piecesTree = new PiecesMerkleTree();
   for (let i = 0; i < pieces.length; i++) {
     const snarkyPiece = await pieces[i].toSnarkyPiece(i + 1);
