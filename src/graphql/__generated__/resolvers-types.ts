@@ -333,12 +333,18 @@ export type Query = {
   __typename?: 'Query';
   game?: Maybe<Game>;
   games: Array<Game>;
+  gamesForPlayer: Array<Game>;
   player?: Maybe<Player>;
   units: Array<Unit>;
 };
 
 export type QueryGameArgs = {
   id: Scalars['Int'];
+};
+
+export type QueryGamesForPlayerArgs = {
+  minaPublicKey: Scalars['String'];
+  statuses?: InputMaybe<Array<InputMaybe<GameStatus>>>;
 };
 
 export type QueryPlayerArgs = {
@@ -1059,6 +1065,12 @@ export type QueryResolvers<
     RequireFields<QueryGameArgs, 'id'>
   >;
   games?: Resolver<Array<ResolversTypes['Game']>, ParentType, ContextType>;
+  gamesForPlayer?: Resolver<
+    Array<ResolversTypes['Game']>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryGamesForPlayerArgs, 'minaPublicKey'>
+  >;
   player?: Resolver<
     Maybe<ResolversTypes['Player']>,
     ParentType,

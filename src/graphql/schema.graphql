@@ -1,6 +1,7 @@
 type Query {
   game(id: Int!): Game
   games: [Game!]!
+  gamesForPlayer(minaPublicKey: String!, statuses: [GameStatus]): [Game!]!
   units: [Unit!]!
   player(minaPublicKey: String!): Player
 }
