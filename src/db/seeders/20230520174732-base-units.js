@@ -2,10 +2,10 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      await queryInterface.bulkInsert('Units', [
+      const units = [
         {
           name: 'Archer',
           maxHealth: 2,
@@ -24,8 +24,6 @@ module.exports = {
           rangedWoundRoll: 4,
           rangedArmorPiercing: 0,
           rangedDamage: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Peasant',
@@ -38,12 +36,10 @@ module.exports = {
           meleeWoundRoll: 5,
           meleeArmorPiercing: 0,
           meleeDamage: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Swordsman',
-          maxHealth: 5,
+          maxHealth: 3,
           movementSpeed: 120,
           pointsCost: 20,
           armorSaveRoll: 4,
@@ -52,12 +48,10 @@ module.exports = {
           meleeWoundRoll: 3,
           meleeArmorPiercing: 1,
           meleeDamage: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Spearman',
-          maxHealth: 5,
+          maxHealth: 3,
           movementSpeed: 120,
           pointsCost: 20,
           armorSaveRoll: 4,
@@ -66,26 +60,22 @@ module.exports = {
           meleeWoundRoll: 3,
           meleeArmorPiercing: 2,
           meleeDamage: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Light Cavalry',
-          maxHealth: 5,
+          maxHealth: 3,
           movementSpeed: 350,
           pointsCost: 30,
-          armorSaveRoll: 4,
+          armorSaveRoll: 5,
           meleeNumAttacks: 3,
           meleeHitRoll: 3,
           meleeWoundRoll: 4,
           meleeArmorPiercing: 1,
           meleeDamage: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Heavy Cavalry',
-          maxHealth: 8,
+          maxHealth: 5,
           movementSpeed: 280,
           pointsCost: 30,
           armorSaveRoll: 3,
@@ -94,12 +84,10 @@ module.exports = {
           meleeWoundRoll: 3,
           meleeArmorPiercing: 1,
           meleeDamage: 2,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Ballista',
-          maxHealth: 5,
+          maxHealth: 3,
           movementSpeed: 70,
           pointsCost: 30,
           armorSaveRoll: 5,
@@ -115,12 +103,10 @@ module.exports = {
           rangedWoundRoll: 2,
           rangedArmorPiercing: 2,
           rangedDamage: 2,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           name: 'Hero',
-          maxHealth: 10,
+          maxHealth: 5,
           movementSpeed: 150,
           pointsCost: 60,
           armorSaveRoll: 3,
@@ -136,11 +122,33 @@ module.exports = {
           rangedWoundRoll: 3,
           rangedArmorPiercing: 1,
           rangedDamage: 2,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
-      ]);
-      
+      ];
+
+      for (const unitAttrs of units) {
+        console.log(`Upserting unit ${unitAttrs.name}`);
+        const numRecordsUpdated = await queryInterface.bulkUpdate(
+          'Units',
+          unitAttrs,
+          { name: unitAttrs.name },
+          { transaction }
+        );
+        if (numRecordsUpdated === 0) {
+          console.log(`No Unit with name ${unitAttrs.name} found, creating`);
+          await queryInterface.bulkInsert(
+            'Units',
+            [
+              {
+                ...unitAttrs,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            ],
+            { transaction }
+          );
+        }
+      }
+
       await transaction.commit();
     } catch (err) {
       await transaction.rollback();
@@ -148,7 +156,7 @@ module.exports = {
     }
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
       await queryInterface.bulkDelete('Units', null, {});
@@ -157,5 +165,5 @@ module.exports = {
       await transaction.rollback();
       throw err;
     }
-  }
+  },
 };
