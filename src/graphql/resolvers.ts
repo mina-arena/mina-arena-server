@@ -26,6 +26,7 @@ const resolvers: Resolvers = {
       const player = await Models.Player.findOne({
         where: { minaPublicKey: args.minaPublicKey },
       });
+      if (!player) return [];
       const gamePlayers = await Models.GamePlayer.findAll({
         where: { playerId: player.id },
       });
