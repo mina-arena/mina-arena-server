@@ -4,6 +4,7 @@ import sequelizeConnection from '../../db/config.js';
 import { PhaseState } from 'mina-arena-contracts';
 import { serializePiecesTreeFromPieces } from '../../service_objects/mina/pieces_tree_serializer.js';
 import { serializeArenaTreeFromPieces } from '../../service_objects/mina/arena_tree_serializer.js';
+import newrelic from 'newrelic';
 
 export default async (
   parent,
@@ -107,7 +108,11 @@ export default async (
 
     gamePhase.save(t);
 
-    console.log('gamePhase', gamePhase);
+    newrelic.recordCustomEvent('ResolveGamePhase', {
+      player: player.minaPublicKey,
+      gameId: game.id,
+      phaseName: gamePhase.phase,
+    });
     return ret;
   });
 };

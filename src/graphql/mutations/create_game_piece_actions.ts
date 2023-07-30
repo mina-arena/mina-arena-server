@@ -8,6 +8,7 @@ import { validateMoveAction } from '../../service_objects/game_piece_action_reso
 import { validateRangedAttackAction } from '../../service_objects/game_piece_action_resolvers/ranged_attack_resolver.js';
 import { validateMeleeAttackAction } from '../../service_objects/game_piece_action_resolvers/melee_attack_resolver.js';
 import dotenv from 'dotenv';
+import newrelic from 'newrelic';
 
 dotenv.config();
 
@@ -116,6 +117,14 @@ export default async (
           );
           break;
       }
+      const playerUnit = await gamePiece.playerUnit();
+      const unit = await playerUnit.unit();
+      newrelic.recordCustomEvent('CreateAction', {
+        player: player.minaPublicKey,
+        pieceName: playerUnit.name,
+        pieceUnit: unit.name,
+        actionType: args.input.actions[0].actionType,
+      });
     }
     return createdGamePieceActions;
   });
