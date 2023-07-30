@@ -5,15 +5,27 @@ import resolveRangedAttackAction, {
 } from '../../../src/service_objects/game_piece_action_resolvers/ranged_attack_resolver';
 import * as AttackResolver from '../../../src/service_objects/game_piece_action_resolvers/attack_resolver';
 import { roll_6_6_1 } from '../../support/dice_rolls';
+import { serializeArenaTreeFromGameId } from '../../../src/service_objects/mina/arena_tree_serializer';
+import { serializePiecesTreeFromGameId } from '../../../src/service_objects/mina/pieces_tree_serializer';
+import { Action } from 'mina-arena-contracts';
+import { Field, PrivateKey } from 'snarkyjs';
 
 describe('validateRangedAttackAction', () => {
   let attackingGamePiece: Models.GamePiece;
   let targetGamePiece: Models.GamePiece;
 
+  let p1PrivateKey;
+  let p2PrivateKey;
+
+  let game: Models.Game;
+
   beforeEach(async () => {
     await Factories.cleanup();
 
-    let game = await Factories.createGame();
+    p1PrivateKey = PrivateKey.random();
+    p2PrivateKey = PrivateKey.random();
+
+    game = await Factories.createGame();
 
     let attackingUnit = await Models.Unit.create({
       name: 'Archer',
@@ -36,8 +48,10 @@ describe('validateRangedAttackAction', () => {
     });
 
     let targetUnit = await Factories.createUnit();
-    let attackingPlayer = await Factories.createPlayer();
-    let targetPlayer = await Factories.createPlayer();
+    let attackingPlayer = await Factories.createPlayer(
+      p1PrivateKey.toPublicKey()
+    );
+    let targetPlayer = await Factories.createPlayer(p2PrivateKey.toPublicKey());
     let attackingPlayerUnit = await Factories.createPlayerUnit(
       attackingPlayer,
       attackingUnit
@@ -108,10 +122,18 @@ describe('resolveRangedAttackAction', () => {
   let targetUnit: Models.Unit;
   let targetGamePiece: Models.GamePiece;
 
+  let game: Models.Game;
+
+  let p1PrivateKey;
+  let p2PrivateKey;
+
   beforeEach(async () => {
     await Factories.cleanup();
 
-    let game = await Factories.createGame();
+    p1PrivateKey = PrivateKey.random();
+    p2PrivateKey = PrivateKey.random();
+
+    game = await Factories.createGame();
 
     let attackingUnit = await Models.Unit.create({
       name: 'Archer',
@@ -134,8 +156,10 @@ describe('resolveRangedAttackAction', () => {
     });
 
     targetUnit = await Factories.createUnit();
-    let attackingPlayer = await Factories.createPlayer();
-    let targetPlayer = await Factories.createPlayer();
+    let attackingPlayer = await Factories.createPlayer(
+      p1PrivateKey.toPublicKey()
+    );
+    let targetPlayer = await Factories.createPlayer(p2PrivateKey.toPublicKey());
     let attackingPlayerUnit = await Factories.createPlayerUnit(
       attackingPlayer,
       attackingUnit
@@ -170,18 +194,35 @@ describe('resolveRangedAttackAction', () => {
       phase: 'shooting',
     });
 
+    const snarkyAttackingGamePiece = await attackingGamePiece.toSnarkyPiece();
+    const snarkyTargetGamePiece = await targetGamePiece.toSnarkyPiece();
+
+    const snarkyAction = new Action({
+      nonce: Field(1),
+      actionType: Field(1),
+      actionParams: snarkyTargetGamePiece.id,
+      piece: Field(snarkyAttackingGamePiece.id),
+    });
+    const signature = snarkyAction.sign(p1PrivateKey);
+
+    const gamePieceNumber = Number(snarkyAttackingGamePiece.id.toString());
+    const targetGamePieceNumber = Number(snarkyTargetGamePiece.id.toString());
     action = await Models.GamePieceAction.create({
       gamePhaseId: gamePhase.id,
       gamePlayerId: attackingGamePlayer.id,
       gamePieceId: attackingGamePiece.id,
       actionType: 'rangedAttack',
       actionData: {
+        gamePieceNumber,
+        targetGamePieceNumber,
+        nonce: 1,
         actionType: 'rangedAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
         encryptedAttackRolls: roll_6_6_1,
         resolvedAttack: undefined,
       },
+      signature: signature.toJSON(),
     });
   });
 
@@ -194,7 +235,21 @@ describe('resolveRangedAttackAction', () => {
       await targetGamePiece.reload();
       expect(targetGamePiece.health).toBe(3);
 
-      await resolveRangedAttackAction(action);
+      const startingPiecesMerkleTree = await serializePiecesTreeFromGameId(
+        game.id
+      );
+      const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
+        game.id
+      );
+      const currentPiecesMerkleTree = startingPiecesMerkleTree.clone();
+      const currentArenaMerkleTree = startingArenaMerkleTree.clone();
+      await resolveRangedAttackAction(
+        action,
+        startingPiecesMerkleTree,
+        startingArenaMerkleTree,
+        currentPiecesMerkleTree,
+        currentArenaMerkleTree
+      );
 
       // Check action to now be resolved with saved results
       await action.reload();
@@ -219,8 +274,22 @@ describe('resolveRangedAttackAction', () => {
   describe('with a unit out of range', () => {
     it('throws error', async () => {
       await targetGamePiece.update({ positionX: 10, positionY: 500 });
+      const startingPiecesMerkleTree = await serializePiecesTreeFromGameId(
+        game.id
+      );
+      const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
+        game.id
+      );
+      const currentPiecesMerkleTree = startingPiecesMerkleTree.clone();
+      const currentArenaMerkleTree = startingArenaMerkleTree.clone();
       try {
-        await resolveRangedAttackAction(action);
+        await resolveRangedAttackAction(
+          action,
+          startingPiecesMerkleTree,
+          startingArenaMerkleTree,
+          currentPiecesMerkleTree,
+          currentArenaMerkleTree
+        );
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
       } catch (e) {

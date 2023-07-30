@@ -131,10 +131,6 @@ export default async function resolveMeleeAttackAction(
   // If target is already dead just abort
   if (targetGamePiece.isDead()) return;
 
-  const attackingPlayerUnit = await Models.PlayerUnit.findByPk(
-    attackingGamePiece.playerUnitId,
-    { transaction }
-  );
   const targetPlayerUnit = await Models.PlayerUnit.findByPk(
     targetGamePiece.playerUnitId,
     { transaction }

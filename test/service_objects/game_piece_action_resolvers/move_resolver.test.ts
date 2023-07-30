@@ -5,6 +5,8 @@ import resolveMoveAction, {
 } from '../../../src/service_objects/game_piece_action_resolvers/move_resolver';
 import { PrivateKey, Field } from 'snarkyjs';
 import { Action, Position } from 'mina-arena-contracts';
+import { serializePiecesTreeFromGameId } from '../../../src/service_objects/mina/pieces_tree_serializer';
+import { serializeArenaTreeFromGameId } from '../../../src/service_objects/mina/arena_tree_serializer';
 
 describe('validateMoveAction', () => {
   let movingGamePiece: Models.GamePiece;
@@ -13,13 +15,15 @@ describe('validateMoveAction', () => {
   let p1PrivateKey;
   let p2PrivateKey;
 
+  let game: Models.Game;
+
   beforeEach(async () => {
     await Factories.cleanup();
 
     p1PrivateKey = PrivateKey.random();
     p2PrivateKey = PrivateKey.random();
 
-    let game = await Factories.createGame();
+    game = await Factories.createGame();
 
     let movingUnit = await Models.Unit.create({
       name: 'Archer',
@@ -131,13 +135,15 @@ describe('resolveMoveAction', () => {
   let p1PrivateKey;
   let p2PrivateKey;
 
+  let game: Models.Game;
+
   beforeEach(async () => {
     await Factories.cleanup();
 
     p1PrivateKey = PrivateKey.random();
     p2PrivateKey = PrivateKey.random();
 
-    let game = await Factories.createGame();
+    game = await Factories.createGame();
 
     let movingUnit = await Models.Unit.create({
       name: 'Archer',
@@ -229,7 +235,21 @@ describe('resolveMoveAction', () => {
       await movingGamePiece.reload();
       let prevPos = movingGamePiece.coordinates();
 
-      await resolveMoveAction(action);
+      const startingPiecesMerkleTree = await serializePiecesTreeFromGameId(
+        game.id
+      );
+      const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
+        game.id
+      );
+      const currentPiecesMerkleTree = startingPiecesMerkleTree.clone();
+      const currentArenaMerkleTree = startingArenaMerkleTree.clone();
+      await resolveMoveAction(
+        action,
+        startingPiecesMerkleTree,
+        startingArenaMerkleTree,
+        currentPiecesMerkleTree,
+        currentArenaMerkleTree
+      );
 
       // Check action to now be resolved with saved results
       await action.reload();
@@ -253,8 +273,22 @@ describe('resolveMoveAction', () => {
       action.actionData = newActionData;
       await action.save();
 
+      const startingPiecesMerkleTree = await serializePiecesTreeFromGameId(
+        game.id
+      );
+      const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
+        game.id
+      );
+      const currentPiecesMerkleTree = startingPiecesMerkleTree.clone();
+      const currentArenaMerkleTree = startingArenaMerkleTree.clone();
       try {
-        await resolveMoveAction(action);
+        await resolveMoveAction(
+          action,
+          startingPiecesMerkleTree,
+          startingArenaMerkleTree,
+          currentPiecesMerkleTree,
+          currentArenaMerkleTree
+        );
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
       } catch (e) {
