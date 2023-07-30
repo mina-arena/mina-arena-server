@@ -3,6 +3,7 @@ import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { unique } from '../helpers.js';
 import axios from 'axios';
+import newrelic from 'newrelic';
 
 import {
   MIN_PLAYERS,
@@ -199,5 +200,7 @@ async function setupGame(
   game.status = 'inProgress';
 
   await game.save({ transaction: t });
+
+  newrelic.recordCustomEvent('Start', { id: game.id });
   return game;
 }

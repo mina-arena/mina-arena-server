@@ -3,6 +3,7 @@ import * as Models from '../../models/index.js';
 import sequelizeConnection from '../../db/config.js';
 import { unique } from '../helpers.js';
 import { Transaction } from 'sequelize';
+import newrelic from 'newrelic';
 
 export default async (
   parent,
@@ -72,6 +73,15 @@ export default async (
           `Invalid entry in argument gamePieceInputs, exactly one of [playerUnitId, createPlayerUnit] must be provided.`
         );
       }
+      const unit = await Models.Unit.findByPk(
+        gamePieceInput.createPlayerUnit.unitId
+      );
+      newrelic.recordCustomEvent('CreateGamePiece', {
+        player: player.minaPublicKey,
+        gameId: game.id,
+        pieceName: gamePieceInput.createPlayerUnit.name,
+        unitName: unit.name,
+      });
     }
 
     return createdGamePieces;
