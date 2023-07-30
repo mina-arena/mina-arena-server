@@ -131,10 +131,6 @@ export default async function resolveMeleeAttackAction(
   // If target is already dead just abort
   if (targetGamePiece.isDead()) return;
 
-  const attackingPlayerUnit = await Models.PlayerUnit.findByPk(
-    attackingGamePiece.playerUnitId,
-    { transaction }
-  );
   const targetPlayerUnit = await Models.PlayerUnit.findByPk(
     targetGamePiece.playerUnitId,
     { transaction }
@@ -169,7 +165,6 @@ export default async function resolveMeleeAttackAction(
   const totalDamageAverage = resolvedAttack.averageDamage;
 
   // Attempt to apply the move action to the game state
-  // Warn on console for failure
   const rngPublicKey = PublicKey.fromBase58(process.env.RNG_PUBLIC_KEY);
   try {
     const serverPrivateKey = PrivateKey.fromBase58(

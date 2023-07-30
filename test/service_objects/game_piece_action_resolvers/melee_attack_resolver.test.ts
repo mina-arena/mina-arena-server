@@ -6,6 +6,8 @@ import resolveMeleeAttackAction, {
 import { MELEE_ATTACK_RANGE, Action } from 'mina-arena-contracts';
 import { Field, PrivateKey } from 'snarkyjs';
 import { roll_6_6_1, roll_1_6_1, roll_6_1_1 } from '../../support/dice_rolls';
+import { serializePiecesTreeFromGameId } from '../../../src/service_objects/mina/pieces_tree_serializer';
+import { serializeArenaTreeFromGameId } from '../../../src/service_objects/mina/arena_tree_serializer';
 
 describe('validateMeleeAttackAction', () => {
   let attackingGamePiece: Models.GamePiece;
@@ -115,13 +117,15 @@ describe('resolveMeleeAttackAction', () => {
   let p1PrivateKey;
   let p2PrivateKey;
 
+  let game: Models.Game;
+
   beforeEach(async () => {
     await Factories.cleanup();
 
     p1PrivateKey = PrivateKey.random();
     p2PrivateKey = PrivateKey.random();
 
-    let game = await Factories.createGame();
+    game = await Factories.createGame();
 
     let attackingUnit = await Models.Unit.create({
       name: 'Berserker',
@@ -184,17 +188,22 @@ describe('resolveMeleeAttackAction', () => {
     const snarkyAction = new Action({
       nonce: Field(1),
       actionType: Field(2),
-      actionParams: snarkyTargteGamePiece.hash(),
+      actionParams: snarkyTargteGamePiece.id,
       piece: Field(snarkyAttackingGamePiece.id),
     });
     const signature = snarkyAction.sign(p1PrivateKey);
 
+    const gamePieceNumber = await attackingGamePiece.gamePieceNumber();
+    const targetGamePieceNumber = await targetGamePiece.gamePieceNumber();
     action = await Models.GamePieceAction.create({
       gamePhaseId: gamePhase.id,
       gamePlayerId: attackingGamePlayer.id,
       gamePieceId: attackingGamePiece.id,
       actionType: 'meleeAttack',
       actionData: {
+        gamePieceNumber,
+        targetGamePieceNumber,
+        nonce: 1,
         actionType: 'meleeAttack',
         resolved: false,
         targetGamePieceId: targetGamePiece.id,
@@ -214,7 +223,21 @@ describe('resolveMeleeAttackAction', () => {
       await targetGamePiece.reload();
       expect(targetGamePiece.health).toBe(3);
 
-      await resolveMeleeAttackAction(action);
+      const startingPiecesMerkleTree = await serializePiecesTreeFromGameId(
+        game.id
+      );
+      const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
+        game.id
+      );
+      const currentPiecesMerkleTree = startingPiecesMerkleTree.clone();
+      const currentArenaMerkleTree = startingArenaMerkleTree.clone();
+      await resolveMeleeAttackAction(
+        action,
+        startingPiecesMerkleTree,
+        startingArenaMerkleTree,
+        currentPiecesMerkleTree,
+        currentArenaMerkleTree
+      );
 
       // Check action to now be resolved with saved results
       await action.reload();
@@ -239,8 +262,22 @@ describe('resolveMeleeAttackAction', () => {
   describe('with a unit out of range', () => {
     it('throws error', async () => {
       await targetGamePiece.update({ positionX: 10, positionY: 100 });
+      const startingPiecesMerkleTree = await serializePiecesTreeFromGameId(
+        game.id
+      );
+      const startingArenaMerkleTree = await serializeArenaTreeFromGameId(
+        game.id
+      );
+      const currentPiecesMerkleTree = startingPiecesMerkleTree.clone();
+      const currentArenaMerkleTree = startingArenaMerkleTree.clone();
       try {
-        await resolveMeleeAttackAction(action);
+        await resolveMeleeAttackAction(
+          action,
+          startingPiecesMerkleTree,
+          startingArenaMerkleTree,
+          currentPiecesMerkleTree,
+          currentArenaMerkleTree
+        );
         // Expect the above to throw error, should fail if not
         expect(true).toBe(false);
       } catch (e) {
