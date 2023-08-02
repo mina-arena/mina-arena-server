@@ -44,6 +44,7 @@ export default async (
 
     // Create GamePieces
     let createdGamePieces = [];
+    let name = '';
     for (const gamePieceInput of args.input.gamePieces) {
       let unit: Models.Unit;
       if (gamePieceInput.playerUnitId) {
@@ -58,9 +59,11 @@ export default async (
           )
         );
 
-        unit = await (
-          await Models.PlayerUnit.findByPk(gamePieceInput.playerUnitId)
-        ).unit();
+        const pu = await await Models.PlayerUnit.findByPk(
+          gamePieceInput.playerUnitId
+        );
+        unit = await pu.unit();
+        name = pu.name;
       } else if (gamePieceInput.createPlayerUnit) {
         // Client has indicated they want to create a PlayerUnit
         // from a selected Unit and create a GamePiece from that.
@@ -73,7 +76,7 @@ export default async (
             t
           )
         );
-
+        name = gamePieceInput.createPlayerUnit.name;
         unit = await Models.Unit.findByPk(
           gamePieceInput.createPlayerUnit.unitId
         );
@@ -85,7 +88,7 @@ export default async (
       newrelic.recordCustomEvent('CreateGamePiece', {
         player: player.minaPublicKey,
         gameId: game.id,
-        pieceName: gamePieceInput.createPlayerUnit.name,
+        pieceName: name,
         unitName: unit.name,
       });
     }
