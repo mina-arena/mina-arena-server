@@ -45,6 +45,7 @@ export default async (
     // Create GamePieces
     let createdGamePieces = [];
     for (const gamePieceInput of args.input.gamePieces) {
+      let unit: Models.Unit;
       if (gamePieceInput.playerUnitId) {
         // Client has selected a pre-existing
         // PlayerUnit, create a GamePiece from that.
@@ -56,6 +57,10 @@ export default async (
             t
           )
         );
+
+        unit = await (
+          await Models.PlayerUnit.findByPk(gamePieceInput.playerUnitId)
+        ).unit();
       } else if (gamePieceInput.createPlayerUnit) {
         // Client has indicated they want to create a PlayerUnit
         // from a selected Unit and create a GamePiece from that.
@@ -68,14 +73,15 @@ export default async (
             t
           )
         );
+
+        unit = await Models.Unit.findByPk(
+          gamePieceInput.createPlayerUnit.unitId
+        );
       } else {
         throw new Error(
           `Invalid entry in argument gamePieceInputs, exactly one of [playerUnitId, createPlayerUnit] must be provided.`
         );
       }
-      const unit = await Models.Unit.findByPk(
-        gamePieceInput.createPlayerUnit.unitId
-      );
       newrelic.recordCustomEvent('CreateGamePiece', {
         player: player.minaPublicKey,
         gameId: game.id,
